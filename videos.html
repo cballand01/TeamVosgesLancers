@@ -5,73 +5,48 @@
   <title>Photos & Vidéos — Groupe Athlé</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root{
-      --bg:#0f172a; --card:#111827; --text:#e5e7eb; --accent:#22c55e;
-    }
-    body{margin:0;background:var(--bg);color:var(--text);
-      font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
+    :root{ --bg:#0f172a; --card:#111827; --text:#e5e7eb; --accent:#22c55e; }
+    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
     .wrap{max-width:960px;margin:0 auto;padding:24px 24px 80px}
-
-    /* back */
-    .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);
-      text-decoration:none;font-size:16px;margin-bottom:16px}
+    .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px;margin-bottom:16px}
     .back svg{width:20px;height:20px;stroke:#fff}
-
     h1{margin:0 0 4px;font-size:28px}
     .subtitle{opacity:.8;margin-bottom:18px}
 
-    /* tabs */
     .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
-    .tab{padding:8px 12px;border-radius:999px;border:1px solid #1f2937;
-      background:#0b1326;color:var(--text);cursor:pointer;font-size:14px}
+    .tab{padding:8px 12px;border-radius:999px;border:1px solid #1f2937;background:#0b1326;color:var(--text);cursor:pointer;font-size:14px}
     .tab.active{background:var(--accent);color:#0b1326;border-color:var(--accent)}
 
-    /* grid */
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
     .card{position:relative;background:var(--card);border:1px solid #1f2937;border-radius:12px;overflow:hidden;cursor:pointer}
-    .thumb{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+    .thumb{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#000}
     .meta{padding:10px}
     .title{font-weight:700;font-size:14px;margin:0 0 4px}
     .info{font-size:12px;opacity:.8}
-    .badge{position:absolute;top:8px;left:8px;font-size:12px;background:rgba(0,0,0,.5);
-      color:#fff;padding:4px 6px;border-radius:8px}
+    .badge{position:absolute;top:8px;left:8px;font-size:12px;background:rgba(0,0,0,.5);color:#fff;padding:4px 6px;border-radius:8px}
     .play{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
     .play svg{width:42px;height:42px;opacity:.9;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
 
-    /* lightbox */
-    .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.75);
-      display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
+    .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
     .lightbox.open{display:flex}
     .viewer{position:relative;width:min(100%,1000px);max-height:90vh;background:#000;border-radius:12px;overflow:hidden}
     .viewer-inner{position:relative;background:#000}
     .viewer img{display:block;width:100%;height:auto;max-height:90vh}
 
-    .viewer-header{position:absolute;top:8px;left:8px;right:8px;display:flex;
-      justify-content:space-between;align-items:center;pointer-events:none}
+    .viewer-header{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
     .viewer-title{color:#fff;font-size:14px;background:rgba(0,0,0,.5);padding:6px 10px;border-radius:8px;pointer-events:auto}
-    .close{pointer-events:auto;background:rgba(255,255,255,.15);border:none;color:#fff;
-      width:36px;height:36px;border-radius:8px;cursor:pointer}
-    .nav{position:absolute;top:50%;transform:translateY(-50%);
-      width:44px;height:44px;border:none;border-radius:50%;background:rgba(255,255,255,.15);
-      color:#fff;cursor:pointer}
+    .close{pointer-events:auto;background:rgba(255,255,255,.15);border:none;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer}
+    .nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border:none;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;cursor:pointer}
     .nav.left{left:8px}.nav.right{right:8px}
 
-    /* Conteneur responsive 16:9 pour YouTube et vidéos MP4 */
+    /* Responsive 16:9 pour YouTube, vidéos et preview Drive */
     .video-wrapper{
-      position:relative;
-      width:100%;
-      padding-bottom:56.25%; /* 16:9 */
-      background:#000;
-      max-height:90vh;
+      position:relative;width:100%;padding-bottom:56.25%; /* 16:9 */
+      background:#000;max-height:90vh;
     }
     .video-wrapper iframe,
     .video-wrapper video{
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      border:0;
-      background:#000;
-      display:block;
-      object-fit:contain; /* utile pour certaines vidéos */
+      position:absolute;inset:0;width:100%;height:100%;border:0;background:#000;display:block;object-fit:contain;
     }
   </style>
 </head>
@@ -86,7 +61,7 @@
     </a>
 
     <h1>Photos & Vidéos</h1>
-    <div class="subtitle">Galerie du groupe — entraînements, compétitions, coulisses</div>
+    <div class="subtitle">Galerie du groupe — Drive partagé (photos & vidéos)</div>
 
     <!-- Onglets -->
     <div class="tabs">
@@ -113,43 +88,86 @@
   </div>
 
   <script>
-    // ====== Données : remplis ici ta galerie ======
-    // type: 'photo' | 'youtube' | 'video'
+    // ===== TYPES pris en charge =====
+    // 'gdrive_photo' : src = ID ou lien Drive ; affichage <img> (uc?export=view)
+    // 'gdrive_video' : src = ID ou lien Drive ; affichage <iframe> (file/d/ID/preview)
+    // 'youtube'      : src = ID YouTube ou URL YouTube ; <iframe> responsive
+    // (Tu peux garder aussi 'photo' et 'video' classiques si tu veux mixer)
+
     const ITEMS = [
-      { type:'photo',   src:'https://images.unsplash.com/photo-1521417531039-96df9febb9ad?q=80&w=1200', title:'Séance poids – hiver', info:'2024 • Epinal' },
-      { type:'youtube', src:'dQw4w9WgXcQ', title:'Finale Disque – Highlights', info:'2023 • France', duration:'4:12' },
-      { type:'photo',   src:'https://images.unsplash.com/photo-1521417712991-4fd5c63b4d49?q=80&w=1200', title:'Stage – lancers', info:'2024 • Stage sud' },
-      { type:'video',   src:'https://storage.googleapis.com/vosgeslancers/videos/example.mp4', title:'Marteau – ralenti', info:'2024 • Metz', duration:'0:26' }
+      // EXEMPLES — remplace par tes liens / IDs Drive
+      { type:'gdrive_photo', src:'https://drive.google.com/file/d/1abcDEFghiJKLmnOPqrSTUVwXYZ/view?usp=sharing', title:'Séance poids – hiver', info:'2025 • Épinal' },
+      { type:'gdrive_video', src:'https://drive.google.com/file/d/1ZzYYxxAA_BBccDD33EEffGGHHIIjjKK/preview', title:'Marteau – ralenti', info:'2024 • Metz', duration:'0:26' },
+      { type:'youtube',      src:'dQw4w9WgXcQ', title:'Finale Disque – Highlights', info:'2023 • France', duration:'4:12' },
     ];
 
-    // ====== Rendu grille ======
     const $grid = document.getElementById('grid');
     const $tabs = document.querySelectorAll('.tab');
     let currentFilter = 'all';
 
+    // ===== Helpers Drive / YouTube =====
+    function extractDriveId(urlOrId){
+      if(!urlOrId) return '';
+      const s = String(urlOrId).trim();
+      // déjà un ID ?
+      if(/^[\w-]{20,}$/.test(s)) return s;
+      // formats courants
+      let m = s.match(/\/d\/([\w-]{20,})/); // /file/d/ID/...
+      if(m) return m[1];
+      m = s.match(/[?&]id=([\w-]{20,})/);   // open?id=ID
+      if(m) return m[1];
+      return s; // fallback
+    }
+    function driveImgURL(id, size=1200){
+      // image pleine taille (affichable en <img>)
+      return `https://drive.google.com/uc?export=view&id=${id}`;
+    }
+    function driveThumbURL(id, size=400){
+      // miniatures (peut varier selon compte) ; sinon on retombe sur uc?export=view
+      return `https://drive.google.com/thumbnail?id=${id}&sz=w${size}`;
+    }
+    function driveVideoPreviewURL(id){
+      // lecteur intégré Google Drive
+      return `https://drive.google.com/file/d/${id}/preview`;
+    }
+    function extractYouTubeId(urlOrId){
+      if(!urlOrId) return '';
+      const s = String(urlOrId);
+      if (/^[\w-]{11}$/.test(s)) return s;
+      const m = s.match(/[?&]v=([\w-]{11})/) || s.match(/youtu\.be\/([\w-]{11})/);
+      return m ? m[1] : s;
+    }
+
+    // ===== Rendu grille =====
     function getThumb(item){
-      if(item.type === 'youtube'){
+      if(item.type==='gdrive_photo'){
+        const id = extractDriveId(item.src);
+        return driveThumbURL(id, 800);
+      }
+      if(item.type==='gdrive_video'){
+        // Drive ne fournit pas toujours une miniature fiable → on met le preview (frame noire) ou un thumb custom si tu ajoutes item.thumb
+        const id = extractDriveId(item.src);
+        return item.thumb || 'https://i.imgur.com/9bZQZ.png'; // placeholder discret (optionnel)
+      }
+      if(item.type==='youtube'){
         const id = extractYouTubeId(item.src);
         return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
       }
+      // autres types
       return item.thumb || item.src;
     }
 
-    function extractYouTubeId(urlOrId){
-      if(!urlOrId) return '';
-      if (/^[\w-]{11}$/.test(urlOrId)) return urlOrId;
-      const m = String(urlOrId).match(/[?&]v=([\w-]{11})/) || String(urlOrId).match(/youtu\.be\/([\w-]{11})/);
-      return m ? m[1] : urlOrId;
+    function normalizedType(t){
+      if(t==='gdrive_photo') return 'photo';
+      if(t==='gdrive_video') return 'video';
+      if(t==='youtube')      return 'video';
+      return t;
     }
 
     function render(){
       $grid.innerHTML = '';
       ITEMS
-        .filter(it =>
-          currentFilter==='all'
-            ? true
-            : (it.type==='photo' ? 'photo' : 'video')===currentFilter || (it.type==='youtube' && currentFilter==='video')
-        )
+        .filter(it => currentFilter==='all' ? true : normalizedType(it.type)===currentFilter)
         .forEach((it, idx) => {
           const card = document.createElement('div');
           card.className = 'card';
@@ -164,7 +182,7 @@
           meta.className = 'meta';
           meta.innerHTML = `<div class="title">${it.title||''}</div><div class="info">${it.info||''}</div>`;
 
-          if(it.type==='youtube' || it.type==='video'){
+          if(normalizedType(it.type)==='video'){
             const badge = document.createElement('div');
             badge.className = 'badge';
             badge.textContent = it.duration ? it.duration : 'vidéo';
@@ -192,7 +210,7 @@
       })
     });
 
-    // ====== Lightbox ======
+    // ===== Lightbox =====
     const $lightbox = document.getElementById('lightbox');
     const $viewer   = document.getElementById('viewer');
     const $title    = document.getElementById('viewerTitle');
@@ -207,11 +225,22 @@
       $viewer.innerHTML = '';
       $title.textContent = it.title || '';
 
-      if(it.type === 'photo'){
+      if(it.type === 'gdrive_photo'){
+        const id = extractDriveId(it.src);
         const img = document.createElement('img');
-        img.src = it.src;
+        img.src = driveImgURL(id);
         img.alt = it.title||'';
         $viewer.appendChild(img);
+      } else if(it.type === 'gdrive_video'){
+        const id = extractDriveId(it.src);
+        const wrapper = document.createElement('div');
+        wrapper.className = 'video-wrapper';
+        const iframe = document.createElement('iframe');
+        iframe.src = driveVideoPreviewURL(id);
+        iframe.allow = 'autoplay; fullscreen';
+        iframe.allowFullscreen = true;
+        wrapper.appendChild(iframe);
+        $viewer.appendChild(wrapper);
       } else if(it.type === 'youtube'){
         const id = extractYouTubeId(it.src);
         const wrapper = document.createElement('div');
@@ -222,6 +251,11 @@
         iframe.allowFullscreen = true;
         wrapper.appendChild(iframe);
         $viewer.appendChild(wrapper);
+      } else if(it.type === 'photo'){
+        const img = document.createElement('img');
+        img.src = it.src;
+        img.alt = it.title||'';
+        $viewer.appendChild(img);
       } else if(it.type === 'video'){
         const wrapper = document.createElement('div');
         wrapper.className = 'video-wrapper';
@@ -244,9 +278,7 @@
     function filteredItems(){
       return ITEMS
         .map((it, i) => ({it, i}))
-        .filter(({it}) => currentFilter==='all'
-          ? true
-          : (it.type==='photo' ? 'photo' : 'video')===currentFilter || (it.type==='youtube' && currentFilter==='video'));
+        .filter(({it}) => currentFilter==='all' ? true : normalizedType(it.type)===currentFilter);
     }
 
     function step(dir){
@@ -257,10 +289,10 @@
       openViewer(list[nextPos].i);
     }
 
-    $close.addEventListener('click', closeViewer);
-    $lightbox.addEventListener('click', (e)=>{ if(e.target === $lightbox) closeViewer(); });
-    $prev.addEventListener('click', ()=>step(-1));
-    $next.addEventListener('click', ()=>step(1));
+    document.getElementById('close').addEventListener('click', closeViewer);
+    document.getElementById('lightbox').addEventListener('click', (e)=>{ if(e.target.id === 'lightbox') closeViewer(); });
+    document.getElementById('prev').addEventListener('click', ()=>step(-1));
+    document.getElementById('next').addEventListener('click', ()=>step(1));
     document.addEventListener('keydown', (e)=>{
       if(!$lightbox.classList.contains('open')) return;
       if(e.key==='Escape') closeViewer();
