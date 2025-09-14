@@ -57,6 +57,19 @@
       font-size: 14px;
       z-index: 100;
     }
+
+    /* Carte principale large */
+    .card-large {
+      display: block;
+      margin-bottom: 16px;
+      width: 100%;
+    }
+    .card-large .card-inner {
+      align-items: center;
+    }
+    .card-large .title {
+      font-size: 1.2rem;
+    }
   </style>
 </head>
 <body>
@@ -69,6 +82,23 @@
     </div>
 
     <div class="grid">
+      <!-- Carte principale : Séances de sport -->
+      <a class="card card-large" href="seances.html">
+        <div class="card-inner">
+          <span class="icon" aria-hidden="true">
+            <!-- Tu pourras mettre ici ton icône "Séances" en SVG inline plus tard -->
+            <svg class="svg-icon" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="18" height="18" rx="4" stroke-width="1.6" fill="none"/>
+              <path d="M8 12h8M8 8h4M8 16h6" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <div>
+            <div class="title" style="font-size:1.2rem;">Séances de sport</div>
+            <div class="desc">Voir, ajouter et partager les entraînements du groupe</div>
+          </div>
+        </div>
+      </a>
+      
       <!-- 1. Calendrier de la saison -->
       <a class="card" href="saison.html">
         <div class="card-inner">
