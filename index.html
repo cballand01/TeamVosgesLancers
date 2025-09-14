@@ -23,15 +23,14 @@
 
     /* Styles de la bannière */
     .banner {
+      height: 40vh; /* hauteur = 40% de la fenêtre (ajuste si tu veux plus/moins haut) */
+      min-height: 220px;
       width: 100%;
-      overflow: hidden;
-    }
-    
-    .banner img {
-      width: 100%;
-      height: auto;
-      display: block;
-      object-fit: cover;
+      background-image: url("https://storage.googleapis.com/NOM-DE-TON-BUCKET/chemin/vers/ton-image.jpg"); /* ← remplace avec ton URL GCS */
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed; /* effet parallax simple sur desktop */
     }
         
   </style>
