@@ -57,12 +57,24 @@
       transition: opacity 0.2s;
     }
     .podium-nav:hover { opacity: 0.7; }
+
     .podium-content {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
+
+    /* viewport + slide pour l’animation */
+    .podium-viewport {
+      width: 100%;
+      max-width: 460px;
+      overflow: hidden;
+    }
+    .podium-slide {
+      will-change: transform, opacity;
+    }
+
     .podium-content h2 {
       margin: 0 0 12px;
       font-size: 20px;
@@ -75,6 +87,7 @@
       gap: 8px;
       width: 100%;
       max-width: 400px;
+      margin: 0 auto;
     }
     .place {
       display: flex;
@@ -95,10 +108,18 @@
     .place.first .bar { height: 100px; }
     .place.second .bar { height: 70px; }
     .place.third .bar { height: 50px; }
-    .athlete {
-      font-size: 14px;
-      text-align: center;
-    }
+    .athlete { font-size: 14px; text-align: center; }
+
+    /* Animations slide */
+    @keyframes slideOutLeft { from {opacity:1; transform:translateX(0);} to {opacity:0; transform:translateX(-24px);} }
+    @keyframes slideInRight { from {opacity:0; transform:translateX(24px);} to {opacity:1; transform:translateX(0);} }
+    @keyframes slideOutRight { from {opacity:1; transform:translateX(0);} to {opacity:0; transform:translateX(24px);} }
+    @keyframes slideInLeft { from {opacity:0; transform:translateX(-24px);} to {opacity:1; transform:translateX(0);} }
+
+    .out-left  { animation: slideOutLeft 200ms ease both; }
+    .in-right  { animation: slideInRight 220ms ease both; }
+    .out-right { animation: slideOutRight 200ms ease both; }
+    .in-left   { animation: slideInLeft 220ms ease both; }
 
     /* Grille d'athlètes */
     .athlete-grid {
@@ -130,11 +151,8 @@
       transition: background 0.2s;
     }
     .ffa-link:hover { background: rgba(255,255,255,0.2); }
-    .ffa-link svg {
-      width: 20px;
-      height: 20px;
-      fill: white;
-    }
+    .ffa-link svg { width: 100%; height: 100%; }
+
     .athlete-photo {
       width: 96px; height: 96px;
       border-radius: 50%;
@@ -178,26 +196,32 @@
     <h1>Records du Groupe</h1>
     <div class="subtitle">Toutes les meilleures perfs de l’équipe dans chaque discipline</div>
 
-    <!-- === Bloc Podium === -->
+    <!-- === Bloc Podium avec slide === -->
     <div class="podium-card">
       <button class="podium-nav left" onclick="prevPodium()">&#10094;</button>
+
       <div class="podium-content">
-        <h2 id="podiumTitle">Podium — Poids Hommes</h2>
-        <div class="podium">
-          <div class="place second">
-            <div class="bar">2</div>
-            <div class="athlete" id="secondPlace">Paul — 14.10 m</div>
-          </div>
-          <div class="place first">
-            <div class="bar">1</div>
-            <div class="athlete" id="firstPlace">Alex — 15.20 m</div>
-          </div>
-          <div class="place third">
-            <div class="bar">3</div>
-            <div class="athlete" id="thirdPlace">Julien — 13.80 m</div>
+        <div class="podium-viewport">
+          <div class="podium-slide" id="podiumSlide">
+            <h2 id="podiumTitle">Podium — Poids Hommes</h2>
+            <div class="podium">
+              <div class="place second">
+                <div class="bar">2</div>
+                <div class="athlete" id="secondPlace">Paul — 14.10 m</div>
+              </div>
+              <div class="place first">
+                <div class="bar">1</div>
+                <div class="athlete" id="firstPlace">Alex — 15.20 m</div>
+              </div>
+              <div class="place third">
+                <div class="bar">3</div>
+                <div class="athlete" id="thirdPlace">Julien — 13.80 m</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
       <button class="podium-nav right" onclick="nextPodium()">&#10095;</button>
     </div>
 
@@ -247,7 +271,7 @@
   </div>
 
   <script>
-    // Gestion du calcul date
+    // --- Durée (années / mois / jours) ---
     function diffYMD(date) {
       const now = new Date();
       let years = now.getFullYear() - date.getFullYear();
@@ -279,28 +303,62 @@
       meta.textContent = `${lieu} • ${parts.join(' ')}`;
     });
 
-    // Gestion podiums
+    // --- Podiums (à remplir manuellement) ---
     const podiums = [
-      { title: "Podium — Poids Hommes", first: "Alex — 15.20 m", second: "Paul — 14.10 m", third: "Julien — 13.80 m" },
-      { title: "Podium — Disque Hommes", first: "Lucas — 45.00 m", second: "Nico — 43.50 m", third: "Paul — 42.80 m" },
-      { title: "Podium — Marteau Hommes", first: "Bruno — 56.00 m", second: "Alex — 55.00 m", third: "Jean — 54.50 m" }
+      { title: "Podium — Poids Hommes",   first: "Alex — 15.20 m",  second: "Paul — 14.10 m",  third: "Julien — 13.80 m" },
+      { title: "Podium — Disque Hommes",  first: "Lucas — 45.00 m", second: "Nico — 43.50 m",  third: "Paul — 42.80 m" },
+      { title: "Podium — Marteau Hommes", first: "Bruno — 56.00 m", second: "Alex — 55.00 m",  third: "Jean — 54.50 m" }
+      // Ajoute ici Poids Femmes, Disque Femmes, etc.
     ];
+
     let currentPodium = 0;
-    function updatePodium() {
-      document.getElementById("podiumTitle").textContent = podiums[currentPodium].title;
-      document.getElementById("firstPlace").textContent = podiums[currentPodium].first;
-      document.getElementById("secondPlace").textContent = podiums[currentPodium].second;
-      document.getElementById("thirdPlace").textContent = podiums[currentPodium].third;
+    const slideEl = document.getElementById('podiumSlide');
+    const titleEl = document.getElementById('podiumTitle');
+    const firstEl = document.getElementById('firstPlace');
+    const secondEl = document.getElementById('secondPlace');
+    const thirdEl = document.getElementById('thirdPlace');
+
+    function setPodium(index){
+      const p = podiums[index];
+      titleEl.textContent = p.title;
+      firstEl.textContent = p.first;
+      secondEl.textContent = p.second;
+      thirdEl.textContent = p.third;
     }
-    function nextPodium() {
-      currentPodium = (currentPodium + 1) % podiums.length;
-      updatePodium();
+
+    function animateTo(index, dir){
+      // dir: 'next' ou 'prev'
+      const outClass = dir === 'next' ? 'out-left' : 'out-right';
+      const inClass  = dir === 'next' ? 'in-right' : 'in-left';
+
+      slideEl.classList.add(outClass);
+      slideEl.addEventListener('animationend', function handleOut(){
+        slideEl.removeEventListener('animationend', handleOut);
+        slideEl.classList.remove(outClass);
+        // mettre à jour le contenu
+        setPodium(index);
+        // animer l'entrée
+        slideEl.classList.add(inClass);
+        slideEl.addEventListener('animationend', function handleIn(){
+          slideEl.removeEventListener('animationend', handleIn);
+          slideEl.classList.remove(inClass);
+        });
+      });
     }
-    function prevPodium() {
-      currentPodium = (currentPodium - 1 + podiums.length) % podiums.length;
-      updatePodium();
+
+    function nextPodium(){
+      const next = (currentPodium + 1) % podiums.length;
+      animateTo(next, 'next');
+      currentPodium = next;
     }
-    updatePodium();
+    function prevPodium(){
+      const prev = (currentPodium - 1 + podiums.length) % podiums.length;
+      animateTo(prev, 'prev');
+      currentPodium = prev;
+    }
+
+    // init
+    setPodium(currentPodium);
   </script>
 </body>
 </html>
