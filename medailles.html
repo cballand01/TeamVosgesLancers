@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Médailles aux Frances — Groupe Athlé</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg:#0f172a;
+      --card:#111827;
+      --text:#e5e7eb;
+      --accent:#22c55e;
+      --gold:#ffd700;
+      --silver:#c0c0c0;
+      --bronze:#cd7f32;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, Segoe UI, Roboto, Arial;
+    }
+    .wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px;
+      padding-bottom: 80px;
+    }
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
+    .back svg { width: 20px; height: 20px; stroke: white; }
+    h1 { font-size: 28px; margin: 0 0 4px; }
+    .subtitle { font-size: 16px; opacity: 0.8; margin-bottom: 24px; }
+
+    /* Compteur de médailles */
+    .medal-counts {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    .medal {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-weight: bold;
+    }
+    .medal span {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+    .gold   { color: var(--gold); }
+    .silver { color: var(--silver); }
+    .bronze { color: var(--bronze); }
+
+    /* Cartes de médailles */
+    .medal-card {
+      display: flex;
+      flex-direction: row;
+      background: var(--card);
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .medal-photo {
+      flex: 0 0 40%;
+      background: #222;
+    }
+    .medal-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .medal-info {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+    }
+    .medal-info h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+    .medal-meta {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <a href="index.html" class="back">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+      </svg>
+      Retour
+    </a>
+
+    <h1>Médailles aux Frances</h1>
+    <div class="subtitle">Historique des podiums nationaux du groupe</div>
+
+    <!-- Compteur global -->
+    <div class="medal-counts">
+      <div class="medal gold">
+        <span>🥇</span> 12
+      </div>
+      <div class="medal silver">
+        <span>🥈</span> 8
+      </div>
+      <div class="medal bronze">
+        <span>🥉</span> 14
+      </div>
+    </div>
+
+    <!-- Liste chronologique des médailles -->
+    <div class="medal-card">
+      <div class="medal-photo">
+        <img src="https://via.placeholder.com/400x250.png?text=Photo+Podium" alt="Photo podium">
+      </div>
+      <div class="medal-info">
+        <h3>Alex Martin — Champion de France Junior</h3>
+        <div class="medal-meta">🥇 Poids — 15.20 m</div>
+        <div class="medal-meta">Épinal • 14 juillet 2024 — Championnats de France Juniors</div>
+      </div>
+    </div>
+
+    <div class="medal-card">
+      <div class="medal-photo">
+        <img src="https://via.placeholder.com/400x250.png?text=Photo+Podium" alt="Photo podium">
+      </div>
+      <div class="medal-info">
+        <h3>Bruno Martin — Vice-Champion de France</h3>
+        <div class="medal-meta">🥈 Marteau — 56.00 m</div>
+        <div class="medal-meta">Metz • 28 mai 2022 — Championnats de France Élite</div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
