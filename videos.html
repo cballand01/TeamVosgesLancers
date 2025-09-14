@@ -42,10 +42,10 @@
     .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.75);
       display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
     .lightbox.open{display:flex}
-    .viewer{position:relative;width:min(100%,900px);max-height:90vh;background:#000;border-radius:12px;overflow:hidden}
+    .viewer{position:relative;width:min(100%,1000px);max-height:90vh;background:#000;border-radius:12px;overflow:hidden}
     .viewer-inner{position:relative;background:#000}
-    .viewer img, .viewer video, .viewer iframe{display:block;width:100%;height:auto;max-height:90vh}
-    .viewer video{background:#000}
+    .viewer img{display:block;width:100%;height:auto;max-height:90vh}
+
     .viewer-header{position:absolute;top:8px;left:8px;right:8px;display:flex;
       justify-content:space-between;align-items:center;pointer-events:none}
     .viewer-title{color:#fff;font-size:14px;background:rgba(0,0,0,.5);padding:6px 10px;border-radius:8px;pointer-events:auto}
@@ -55,6 +55,24 @@
       width:44px;height:44px;border:none;border-radius:50%;background:rgba(255,255,255,.15);
       color:#fff;cursor:pointer}
     .nav.left{left:8px}.nav.right{right:8px}
+
+    /* Conteneur responsive 16:9 pour YouTube et vidéos MP4 */
+    .video-wrapper{
+      position:relative;
+      width:100%;
+      padding-bottom:56.25%; /* 16:9 */
+      background:#000;
+      max-height:90vh;
+    }
+    .video-wrapper iframe,
+    .video-wrapper video{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      border:0;
+      background:#000;
+      display:block;
+      object-fit:contain; /* utile pour certaines vidéos */
+    }
   </style>
 </head>
 <body>
@@ -97,18 +115,14 @@
   <script>
     // ====== Données : remplis ici ta galerie ======
     // type: 'photo' | 'youtube' | 'video'
-    // - photo: src = URL image
-    // - youtube: src = ID YouTube (ex: 'dQw4w9WgXcQ') ou URL complète (on extrait l'ID)
-    // - video: src = URL mp4 (ex: https://storage.googleapis.com/tonbucket/videos/clip.mp4)
     const ITEMS = [
       { type:'photo',   src:'https://images.unsplash.com/photo-1521417531039-96df9febb9ad?q=80&w=1200', title:'Séance poids – hiver', info:'2024 • Epinal' },
       { type:'youtube', src:'dQw4w9WgXcQ', title:'Finale Disque – Highlights', info:'2023 • France', duration:'4:12' },
       { type:'photo',   src:'https://images.unsplash.com/photo-1521417712991-4fd5c63b4d49?q=80&w=1200', title:'Stage – lancers', info:'2024 • Stage sud' },
-      { type:'video',   src:'https://storage.googleapis.com/voSgeslancers/videos/example.mp4', title:'Marteau – ralenti', info:'2024 • Metz', duration:'0:26' }
-      // Ajoute tes éléments ici (y compris tes URLs Google Cloud Storage)
+      { type:'video',   src:'https://storage.googleapis.com/vosgeslancers/videos/example.mp4', title:'Marteau – ralenti', info:'2024 • Metz', duration:'0:26' }
     ];
 
-    // ====== Rendu ======
+    // ====== Rendu grille ======
     const $grid = document.getElementById('grid');
     const $tabs = document.querySelectorAll('.tab');
     let currentFilter = 'all';
@@ -118,7 +132,6 @@
         const id = extractYouTubeId(item.src);
         return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
       }
-      // photo / video -> on affiche le visuel direct. Pour video, prévoir une image si besoin
       return item.thumb || item.src;
     }
 
@@ -132,7 +145,11 @@
     function render(){
       $grid.innerHTML = '';
       ITEMS
-        .filter(it => currentFilter==='all' ? true : (it.type==='photo' ? 'photo' : 'video')===currentFilter || (it.type==='youtube' && currentFilter==='video'))
+        .filter(it =>
+          currentFilter==='all'
+            ? true
+            : (it.type==='photo' ? 'photo' : 'video')===currentFilter || (it.type==='youtube' && currentFilter==='video')
+        )
         .forEach((it, idx) => {
           const card = document.createElement('div');
           card.className = 'card';
@@ -147,7 +164,6 @@
           meta.className = 'meta';
           meta.innerHTML = `<div class="title">${it.title||''}</div><div class="info">${it.info||''}</div>`;
 
-          // badge/durée + bouton play si vidéo
           if(it.type==='youtube' || it.type==='video'){
             const badge = document.createElement('div');
             badge.className = 'badge';
@@ -198,20 +214,23 @@
         $viewer.appendChild(img);
       } else if(it.type === 'youtube'){
         const id = extractYouTubeId(it.src);
+        const wrapper = document.createElement('div');
+        wrapper.className = 'video-wrapper';
         const iframe = document.createElement('iframe');
-        iframe.width = '100%';
-        iframe.height = '480';
         iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
         iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
         iframe.allowFullscreen = true;
-        iframe.style.border = '0';
-        $viewer.appendChild(iframe);
+        wrapper.appendChild(iframe);
+        $viewer.appendChild(wrapper);
       } else if(it.type === 'video'){
+        const wrapper = document.createElement('div');
+        wrapper.className = 'video-wrapper';
         const video = document.createElement('video');
         video.src = it.src;
         video.controls = true;
         video.autoplay = true;
-        $viewer.appendChild(video);
+        wrapper.appendChild(video);
+        $viewer.appendChild(wrapper);
       }
 
       $lightbox.classList.add('open');
@@ -222,15 +241,20 @@
       $viewer.innerHTML = '';
     }
 
+    function filteredItems(){
+      return ITEMS
+        .map((it, i) => ({it, i}))
+        .filter(({it}) => currentFilter==='all'
+          ? true
+          : (it.type==='photo' ? 'photo' : 'video')===currentFilter || (it.type==='youtube' && currentFilter==='video'));
+    }
+
     function step(dir){
       if(currentIndex < 0) return;
-      const len = ITEMS.filter(it => currentFilter==='all' ? true : (it.type==='photo' ? 'photo' : 'video')===currentFilter || (it.type==='youtube' && currentFilter==='video')).length;
-      // Recalcule l'index dans la vue filtrée
-      const filtered = ITEMS.map((it, i) => ({it, i}))
-        .filter(({it}) => currentFilter==='all' ? true : (it.type==='photo' ? 'photo' : 'video')===currentFilter || (it.type==='youtube' && currentFilter==='video'));
-      const pos = filtered.findIndex(x => x.i === currentIndex);
-      const nextPos = (pos + dir + filtered.length) % filtered.length;
-      openViewer(filtered[nextPos].i);
+      const list = filteredItems();
+      const pos = list.findIndex(x => x.i === currentIndex);
+      const nextPos = (pos + dir + list.length) % list.length;
+      openViewer(list[nextPos].i);
     }
 
     $close.addEventListener('click', closeViewer);
