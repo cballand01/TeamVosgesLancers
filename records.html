@@ -23,7 +23,6 @@
       padding: 24px;
       padding-bottom: 80px;
     }
-    /* Flèche retour */
     .back {
       display: inline-flex;
       align-items: center;
@@ -44,6 +43,7 @@
       gap: 16px;
     }
     .athlete-card {
+      position: relative;
       background: var(--card);
       border: 1px solid #1f2937;
       border-radius: 12px;
@@ -51,6 +51,28 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+    }
+    /* Logo FFA en haut à droite */
+    .ffa-link {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(255,255,255,0.08);
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .ffa-link:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .ffa-link svg {
+      width: 20px;
+      height: 20px;
+      fill: white;
     }
     .athlete-photo {
       width: 96px; height: 96px;
@@ -73,7 +95,6 @@
     }
     .record-label { opacity: 0.8; }
     .record-value { text-align: right; font-weight: 600; }
-    /* Date + lieu alignés à droite */
     .record-meta {
       grid-column: 1 / -1;
       font-size: 12px;
@@ -86,7 +107,6 @@
 <body>
   <div class="wrap">
 
-    <!-- Flèche retour -->
     <a href="index.html" class="back">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
@@ -94,15 +114,19 @@
       Retour
     </a>
 
-    <!-- Titre -->
     <h1>Records du Groupe</h1>
     <div class="subtitle">Toutes les meilleures perfs de l’équipe dans chaque discipline</div>
 
-    <!-- Grille des athlètes -->
     <div class="athlete-grid">
 
       <!-- Athlète 1 -->
       <div class="athlete-card">
+        <a href="https://www.ffa.fr/athletes/12345" class="ffa-link" target="_blank" title="Voir sur FFA">
+          <!-- Petit logo FFA (simplifié en SVG) -->
+          <svg viewBox="0 0 24 24">
+            <path d="M3 12l5-8h4l-5 8 5 8H8l-5-8zm13-8h5v16h-5V4z"/>
+          </svg>
+        </a>
         <img src="https://via.placeholder.com/96x96.png?text=A1" alt="Athlète 1" class="athlete-photo">
         <div class="athlete-name">Alice Dupont</div>
         <div class="records">
@@ -118,6 +142,11 @@
 
       <!-- Athlète 2 -->
       <div class="athlete-card">
+        <a href="https://www.ffa.fr/athletes/67890" class="ffa-link" target="_blank" title="Voir sur FFA">
+          <svg viewBox="0 0 24 24">
+            <path d="M3 12l5-8h4l-5 8 5 8H8l-5-8zm13-8h5v16h-5V4z"/>
+          </svg>
+        </a>
         <img src="https://via.placeholder.com/96x96.png?text=A2" alt="Athlète 2" class="athlete-photo">
         <div class="athlete-name">Bruno Martin</div>
         <div class="records">
@@ -128,17 +157,6 @@
           <div class="record-label">Javelot</div>
           <div class="record-value">60.10 m</div>
           <div class="record-meta" data-date="2024-03-15" data-lieu="Paris"></div>
-        </div>
-      </div>
-
-      <!-- Athlète 3 -->
-      <div class="athlete-card">
-        <img src="https://via.placeholder.com/96x96.png?text=A3" alt="Athlète 3" class="athlete-photo">
-        <div class="athlete-name">Clara Bernard</div>
-        <div class="records">
-          <div class="record-label">Poids</div>
-          <div class="record-value">12.85 m</div>
-          <div class="record-meta" data-date="2023-04-20" data-lieu="Strasbourg"></div>
         </div>
       </div>
 
