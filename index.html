@@ -5,7 +5,14 @@
   <title>Groupe Athlé — Accueil</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root{--bg:#0f172a;--card:#111827;--text:#e5e7eb;--accent:#22c55e}
+    :root{
+      --bg:#0f172a;
+      --card:#111827;
+      --text:#e5e7eb;
+      --accent:#22c55e;
+      --icon-size: 24px;   /* taille des icônes */
+      --icon-dim: #d9dde3; /* gris clair (si vos SVG sont déjà gris clair, laissez comme ça) */
+    }
     *{box-sizing:border-box}html,body{height:100%}
     body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
     .wrap{max-width:960px;margin:0 auto;padding:24px}
@@ -17,60 +24,127 @@
     @media (min-width:720px){.grid{grid-template-columns:repeat(3,1fr)}}
     a.card{display:block;background:var(--card);padding:18px;border-radius:16px;text-decoration:none;color:var(--text);border:1px solid #1f2937}
     a.card:hover{outline:2px solid var(--accent)}
-    .title{font-weight:700;margin-bottom:6px}
-    .desc{opacity:.8;font-size:14px}
+    .card-inner{display:flex;gap:12px;align-items:flex-start}
+    .title{font-weight:700;margin:0;display:flex;align-items:center;gap:8px}
+    .desc{opacity:.8;font-size:14px;margin-top:6px}
     footer{margin-top:28px;opacity:.7;font-size:12px;text-align:center}
 
-    /* ====== BANNIÈRE bas ====== */
+    /* Icônes externes (SVG en <img>) */
+    .icon {
+      width: var(--icon-size);
+      height: var(--icon-size);
+      display: inline-block;
+      flex: 0 0 var(--icon-size);
+    }
+    .icon img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      /* Si les SVG sont trop foncés, éclaircir un peu visuellement : */
+      filter: brightness(1.3) contrast(0.9);
+    }
+
+    /* Footer fixe */
     .site-footer {
       position: fixed;
       bottom: 0;
       left: 0;
       width: 100%;
-      background: #111;      /* couleur du fond */
-      color: #fff;           /* couleur du texte */
+      background: #111;
+      color: #fff;
       text-align: center;
       padding: 10px 0;
       font-size: 14px;
-      z-index: 100;          /* toujours au-dessus */
+      z-index: 100;
     }
-        
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="hero">
       <div class="logo">
-        <!-- Mets ton logo ici -->
         <img src="IMG_20250401_225839_471.webp" alt="Logo du club">
       </div>
       <h1>Groupe Athlé — Menu</h1>
     </div>
 
     <div class="grid">
+      <!-- 1. Calendrier de la saison -->
       <a class="card" href="saison.html">
-        <div class="title">Calendrier de la saison</div>
-        <div class="desc">Meetings, compétitions, stages…</div>
+        <div class="card-inner">
+          <span class="icon" aria-hidden="true">
+            <img src="https://storage.googleapis.com/vosgeslancers/icones/Calendrier.svg" alt="">
+          </span>
+          <div>
+            <div class="title">Calendrier de la saison</div>
+            <div class="desc">Meetings, compétitions, stages…</div>
+          </div>
+        </div>
       </a>
+
+      <!-- 2. Records -->
       <a class="card" href="records.html">
-        <div class="title">Records</div>
-        <div class="desc">Perso & records du club</div>
+        <div class="card-inner">
+          <span class="icon" aria-hidden="true">
+            <img src="https://storage.googleapis.com/vosgeslancers/icones/Records.svg" alt="">
+          </span>
+          <div>
+            <div class="title">Records</div>
+            <div class="desc">Perso & records du club</div>
+          </div>
+        </div>
       </a>
+
+      <!-- 3. Médailles aux France -->
       <a class="card" href="medailles.html">
-        <div class="title">Médailles aux France</div>
-        <div class="desc">Podiums et résultats marquants</div>
+        <div class="card-inner">
+          <span class="icon" aria-hidden="true">
+            <img src="https://storage.cloud.google.com/vosgeslancers/icones/Medailles.svg" alt="">
+          </span>
+          <div>
+            <div class="title">Médailles aux France</div>
+            <div class="desc">Podiums et résultats marquants</div>
+          </div>
+        </div>
       </a>
+
+      <!-- 4. Planning de la semaine -->
       <a class="card" href="planning.html">
-        <div class="title">Planning de la semaine</div>
-        <div class="desc">Créneaux & disponibilités</div>
+        <div class="card-inner">
+          <span class="icon" aria-hidden="true">
+            <img src="https://storage.googleapis.com/vosgeslancers/icones/time.svg" alt="">
+          </span>
+          <div>
+            <div class="title">Planning de la semaine</div>
+            <div class="desc">Créneaux & disponibilités</div>
+          </div>
+        </div>
       </a>
+
+      <!-- 5. Vidéos -->
       <a class="card" href="videos.html">
-        <div class="title">Vidéos</div>
-        <div class="desc">YouTube, Drive, serveur perso…</div>
+        <div class="card-inner">
+          <span class="icon" aria-hidden="true">
+            <img src="https://storage.googleapis.com/vosgeslancers/icones/Videos.svg" alt="">
+          </span>
+          <div>
+            <div class="title">Vidéos</div>
+            <div class="desc">YouTube, Drive, serveur perso…</div>
+          </div>
+        </div>
       </a>
+
+      <!-- 6. Athlètes -->
       <a class="card" href="athletes.html">
-        <div class="title">Athlètes</div>
-        <div class="desc">Calendrier et séances par personne</div>
+        <div class="card-inner">
+          <span class="icon" aria-hidden="true">
+            <img src="https://storage.googleapis.com/vosgeslancers/icones/Athletes.svg" alt="">
+          </span>
+          <div>
+            <div class="title">Athlètes</div>
+            <div class="desc">Calendrier et séances par personne</div>
+          </div>
+        </div>
       </a>
     </div>
 
