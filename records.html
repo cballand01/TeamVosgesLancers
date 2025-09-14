@@ -21,7 +21,7 @@
       max-width: 960px;
       margin: 0 auto;
       padding: 24px;
-      padding-bottom: 80px; /* espace pour un footer fixe si besoin */
+      padding-bottom: 80px;
     }
     /* Flèche retour */
     .back {
@@ -33,20 +33,10 @@
       font-size: 16px;
       margin-bottom: 16px;
     }
-    .back svg {
-      width: 20px;
-      height: 20px;
-      stroke: white;
-    }
-    h1 {
-      font-size: 28px;
-      margin: 0 0 4px;
-    }
-    .subtitle {
-      font-size: 16px;
-      opacity: 0.8;
-      margin-bottom: 24px;
-    }
+    .back svg { width: 20px; height: 20px; stroke: white; }
+    h1 { font-size: 28px; margin: 0 0 4px; }
+    .subtitle { font-size: 16px; opacity: 0.8; margin-bottom: 24px; }
+
     /* Grille d'athlètes */
     .athlete-grid {
       display: grid;
@@ -64,8 +54,7 @@
       text-align: center;
     }
     .athlete-photo {
-      width: 96px;
-      height: 96px;
+      width: 96px; height: 96px;
       border-radius: 50%;
       object-fit: cover;
       margin-bottom: 12px;
@@ -80,24 +69,19 @@
       width: 100%;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 4px 8px;
+      gap: 6px 8px;
       font-size: 14px;
       text-align: left;
     }
-    .record-label {
-      opacity: 0.8;
-    }
-    .record-value {
-      text-align: right;
-      font-weight: 600;
-    }
+    .record-label { opacity: 0.8; }
+    .record-value { text-align: right; font-weight: 600; }
+    /* Lieu + date sous chaque record */
     .record-meta {
       grid-column: 1 / -1;
       font-size: 12px;
-      opacity: 0.8;
-      margin-top: 4px;
-      display: flex;
-      justify-content: space-between;
+      opacity: 0.75;
+      text-align: center;
+      margin-bottom: 4px;
     }
   </style>
 </head>
@@ -124,32 +108,21 @@
         <img src="https://via.placeholder.com/96x96.png?text=Photo" alt="Nom Athlète" class="athlete-photo">
         <div class="athlete-name">Prénom Nom</div>
         <div class="records">
-          <div class="record-label">Poids</div><div class="record-value">14.50 m</div>
-          <div class="record-label">Disque</div><div class="record-value">42.30 m</div>
-          <div class="record-label">Marteau</div><div class="record-value">55.70 m</div>
-          <div class="record-label">Javelot</div><div class="record-value">60.10 m</div>
-          <!-- Métadonnées -->
-          <div class="record-meta" data-date="2024-07-14" data-lieu="Epinal">
-            <span class="record-lieu"></span>
-            <span class="record-jours"></span>
-          </div>
-        </div>
-      </div>
+          <div class="record-label">Poids</div>
+          <div class="record-value">14.50 m</div>
+          <div class="record-meta" data-date="2024-07-14" data-lieu="Epinal"></div>
 
-      <!-- Copie pour un autre athlète -->
-      <div class="athlete-card">
-        <img src="https://via.placeholder.com/96x96.png?text=Photo" alt="Athlète 2" class="athlete-photo">
-        <div class="athlete-name">Athlète 2</div>
-        <div class="records">
-          <div class="record-label">Poids</div><div class="record-value">13.10 m</div>
-          <div class="record-label">Disque</div><div class="record-value">40.05 m</div>
-          <div class="record-label">Marteau</div><div class="record-value">50.80 m</div>
-          <div class="record-label">Javelot</div><div class="record-value">58.00 m</div>
-          <!-- Métadonnées -->
-          <div class="record-meta" data-date="2023-09-10" data-lieu="Nancy">
-            <span class="record-lieu"></span>
-            <span class="record-jours"></span>
-          </div>
+          <div class="record-label">Disque</div>
+          <div class="record-value">42.30 m</div>
+          <div class="record-meta" data-date="2023-11-03" data-lieu="Nancy"></div>
+
+          <div class="record-label">Marteau</div>
+          <div class="record-value">55.70 m</div>
+          <div class="record-meta" data-date="2022-05-28" data-lieu="Metz"></div>
+
+          <div class="record-label">Javelot</div>
+          <div class="record-value">60.10 m</div>
+          <div class="record-meta" data-date="2024-03-15" data-lieu="Paris"></div>
         </div>
       </div>
 
@@ -157,17 +130,41 @@
   </div>
 
   <script>
-    // Script pour afficher le lieu et le nombre de jours depuis la date
+    // Fonction pour calculer années / mois / jours
+    function diffYMD(date) {
+      const now = new Date();
+      let years = now.getFullYear() - date.getFullYear();
+      let months = now.getMonth() - date.getMonth();
+      let days = now.getDate() - date.getDate();
+
+      if (days < 0) {
+        months -= 1;
+        // récupérer nb de jours du mois précédent
+        const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+        days += prevMonth;
+      }
+      if (months < 0) {
+        years -= 1;
+        months += 12;
+      }
+      return {years, months, days};
+    }
+
     document.querySelectorAll('.record-meta').forEach(meta => {
       const dateStr = meta.dataset.date;
       const lieu = meta.dataset.lieu;
-      const dateRecord = new Date(dateStr);
-      const today = new Date();
-      const diffTime = today - dateRecord;
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      if (!dateStr) return;
 
-      meta.querySelector('.record-lieu').textContent = lieu;
-      meta.querySelector('.record-jours').textContent = `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+      const d = new Date(dateStr);
+      const {years, months, days} = diffYMD(d);
+
+      // Construire la phrase
+      let parts = [];
+      if (years > 0) parts.push(`${years} an${years > 1 ? 's' : ''}`);
+      if (months > 0) parts.push(`${months} mois`);
+      if (days > 0) parts.push(`${days} jour${days > 1 ? 's' : ''}`);
+
+      meta.textContent = `${lieu} • il y a ${parts.join(' ')}`;
     });
   </script>
 </body>
