@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Records — Groupe Athlé</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0f172a;
+      --card:#111827;
+      --text:#e5e7eb;
+      --accent:#22c55e;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, Segoe UI, Roboto, Arial;
+    }
+    .wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px;
+      padding-bottom: 80px; /* espace pour un footer fixe si besoin */
+    }
+    /* Flèche retour */
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 16px;
+      margin-bottom: 16px;
+    }
+    .back svg {
+      width: 20px;
+      height: 20px;
+      stroke: white;
+    }
+    h1 {
+      font-size: 28px;
+      margin: 0 0 4px;
+    }
+    .subtitle {
+      font-size: 16px;
+      opacity: 0.8;
+      margin-bottom: 24px;
+    }
+    /* Grille d'athlètes */
+    .athlete-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+    }
+    .athlete-card {
+      background: var(--card);
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .athlete-photo {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 12px;
+      border: 2px solid #334155;
+    }
+    .athlete-name {
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+    .records {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 8px;
+      font-size: 14px;
+      text-align: left;
+    }
+    .record-label {
+      opacity: 0.8;
+    }
+    .record-value {
+      text-align: right;
+      font-weight: 600;
+    }
+    .record-meta {
+      grid-column: 1 / -1;
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- Flèche retour -->
+    <a href="index.html" class="back">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+      </svg>
+      Retour
+    </a>
+
+    <!-- Titre -->
+    <h1>Records du Groupe</h1>
+    <div class="subtitle">Toutes les meilleures perfs de l’équipe dans chaque discipline</div>
+
+    <!-- Grille des athlètes -->
+    <div class="athlete-grid">
+
+      <!-- Exemple de carte athlète -->
+      <div class="athlete-card">
+        <img src="https://via.placeholder.com/96x96.png?text=Photo" alt="Nom Athlète" class="athlete-photo">
+        <div class="athlete-name">Prénom Nom</div>
+        <div class="records">
+          <div class="record-label">Poids</div><div class="record-value">14.50 m</div>
+          <div class="record-label">Disque</div><div class="record-value">42.30 m</div>
+          <div class="record-label">Marteau</div><div class="record-value">55.70 m</div>
+          <div class="record-label">Javelot</div><div class="record-value">60.10 m</div>
+          <!-- Métadonnées -->
+          <div class="record-meta" data-date="2024-07-14" data-lieu="Epinal">
+            <span class="record-lieu"></span>
+            <span class="record-jours"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Copie pour un autre athlète -->
+      <div class="athlete-card">
+        <img src="https://via.placeholder.com/96x96.png?text=Photo" alt="Athlète 2" class="athlete-photo">
+        <div class="athlete-name">Athlète 2</div>
+        <div class="records">
+          <div class="record-label">Poids</div><div class="record-value">13.10 m</div>
+          <div class="record-label">Disque</div><div class="record-value">40.05 m</div>
+          <div class="record-label">Marteau</div><div class="record-value">50.80 m</div>
+          <div class="record-label">Javelot</div><div class="record-value">58.00 m</div>
+          <!-- Métadonnées -->
+          <div class="record-meta" data-date="2023-09-10" data-lieu="Nancy">
+            <span class="record-lieu"></span>
+            <span class="record-jours"></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Script pour afficher le lieu et le nombre de jours depuis la date
+    document.querySelectorAll('.record-meta').forEach(meta => {
+      const dateStr = meta.dataset.date;
+      const lieu = meta.dataset.lieu;
+      const dateRecord = new Date(dateStr);
+      const today = new Date();
+      const diffTime = today - dateRecord;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+      meta.querySelector('.record-lieu').textContent = lieu;
+      meta.querySelector('.record-jours').textContent = `Il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+    });
+  </script>
+</body>
+</html>
