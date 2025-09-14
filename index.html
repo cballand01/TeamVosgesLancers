@@ -20,6 +20,20 @@
     .title{font-weight:700;margin-bottom:6px}
     .desc{opacity:.8;font-size:14px}
     footer{margin-top:28px;opacity:.7;font-size:12px;text-align:center}
+
+    /* ====== BANNIÈRE bas ====== */
+    .site-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #111;      /* couleur du fond */
+      color: #fff;           /* couleur du texte */
+      text-align: center;
+      padding: 10px 0;
+      font-size: 14px;
+      z-index: 100;          /* toujours au-dessus */
+    }
         
   </style>
 </head>
@@ -60,8 +74,8 @@
       </a>
     </div>
 
-    <footer>
-      © Ton Club – {année}
+    <footer class="site-footer">
+      © Team Vosges Lancers - 2025
     </footer>
   </div>
 </body>
