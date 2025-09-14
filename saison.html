@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Calendrier de la saison</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- FullCalendar -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+  <style>
+    :root{--bg:#0f172a;--card:#111827;--text:#e5e7eb;--accent:#22c55e}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
+    .wrap{max-width:960px;margin:0 auto;padding:24px 24px 80px}
+    .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px;margin-bottom:16px}
+    .back svg{width:20px;height:20px;stroke:#fff}
+    h1{margin:0 0 8px;font-size:28px}
+    .subtitle{opacity:.8;margin:0 0 16px}
+
+    /* carte calendrier */
+    .cal-card{background:var(--card);border:1px solid #1f2937;border-radius:12px;padding:12px}
+    #calendar{background:#0b1326;border-radius:8px;padding:8px}
+
+    /* modale légère */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+    .modal.open{display:flex}
+    .modal-card{background:#0f172a;border:1px solid #1f2937;border-radius:12px;max-width:420px;width:100%;padding:16px}
+    .row{display:flex;gap:8px;margin-bottom:10px}
+    .row label{flex:0 0 90px;opacity:.85}
+    .row input,.row textarea{flex:1;background:#0b1326;border:1px solid #1f2937;border-radius:8px;color:var(--text);padding:8px}
+    .actions{display:flex;gap:8px;justify-content:flex-end}
+    button{background:#0b1326;color:var(--text);border:1px solid #1f2937;border-radius:8px;padding:8px 12px;cursor:pointer}
+    .primary{background:var(--accent);color:#0b1326;border-color:var(--accent)}
+    .danger{border-color:#ef4444;color:#ef4444}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="index.html" class="back">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+      </svg>
+      Retour
+    </a>
+    <h1>Calendrier de la saison</h1>
+    <p class="subtitle">Ajoute/édite des compétitions, stages, entraînements… (partagé)</p>
+
+    <div class="cal-card">
+      <div id="calendar"></div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal" aria-modal="true" role="dialog">
+    <div class="modal-card">
+      <h3 id="modalTitle" style="margin:0 0 12px">Nouvel évènement</h3>
+      <div class="row"><label>Titre</label><input id="fTitle" placeholder="Ex: Meeting régional"></div>
+      <div class="row"><label>Début</label><input id="fStart" type="datetime-local"></div>
+      <div class="row"><label>Fin</label><input id="fEnd" type="datetime-local"></div>
+      <div class="row"><label>Lieu</label><input id="fLoc" placeholder="Ville / stade"></div>
+      <div class="row"><label>Notes</label><textarea id="fNotes" rows="3" placeholder="Détails, lien inscription…"></textarea></div>
+      <div class="actions">
+        <button id="btnDelete" class="danger" style="display:none">Supprimer</button>
+        <span style="flex:1"></span>
+        <button id="btnCancel">Annuler</button>
+        <button id="btnSave" class="primary">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'YOUR_APPS_SCRIPT_URL_HERE'; // <= remplace par l’URL de ton déploiement Apps Script
+
+    // helpers fetch
+    async function apiList() {
+      const r = await fetch(API);
+      const j = await r.json();
+      return (j.events||[]).map(e => ({
+        id: e.id,
+        title: e.title,
+        start: e.start,
+        end: e.end || null,
+        extendedProps: { location: e.location || '', notes: e.notes || '' }
+      }));
+    }
+    async function apiSave(action, event) {
+      const r = await fetch(API, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({action, event})
+      });
+      return r.json();
+    }
+    async function apiDelete(id) {
+      const r = await fetch(API, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({action:'delete', id})
+      });
+      return r.json();
+    }
+
+    // UI modal
+    const $modal = document.getElementById('modal');
+    const $title = document.getElementById('fTitle');
+    const $start = document.getElementById('fStart');
+    const $end = document.getElementById('fEnd');
+    const $loc = document.getElementById('fLoc');
+    const $notes = document.getElementById('fNotes');
+    const $btnDelete = document.getElementById('btnDelete');
+    const $btnCancel = document.getElementById('btnCancel');
+    const $btnSave = document.getElementById('btnSave');
+    const $modalTitle = document.getElementById('modalTitle');
+
+    let currentEvent = null; // FullCalendar event or null (create)
+
+    function openModal(ev) {
+      currentEvent = ev || null;
+      $modal.classList.add('open');
+      $btnDelete.style.display = ev ? '' : 'none';
+      $modalTitle.textContent = ev ? 'Modifier l’évènement' : 'Nouvel évènement';
+
+      if (ev) {
+        $title.value = ev.title || '';
+        $start.value = toLocalInput(ev.start);
+        $end.value = ev.end ? toLocalInput(ev.end) : '';
+        $loc.value = ev.extendedProps.location || '';
+        $notes.value = ev.extendedProps.notes || '';
+      } else {
+        $title.value = '';
+        $start.value = toLocalInput(new Date());
+        $end.value = '';
+        $loc.value = '';
+        $notes.value = '';
+      }
+    }
+    function closeModal(){ $modal.classList.remove('open'); }
+
+    function toLocalInput(d) {
+      const pad = n => String(n).padStart(2,'0');
+      const yyyy = d.getFullYear();
+      const mm = pad(d.getMonth()+1);
+      const dd = pad(d.getDate());
+      const hh = pad(d.getHours());
+      const mi = pad(d.getMinutes());
+      return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+    }
+
+    // FullCalendar
+    document.addEventListener('DOMContentLoaded', async () => {
+      const calendarEl = document.getElementById('calendar');
+      const events = await apiList();
+
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        themeSystem: 'standard',
+        height: 'auto',
+        selectable: true,
+        editable: true,       // drag/resize
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,listWeek'
+        },
+        events, // data initiale
+        select: (info) => {
+          // Création
+          openModal(null);
+          $start.value = toLocalInput(info.start);
+          if (info.end) $end.value = toLocalInput(info.end);
+          // sauvegarde via bouton
+        },
+        eventClick: (info) => {
+          // Edition
+          openModal(info.event);
+        },
+        eventDrop: async (info) => {
+          // drag → update dates
+          const ev = info.event;
+          await apiSave('update', {
+            id: ev.id, title: ev.title,
+            start: ev.start.toISOString(),
+            end: ev.end ? ev.end.toISOString() : '',
+            location: ev.extendedProps.location || '',
+            notes: ev.extendedProps.notes || ''
+          });
+        },
+        eventResize: async (info) => {
+          const ev = info.event;
+          await apiSave('update', {
+            id: ev.id, title: ev.title,
+            start: ev.start.toISOString(),
+            end: ev.end ? ev.end.toISOString() : '',
+            location: ev.extendedProps.location || '',
+            notes: ev.extendedProps.notes || ''
+          });
+        }
+      });
+
+      calendar.render();
+
+      // actions modal
+      $btnCancel.onclick = closeModal;
+
+      $btnSave.onclick = async () => {
+        const data = {
+          title: $title.value.trim(),
+          start: new Date($start.value).toISOString(),
+          end: $end.value ? new Date($end.value).toISOString() : '',
+          location: $loc.value.trim(),
+          notes: $notes.value.trim()
+        };
+        if (!data.title) { alert('Titre requis'); return; }
+
+        if (currentEvent) {
+          // update
+          data.id = currentEvent.id;
+          const res = await apiSave('update', data);
+          if (res.ok) {
+            currentEvent.setProp('title', data.title);
+            currentEvent.setDates(new Date(data.start), data.end ? new Date(data.end) : null);
+            currentEvent.setExtendedProp('location', data.location);
+            currentEvent.setExtendedProp('notes', data.notes);
+          } else {
+            alert('Erreur update: ' + (res.error||''));
+          }
+        } else {
+          // create
+          const res = await apiSave('create', data);
+          if (res.ok && res.event) {
+            calendar.addEvent({
+              id: res.event.id,
+              title: data.title,
+              start: data.start,
+              end: data.end || null,
+              extendedProps: {location: data.location, notes: data.notes}
+            });
+          } else {
+            alert('Erreur création: ' + (res.error||''));
+          }
+        }
+        closeModal();
+      };
+
+      $btnDelete.onclick = async () => {
+        if (!currentEvent) return;
+        if (!confirm('Supprimer cet évènement ?')) return;
+        const res = await apiDelete(currentEvent.id);
+        if (res.ok) {
+          currentEvent.remove();
+          closeModal();
+        } else {
+          alert('Suppression impossible');
+        }
+      };
+    });
+  </script>
+</body>
+</html>
