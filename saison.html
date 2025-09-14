@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <title>Calendrier de la saison</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- FullCalendar -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
   <style>
@@ -16,18 +15,18 @@
     h1{margin:0 0 8px;font-size:28px}
     .subtitle{opacity:.8;margin:0 0 16px}
 
-    /* carte calendrier */
     .cal-card{background:var(--card);border:1px solid #1f2937;border-radius:12px;padding:12px}
     #calendar{background:#0b1326;border-radius:8px;padding:8px}
 
-    /* modale légère */
     .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
     .modal.open{display:flex}
-    .modal-card{background:#0f172a;border:1px solid #1f2937;border-radius:12px;max-width:420px;width:100%;padding:16px}
-    .row{display:flex;gap:8px;margin-bottom:10px}
-    .row label{flex:0 0 90px;opacity:.85}
-    .row input,.row textarea{flex:1;background:#0b1326;border:1px solid #1f2937;border-radius:8px;color:var(--text);padding:8px}
-    .actions{display:flex;gap:8px;justify-content:flex-end}
+    .modal-card{background:#0f172a;border:1px solid #1f2937;border-radius:12px;max-width:460px;width:100%;padding:16px}
+    .row{display:flex;gap:8px;margin-bottom:10px;align-items:center}
+    .row label{flex:0 0 140px;opacity:.85}
+    .row input,.row select,.row textarea{flex:1;background:#0b1326;border:1px solid #1f2937;border-radius:8px;color:var(--text);padding:8px}
+    .checks{display:flex;gap:10px;flex-wrap:wrap}
+    .checks label{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto}
+    .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
     button{background:#0b1326;color:var(--text);border:1px solid #1f2937;border-radius:8px;padding:8px 12px;cursor:pointer}
     .primary{background:var(--accent);color:#0b1326;border-color:var(--accent)}
     .danger{border-color:#ef4444;color:#ef4444}
@@ -53,11 +52,44 @@
   <div id="modal" class="modal" aria-modal="true" role="dialog">
     <div class="modal-card">
       <h3 id="modalTitle" style="margin:0 0 12px">Nouvel évènement</h3>
-      <div class="row"><label>Titre</label><input id="fTitle" placeholder="Ex: Meeting régional"></div>
-      <div class="row"><label>Début</label><input id="fStart" type="datetime-local"></div>
-      <div class="row"><label>Fin</label><input id="fEnd" type="datetime-local"></div>
-      <div class="row"><label>Lieu</label><input id="fLoc" placeholder="Ville / stade"></div>
-      <div class="row"><label>Notes</label><textarea id="fNotes" rows="3" placeholder="Détails, lien inscription…"></textarea></div>
+
+      <div class="row">
+        <label>Type</label>
+        <select id="fType">
+          <option value="Meeting">Meeting</option>
+          <option value="Championnats">Championnats</option>
+          <option value="Interclubs">Interclubs</option>
+          <option value="Stage">Stage</option>
+          <option value="Test">Test</option>
+          <option value="Autre">Autre</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label>Date</label>
+        <input id="fDate" type="date">
+      </div>
+
+      <div class="row">
+        <label>Lieu</label>
+        <input id="fLieu" placeholder="Ville / stade">
+      </div>
+
+      <div class="row">
+        <label>Épreuves dispo</label>
+        <div class="checks">
+          <label><input type="checkbox" id="cDisque"> Disque</label>
+          <label><input type="checkbox" id="cPoids"> Poids</label>
+          <label><input type="checkbox" id="cJavelot"> Javelot</label>
+          <label><input type="checkbox" id="cMarteau"> Marteau</label>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>Notes</label>
+        <textarea id="fNotes" rows="3" placeholder="Détails, lien, horaires…"></textarea>
+      </div>
+
       <div class="actions">
         <button id="btnDelete" class="danger" style="display:none">Supprimer</button>
         <span style="flex:1"></span>
@@ -68,19 +100,12 @@
   </div>
 
   <script>
-    const API = 'YOUR_APPS_SCRIPT_URL_HERE'; // <= remplace par l’URL de ton déploiement Apps Script
+    const API = 'YOUR_APPS_SCRIPT_URL_HERE'; // <= remplace par l’URL Apps Script
 
-    // helpers fetch
     async function apiList() {
       const r = await fetch(API);
       const j = await r.json();
-      return (j.events||[]).map(e => ({
-        id: e.id,
-        title: e.title,
-        start: e.start,
-        end: e.end || null,
-        extendedProps: { location: e.location || '', notes: e.notes || '' }
-      }));
+      return j.events || [];
     }
     async function apiSave(action, event) {
       const r = await fetch(API, {
@@ -99,156 +124,121 @@
       return r.json();
     }
 
-    // UI modal
+    // Modal refs
     const $modal = document.getElementById('modal');
-    const $title = document.getElementById('fTitle');
-    const $start = document.getElementById('fStart');
-    const $end = document.getElementById('fEnd');
-    const $loc = document.getElementById('fLoc');
-    const $notes = document.getElementById('fNotes');
+    const $modalTitle = document.getElementById('modalTitle');
     const $btnDelete = document.getElementById('btnDelete');
     const $btnCancel = document.getElementById('btnCancel');
     const $btnSave = document.getElementById('btnSave');
-    const $modalTitle = document.getElementById('modalTitle');
 
-    let currentEvent = null; // FullCalendar event or null (create)
+    const $fType = document.getElementById('fType');
+    const $fDate = document.getElementById('fDate');
+    const $fLieu = document.getElementById('fLieu');
+    const $cDisque = document.getElementById('cDisque');
+    const $cPoids = document.getElementById('cPoids');
+    const $cJavelot = document.getElementById('cJavelot');
+    const $cMarteau = document.getElementById('cMarteau');
+    const $fNotes = document.getElementById('fNotes');
 
-    function openModal(ev) {
+    let currentEvent = null; // FullCalendar Event (si edition)
+
+    function openModal(ev){
       currentEvent = ev || null;
       $modal.classList.add('open');
       $btnDelete.style.display = ev ? '' : 'none';
       $modalTitle.textContent = ev ? 'Modifier l’évènement' : 'Nouvel évènement';
 
-      if (ev) {
-        $title.value = ev.title || '';
-        $start.value = toLocalInput(ev.start);
-        $end.value = ev.end ? toLocalInput(ev.end) : '';
-        $loc.value = ev.extendedProps.location || '';
-        $notes.value = ev.extendedProps.notes || '';
-      } else {
-        $title.value = '';
-        $start.value = toLocalInput(new Date());
-        $end.value = '';
-        $loc.value = '';
-        $notes.value = '';
+      if(ev){
+        const xp = ev.extendedProps || {};
+        $fType.value = xp.type_compet || 'Meeting';
+        $fDate.value = ev.start ? ev.start.toISOString().slice(0,10) : '';
+        $fLieu.value = xp.lieu || xp.location || '';
+        $cDisque.checked = !!xp.disque;
+        $cPoids.checked  = !!xp.poids;
+        $cJavelot.checked= !!xp.javelot;
+        $cMarteau.checked= !!xp.marteau;
+        $fNotes.value = xp.notes || '';
+      }else{
+        $fType.value = 'Meeting';
+        $fDate.value = new Date().toISOString().slice(0,10);
+        $fLieu.value = '';
+        $cDisque.checked = $cPoids.checked = $cJavelot.checked = $cMarteau.checked = false;
+        $fNotes.value = '';
       }
     }
     function closeModal(){ $modal.classList.remove('open'); }
 
-    function toLocalInput(d) {
-      const pad = n => String(n).padStart(2,'0');
-      const yyyy = d.getFullYear();
-      const mm = pad(d.getMonth()+1);
-      const dd = pad(d.getDate());
-      const hh = pad(d.getHours());
-      const mi = pad(d.getMinutes());
-      return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
-    }
-
-    // FullCalendar
-    document.addEventListener('DOMContentLoaded', async () => {
+    document.addEventListener('DOMContentLoaded', async ()=>{
       const calendarEl = document.getElementById('calendar');
       const events = await apiList();
 
       const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
-        themeSystem: 'standard',
         height: 'auto',
         selectable: true,
-        editable: true,       // drag/resize
-        headerToolbar: {
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,listWeek'
-        },
-        events, // data initiale
+        editable: false, // (on garde l’édition via le formulaire)
+        headerToolbar: { left:'prev,next today', center:'title', right:'dayGridMonth,listMonth' },
+        events,
         select: (info) => {
-          // Création
           openModal(null);
-          $start.value = toLocalInput(info.start);
-          if (info.end) $end.value = toLocalInput(info.end);
-          // sauvegarde via bouton
+          // propose la date cliquée
+          if(info.start) { document.getElementById('fDate').value = info.startStr; }
         },
-        eventClick: (info) => {
-          // Edition
-          openModal(info.event);
-        },
-        eventDrop: async (info) => {
-          // drag → update dates
-          const ev = info.event;
-          await apiSave('update', {
-            id: ev.id, title: ev.title,
-            start: ev.start.toISOString(),
-            end: ev.end ? ev.end.toISOString() : '',
-            location: ev.extendedProps.location || '',
-            notes: ev.extendedProps.notes || ''
-          });
-        },
-        eventResize: async (info) => {
-          const ev = info.event;
-          await apiSave('update', {
-            id: ev.id, title: ev.title,
-            start: ev.start.toISOString(),
-            end: ev.end ? ev.end.toISOString() : '',
-            location: ev.extendedProps.location || '',
-            notes: ev.extendedProps.notes || ''
-          });
-        }
+        eventClick: (info) => openModal(info.event)
       });
 
       calendar.render();
 
-      // actions modal
       $btnCancel.onclick = closeModal;
 
-      $btnSave.onclick = async () => {
-        const data = {
-          title: $title.value.trim(),
-          start: new Date($start.value).toISOString(),
-          end: $end.value ? new Date($end.value).toISOString() : '',
-          location: $loc.value.trim(),
-          notes: $notes.value.trim()
+      $btnSave.onclick = async ()=>{
+        const payload = {
+          type_compet: $fType.value,
+          date: $fDate.value, // YYYY-MM-DD
+          lieu: $fLieu.value.trim(),
+          disque:  $cDisque.checked,
+          poids:   $cPoids.checked,
+          javelot: $cJavelot.checked,
+          marteau: $cMarteau.checked,
+          notes: $fNotes.value.trim()
         };
-        if (!data.title) { alert('Titre requis'); return; }
 
-        if (currentEvent) {
-          // update
-          data.id = currentEvent.id;
-          const res = await apiSave('update', data);
-          if (res.ok) {
-            currentEvent.setProp('title', data.title);
-            currentEvent.setDates(new Date(data.start), data.end ? new Date(data.end) : null);
-            currentEvent.setExtendedProp('location', data.location);
-            currentEvent.setExtendedProp('notes', data.notes);
-          } else {
-            alert('Erreur update: ' + (res.error||''));
+        if(!payload.date){ alert('Date requise'); return; }
+        if(!payload.type_compet){ alert('Type requis'); return; }
+
+        if(currentEvent){
+          payload.id = currentEvent.id;
+          const res = await apiSave('update', payload);
+          if(res.ok){
+            // Recharge propre (l’API compose le title)
+            const fresh = await apiList();
+            calendar.removeAllEvents();
+            calendar.addEventSource(fresh);
+            closeModal();
+          }else{
+            alert('Erreur update: '+(res.error||''));
           }
-        } else {
-          // create
-          const res = await apiSave('create', data);
-          if (res.ok && res.event) {
-            calendar.addEvent({
-              id: res.event.id,
-              title: data.title,
-              start: data.start,
-              end: data.end || null,
-              extendedProps: {location: data.location, notes: data.notes}
-            });
-          } else {
-            alert('Erreur création: ' + (res.error||''));
+        }else{
+          const res = await apiSave('create', payload);
+          if(res.ok){
+            const fresh = await apiList();
+            calendar.removeAllEvents();
+            calendar.addEventSource(fresh);
+            closeModal();
+          }else{
+            alert('Erreur création: '+(res.error||''));
           }
         }
-        closeModal();
       };
 
-      $btnDelete.onclick = async () => {
-        if (!currentEvent) return;
-        if (!confirm('Supprimer cet évènement ?')) return;
+      $btnDelete.onclick = async ()=>{
+        if(!currentEvent) return;
+        if(!confirm('Supprimer cet évènement ?')) return;
         const res = await apiDelete(currentEvent.id);
-        if (res.ok) {
+        if(res.ok){
           currentEvent.remove();
           closeModal();
-        } else {
+        }else{
           alert('Suppression impossible');
         }
       };
