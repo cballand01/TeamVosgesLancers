@@ -17,15 +17,15 @@
     h1{margin:0 0 4px;font-size:28px}
     .subtitle{opacity:.8;margin-bottom:18px}
 
-    /* Tabs athlètes */
-    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-    .tab{padding:8px 12px;border-radius:999px;border:1px solid #1f2937;background:#0b1326;color:var(--text);cursor:pointer;font-size:14px}
-    .tab.active{background:var(--accent);color:#0b1326;border-color:var(--accent)}
-
     /* Filtres disciplines */
-    .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+    .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
     .filter{padding:6px 10px;border-radius:8px;border:1px solid #1f2937;background:#0b1326;color:var(--text);cursor:pointer;font-size:13px}
     .filter.active{background:var(--accent);color:#0b1326;border-color:var(--accent)}
+
+    /* Tabs athlètes */
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+    .tab{padding:6px 10px;border-radius:999px;border:1px solid #1f2937;background:#0b1326;color:var(--text);cursor:pointer;font-size:13px}
+    .tab.active{background:var(--accent);color:#0b1326;border-color:var(--accent)}
 
     /* Grille vidéos */
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
@@ -46,8 +46,6 @@
     .viewer-header{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
     .viewer-title{color:#fff;font-size:14px;background:rgba(0,0,0,.5);padding:6px 10px;border-radius:8px;pointer-events:auto}
     .close{pointer-events:auto;background:rgba(255,255,255,.15);border:none;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer}
-    .nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border:none;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;cursor:pointer}
-    .nav.left{left:8px}.nav.right{right:8px}
   </style>
 </head>
 <body>
@@ -61,13 +59,13 @@
     </a>
 
     <h1>Vidéos Inspirantes</h1>
-    <div class="subtitle">Sélection d’athlètes et de disciplines pour progresser</div>
-
-    <!-- Onglets Athlètes -->
-    <div class="tabs" id="athleteTabs"></div>
+    <div class="subtitle">Choisis une discipline puis un athlète pour voir ses vidéos</div>
 
     <!-- Filtres Disciplines -->
     <div class="filters" id="disciplineFilters"></div>
+
+    <!-- Onglets Athlètes -->
+    <div class="tabs" id="athleteTabs"></div>
 
     <!-- Grille -->
     <div id="grid" class="grid"></div>
@@ -76,9 +74,7 @@
   <!-- Lightbox -->
   <div id="lightbox" class="lightbox">
     <div class="viewer">
-      <button class="nav left" id="prev" title="Précédent">⟨</button>
       <div class="video-wrapper" id="viewer"></div>
-      <button class="nav right" id="next" title="Suivant">⟩</button>
       <div class="viewer-header">
         <div class="viewer-title" id="viewerTitle"></div>
         <button class="close" id="close">✕</button>
@@ -87,62 +83,64 @@
   </div>
 
   <script>
-    // ===== Données : remplis ici =====
     const VIDEOS = [
-      { athlete:'Ryan Crouser', discipline:'Poids', youtube:'bMRj6N95Hk8', title:'Technique glide', info:'Analyse par Ryan' },
-      { athlete:'Ryan Crouser', discipline:'Poids', youtube:'x7Tfq1eXY9Q', title:'Séance muscu', info:'Force spécifique' },
-      { athlete:'Valarie Allman', discipline:'Disque', youtube:'q2ULYz8oDnc', title:'Technique Disque', info:'Analyse ralentie' },
-      { athlete:'Johannes Vetter', discipline:'Javelot', youtube:'KR5XeapsoR0', title:'Approches', info:'Préparation été' },
-      { athlete:'Wojciech Nowicki', discipline:'Marteau', youtube:'rZFR0dpFzEw', title:'Tech Marteau', info:'Finale Européenne' },
+      { athlete:'Ryan Crouser', discipline:'Poids', youtube:'bMRj6N95Hk8', title:'Technique Glide', info:'Analyse' },
+      { athlete:'Ryan Crouser', discipline:'Poids', youtube:'x7Tfq1eXY9Q', title:'Musculation spécifique', info:'Séance force' },
+      { athlete:'Valarie Allman', discipline:'Disque', youtube:'q2ULYz8oDnc', title:'Technique Disque', info:'Ralentis HD' },
+      { athlete:'Johannes Vetter', discipline:'Javelot', youtube:'KR5XeapsoR0', title:'Approches', info:'Prépa été' },
+      { athlete:'Wojciech Nowicki', discipline:'Marteau', youtube:'rZFR0dpFzEw', title:'Tech Marteau', info:'Compétition' },
+      { athlete:'Paweł Fajdek', discipline:'Marteau', youtube:'cTMEz5bEPWk', title:'Entraînement', info:'Slow motion' }
     ];
 
-    const athletes = [...new Set(VIDEOS.map(v => v.athlete))];
-    const disciplines = ['Tous', ...new Set(VIDEOS.map(v => v.discipline))];
+    const disciplines = ['Poids','Disque','Marteau','Javelot'];
+    let currentDiscipline = 'Poids';
+    let currentAthlete = null;
 
-    let currentAthlete = athletes[0];
-    let currentDiscipline = 'Tous';
-
-    const $tabs = document.getElementById('athleteTabs');
     const $filters = document.getElementById('disciplineFilters');
+    const $tabs = document.getElementById('athleteTabs');
     const $grid = document.getElementById('grid');
 
-    // Crée les onglets
-    athletes.forEach(name=>{
-      const btn = document.createElement('button');
-      btn.className = 'tab' + (name===currentAthlete?' active':'');
-      btn.textContent = name;
-      btn.addEventListener('click', ()=>{
-        currentAthlete = name;
-        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-        btn.classList.add('active');
-        render();
-      });
-      $tabs.appendChild(btn);
-    });
-
-    // Crée les filtres
+    // Crée les filtres de disciplines
     disciplines.forEach(d=>{
       const btn = document.createElement('button');
       btn.className = 'filter' + (d===currentDiscipline?' active':'');
       btn.textContent = d;
       btn.addEventListener('click', ()=>{
         currentDiscipline = d;
+        currentAthlete = null;
         document.querySelectorAll('.filter').forEach(f=>f.classList.remove('active'));
         btn.classList.add('active');
+        updateAthletes();
         render();
       });
       $filters.appendChild(btn);
     });
 
+    function updateAthletes(){
+      $tabs.innerHTML = '';
+      const athletes = [...new Set(VIDEOS.filter(v=>v.discipline===currentDiscipline).map(v=>v.athlete))];
+      athletes.forEach(name=>{
+        const b = document.createElement('button');
+        b.className = 'tab' + (name===currentAthlete?' active':'');
+        b.textContent = name;
+        b.addEventListener('click', ()=>{
+          currentAthlete = name;
+          document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+          b.classList.add('active');
+          render();
+        });
+        $tabs.appendChild(b);
+      });
+    }
+
     function render(){
       $grid.innerHTML = '';
       VIDEOS
-        .filter(v=>v.athlete===currentAthlete)
-        .filter(v=>currentDiscipline==='Tous' || v.discipline===currentDiscipline)
-        .forEach((v,i)=>{
+        .filter(v=>v.discipline===currentDiscipline)
+        .filter(v=>!currentAthlete || v.athlete===currentAthlete)
+        .forEach(v=>{
           const card = document.createElement('div');
           card.className = 'card';
-          card.dataset.index = i;
           const thumb = document.createElement('img');
           thumb.className = 'thumb';
           thumb.src = `https://img.youtube.com/vi/${v.youtube}/hqdefault.jpg`;
@@ -150,12 +148,12 @@
 
           const meta = document.createElement('div');
           meta.className = 'meta';
-          meta.innerHTML = `<div class="title">${v.title}</div><div class="info">${v.discipline} • ${v.info}</div>`;
+          meta.innerHTML = `<div class="title">${v.title}</div><div class="info">${v.athlete}</div>`;
           card.appendChild(meta);
 
           const play = document.createElement('div');
           play.className = 'play';
-          play.innerHTML = `<svg viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>`;
+          play.innerHTML = `<svg viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>`;
           card.appendChild(play);
 
           card.addEventListener('click', ()=>openViewer(v));
@@ -163,7 +161,6 @@
         });
     }
 
-    // Lightbox
     const $lightbox = document.getElementById('lightbox');
     const $viewer = document.getElementById('viewer');
     const $title = document.getElementById('viewerTitle');
@@ -182,6 +179,8 @@
     $close.addEventListener('click', ()=>{$lightbox.classList.remove('open');$viewer.innerHTML='';});
     $lightbox.addEventListener('click', e=>{if(e.target=== $lightbox){$lightbox.classList.remove('open');$viewer.innerHTML='';}});
 
+    // init
+    updateAthletes();
     render();
   </script>
 </body>
