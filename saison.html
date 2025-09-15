@@ -125,7 +125,7 @@
   </div>
 
   <script>
-    const API = 'https://script.google.com/macros/s/AKfycbzD4NrguWXjA4iC7okQGhquZ8qrMkD1EXN24GblQitrIJ2iZEaEEvMYjExBheaAB2s/exec'; // colle ton URL
+    const API = 'https://script.google.com/macros/s/AKfycbzD4NrguWXjA4iC7okQGhquZ8qrMkD1EXN24GblQitrIJ2iZEaEEvMYjExBheaAB2s/exec';
 
     let ITEMS = [];
     const $ = (q,root=document)=>root.querySelector(q);
@@ -135,28 +135,34 @@
     function fmtDateFR(s){const d=isoToDate(s);return d.toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'});}
     function todayISO(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 
+    // ---- API calls (GET sans preflight, POST sans headers -> pas de CORS) ----
     async function fetchAll(){
-      try{const r=await fetch(API);const j=await r.json();ITEMS=(j.items||[]).filter(x=>x.date);render();}
-      catch(e){console.error(e);}
+      try{
+        const r = await fetch(API + '?resource=competitions');
+        const j = await r.json();
+        ITEMS = (j.items||[]).filter(x=>x.date);
+        render();
+      }catch(e){ console.error(e); }
     }
 
     async function createItem(payload){
       const form = new URLSearchParams();
-      form.append('resource','competitions'); 
+      form.append('resource','competitions');
       form.append('action','create');
       form.append('item', JSON.stringify(payload));
-    
-      // 🔥 PAS de headers, pas de mode: 'cors', pas de JSON direct :
-      const r = await fetch(API, {
-        method:'POST',
-        body: form
-      });
+      const r = await fetch(API, { method:'POST', body: form }); // pas de headers !
       return r.json();
     }
+
     async function deleteItem(id){
-      const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',id})});
+      const form = new URLSearchParams();
+      form.append('resource','competitions');
+      form.append('action','delete');
+      form.append('id', id);
+      const r = await fetch(API, { method:'POST', body: form }); // pas de headers !
       return r.json();
     }
+    // -------------------------------------------------------------------------
 
     function render(){
       const today=todayISO();
@@ -188,9 +194,10 @@
       if(!confirm("Êtes-vous sûr ?"))return;
       const res=await deleteItem(id);
       if(res&&res.ok){ITEMS=ITEMS.filter(x=>x.id!==id);render();}
+      else alert('Suppression impossible.');
     }
 
-    // FAB et bottom sheet
+    // FAB & bottom sheet
     const sheetBg=$('#sheetBg');
     $('#fab').onclick=()=>sheetBg.style.display='flex';
     $('#cancel').onclick=()=>sheetBg.style.display='none';
@@ -205,6 +212,7 @@
       const res=await createItem(payload);
       if(res&&res.ok&&res.item){
         ITEMS.push(res.item);render();sheetBg.style.display='none';
+        // reset
         $('#fDate').value='';$('#fLieu').value='';$('#fType').value='Meeting';$$('.fEp').forEach(x=>x.checked=false);$('#fInfos').value='';
       } else $('#msg').textContent='Erreur.';
     };
