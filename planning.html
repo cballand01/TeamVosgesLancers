@@ -2,61 +2,34 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>Planning — Groupe Athlé</title>
+  <title>Compétitions — Groupe Athlé</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root{
-      --bg:#0f172a; --card:#111827; --text:#e5e7eb; --muted:#94a3b8; --line:#1f2937;
-      --accent:#22c55e;
-    }
+    :root{--bg:#0f172a;--card:#111827;--text:#e5e7eb;--muted:#94a3b8;--line:#1f2937;--accent:#22c55e;--danger:#ef4444}
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
     .wrap{max-width:960px;margin:0 auto;padding:16px 16px 96px}
 
-    /* Retour en haut */
+    /* Retour */
     .topbar{display:flex;align-items:center;margin-bottom:8px}
     .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px}
     .back svg{width:20px;height:20px;stroke:#fff}
 
-    /* TITRES collés à gauche (même DA que records.html) */
+    /* TITRES */
     h1{margin:8px 0 4px;font-size:28px;font-weight:700;text-align:left}
     .subtitle{text-align:left;opacity:.7;font-size:16px;margin-bottom:16px}
 
-    /* Barre semaine */
-    .weekbar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px}
-    .navbtn{
-      width:36px;height:36px;border-radius:50%;border:1px solid var(--line);
-      background:var(--card);color:var(--text);display:grid;place-items:center;
-      font-size:18px;cursor:pointer
-    }
-    .navbtn:active{transform:scale(0.95)}
-    .when{font-weight:600;font-size:15px;min-width:190px;text-align:center}
-
-    /* Day pills (scrollable) */
-    .days{display:flex;gap:8px;overflow-x:auto;padding:6px 0 10px;margin-bottom:8px;scroll-behavior:smooth}
-    .daypill{
-      flex:0 0 auto; min-width:72px; text-align:center; padding:10px 12px; border-radius:999px;
-      border:1px solid var(--line); background:#0b1326; color:var(--text); cursor:pointer;
-      font-weight:500
-    }
-    .daypill small{display:block;opacity:.7}
-    .daypill.active{background:var(--accent); color:#0b1326; border-color:var(--accent); font-weight:700}
-
-    /* Liste des créneaux */
+    /* Liste des compétitions */
     .list{display:grid;gap:10px}
-    .empty{font-size:14px;color:var(--muted);opacity:.9;padding:8px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;grid-template-columns:1fr auto;gap:8px}
+    .title{font-weight:700}
+    .meta{font-size:13px;color:var(--muted)}
+    .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+    .chip{font-size:12px;border:1px solid #334155;border-radius:999px;padding:3px 8px;color:#cbd5e1}
 
-    .ev{
-      display:flex;gap:10px;align-items:stretch;background:var(--card);border:1px solid var(--line);
-      border-radius:12px;padding:10px;position:relative;overflow:hidden
-    }
-    .ev .bar{width:6px;border-radius:8px;background:var(--accent);flex:0 0 6px}
-    .ev .info{flex:1;min-width:0}
-    .ev .title{font-weight:800;margin-bottom:2px}
-    .ev .meta{font-size:13px;color:var(--muted)}
-    .ev .meta strong{color:var(--text)}
-    .ev .del{position:absolute;top:6px;right:8px;border:none;background:transparent;color:#94a3b8;cursor:pointer;font-size:18px}
-    .ev .del:hover{color:#fff}
+    .actions{display:flex;gap:8px;align-items:center}
+    .btn{border:1px solid #1f2937;border-radius:8px;background:#0b1326;color:var(--text);padding:6px 10px;cursor:pointer}
+    .btn.danger{border-color:var(--danger);color:var(--danger)}
 
     /* FAB */
     .fab{
@@ -79,24 +52,20 @@
     @keyframes slideup{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
 
     .row{display:flex;gap:8px;margin:8px 0;align-items:center}
-    .row label{flex:0 0 110px;opacity:.9}
-    .row input{flex:1;background:#0b1326;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:10px}
+    .row label{flex:0 0 120px;opacity:.9}
+    .row input,.row select,.row textarea{flex:1;background:#0b1326;border:1px solid #1f2937;border-radius:8px;color:var(--text);padding:8px}
+    .checks{display:flex;gap:10px;flex-wrap:wrap}
+    .checks label{display:inline-flex;gap:6px;align-items:center}
 
-    .sheet .actions{display:flex;gap:8px;margin-top:8px}
-    .btn{border:1px solid var(--line);border-radius:10px;background:#0b1326;color:var(--text);padding:8px 12px;cursor:pointer}
-    .btn.ghost{background:transparent}
-    .subtitle.small{font-size:12px}
-
-    @media (min-width:900px){
-      h1{font-size:30px}
-      .subtitle{font-size:16px}
-      .when{font-size:16px;min-width:260px}
+    @media(max-width:640px){
+      .checks{flex-direction:column;align-items:flex-start}
+      .card{grid-template-columns:1fr}
+      .actions{justify-content:flex-end}
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <!-- Retour -->
     <div class="topbar">
       <a href="index.html" class="back">
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
@@ -104,118 +73,143 @@
       </a>
     </div>
 
-    <!-- TITRES -->
-    <h1>Planning</h1>
-    <div class="subtitle">Vue de la semaine — créneaux d’entraînement</div>
+    <h1>Compétitions</h1>
+    <div class="subtitle">Liste des compétitions à venir / passées</div>
 
-    <!-- Nav semaine -->
-    <div class="weekbar">
-      <button class="navbtn" id="prev">‹</button>
-      <div class="when" id="when"></div>
-      <button class="navbtn" id="today">⌂</button>
-      <button class="navbtn" id="next">›</button>
-    </div>
+    <!-- Listes -->
+    <div id="list-upcoming" class="list"></div>
+    <div id="list-past" class="list" style="margin-top:16px"></div>
 
-    <!-- Jours -->
-    <div class="days" id="days"></div>
-
-    <!-- Liste du jour actif -->
-    <div class="list" id="list"></div>
-
-    <!-- FAB -->
+    <!-- FAB pour ajouter -->
     <button class="fab" id="fab" title="Ajouter">＋</button>
 
-    <!-- Bottom sheet -->
+    <!-- Bottom sheet d'ajout -->
     <div class="sheet-backdrop" id="sheetBg">
       <div class="sheet">
-        <h3 style="margin:4px 0 8px">Ajouter un créneau</h3>
+        <h3 style="margin:4px 0 8px">Ajouter une compétition</h3>
         <div class="row"><label>Date</label><input id="fDate" type="date"></div>
-        <div class="row"><label>Début</label><input id="fStart" placeholder="HH:MM" value="18:00"></div>
-        <div class="row"><label>Fin</label><input id="fEnd" placeholder="HH:MM" value="20:00"></div>
-        <div class="row"><label>Lieu</label><input id="fLieu" placeholder="Stade / salle"></div>
-        <div class="actions">
-          <button class="btn ghost" id="cancel">Annuler</button>
+        <div class="row"><label>Lieu</label><input id="fLieu" placeholder="Ville / stade"></div>
+        <div class="row">
+          <label>Type</label>
+          <select id="fType">
+            <option value="Meeting">Meeting</option>
+            <option value="Championnats">Championnats</option>
+            <option value="Interclubs">Interclubs</option>
+            <option value="Stage">Stage</option>
+            <option value="Test">Test</option>
+            <option value="Autre">Autre</option>
+          </select>
+        </div>
+        <div class="row">
+          <label>Épreuves</label>
+          <div class="checks">
+            <label><input type="checkbox" value="Disque" class="fEp"> Disque</label>
+            <label><input type="checkbox" value="Poids" class="fEp"> Poids</label>
+            <label><input type="checkbox" value="Javelot" class="fEp"> Javelot</label>
+            <label><input type="checkbox" value="Marteau" class="fEp"> Marteau</label>
+          </div>
+        </div>
+        <div class="row"><label>Infos</label><textarea id="fInfos" rows="3" placeholder="Détails, lien…"></textarea></div>
+        <div class="row" style="justify-content:flex-end">
           <button class="btn" id="save">Ajouter</button>
         </div>
-        <div id="msg" class="subtitle small" style="margin-top:6px"></div>
+        <div id="msg" class="meta"></div>
       </div>
     </div>
   </div>
 
   <script>
-    const daysEl = document.getElementById("days");
-    const listEl = document.getElementById("list");
-    const whenEl = document.getElementById("when");
-    let currentMonday = getMonday(new Date());
-    let selectedDate = new Date();
+    const API = 'YOUR_APPS_SCRIPT_URL_HERE'; 
+    let ITEMS = [];
 
-    const events = []; // à remplacer par ton API Google Sheets
+    const $ = (q,root=document)=>root.querySelector(q);
+    const $$ = (q,root=document)=>Array.from(root.querySelectorAll(q));
 
-    function getMonday(d){
-      d = new Date(d);
-      const day = d.getDay(), diff = d.getDate() - day + (day === 0 ? -6 : 1);
-      return new Date(d.setDate(diff));
-    }
-    function formatDate(d){
-      return d.toISOString().split("T")[0];
-    }
-    function renderWeek(){
-      daysEl.innerHTML = "";
-      const days = [];
-      for(let i=0;i<7;i++){
-        const day = new Date(currentMonday);
-        day.setDate(day.getDate()+i);
-        const pill = document.createElement("div");
-        pill.className = "daypill";
-        pill.innerHTML = `${day.toLocaleDateString("fr-FR",{weekday:"short"})}<small>${day.getDate()} ${day.toLocaleDateString("fr-FR",{month:"short"})}</small>`;
-        pill.onclick = ()=>{selectedDate = day; renderEvents(); highlightSelected(day);};
-        daysEl.appendChild(pill);
-        days.push({el:pill,date:day});
-      }
-      const end = new Date(currentMonday); end.setDate(end.getDate()+6);
-      whenEl.textContent = `${currentMonday.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})} – ${end.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}`;
-      highlightSelected(selectedDate);
+    function isoToDate(s){const p=s.split('-');return new Date(+p[0],p[1]-1,+p[2]);}
+    function fmtDateFR(s){const d=isoToDate(s);return d.toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'});}
+    function todayISO(){const d=new Date();const m=String(d.getMonth()+1).padStart(2,'0');const day=String(d.getDate()).padStart(2,'0');return `${d.getFullYear()}-${m}-${day}`;}
 
-      // centrage sur le jour actuel (mobile)
-      const today = formatDate(new Date());
-      const activePill = days.find(d=>formatDate(d.date)===today);
-      if(activePill) {
-        setTimeout(()=>activePill.el.scrollIntoView({inline:"center",behavior:"smooth"}),50);
-      }
+    async function fetchAll(){
+      const r=await fetch(API);
+      const j=await r.json();
+      ITEMS=(j.items||[]).filter(x=>x.date);
+      render();
     }
-    function highlightSelected(day){
-      document.querySelectorAll(".daypill").forEach(p=>p.classList.remove("active"));
-      document.querySelectorAll(".daypill").forEach((p,i)=>{
-        if(p.innerText.includes(day.getDate())) p.classList.add("active");
-      });
-      renderEvents();
+
+    async function createItem(payload){
+      const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'create',item:payload})});
+      return r.json();
     }
-    function renderEvents(){
-      listEl.innerHTML = "";
-      const dateStr = formatDate(selectedDate);
-      const todaysEvents = events.filter(e=>e.date===dateStr);
-      if(todaysEvents.length===0){
-        listEl.innerHTML = `<div class="empty">Aucun entraînement</div>`;
-      } else {
-        todaysEvents.forEach(e=>{
-          const card=document.createElement("div");
-          card.className="ev";
-          card.innerHTML=`
-            <div class="bar"></div>
-            <div class="info">
-              <div class="title">${e.lieu}</div>
-              <div class="meta"><strong>${e.start}</strong> – ${e.end}</div>
-            </div>
-            <button class="del">×</button>
-          `;
-          listEl.appendChild(card);
-        });
+    async function deleteItem(id){
+      const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',id})});
+      return r.json();
+    }
+
+    function render(){
+      const today=todayISO();
+      const upcoming=ITEMS.filter(x=>x.date>=today).sort((a,b)=>a.date.localeCompare(b.date));
+      const past=ITEMS.filter(x=>x.date<today).sort((a,b)=>b.date.localeCompare(a.date));
+
+      renderList($('#list-upcoming'), upcoming, false);
+      renderList($('#list-past'), past, true);
+    }
+
+    function renderList(root, arr, isPast){
+      root.innerHTML='';
+      if(arr.length===0){root.innerHTML=`<div class="meta">${isPast?'Aucune compétition passée.':'Aucune compétition à venir.'}</div>`;return;}
+      for(const it of arr){
+        const card=document.createElement('div');
+        card.className='card';
+        const left=document.createElement('div');
+        left.innerHTML=`
+          <div class="title">${fmtDateFR(it.date)} — ${it.lieu||''}</div>
+          <div class="meta">${it.type||'Compétition'}</div>
+          ${it.epreuves?`<div class="chips">${it.epreuves.split(',').map(s=>s.trim()).filter(Boolean).map(s=>`<span class="chip">${s}</span>`).join('')}</div>`:''}
+          ${it.infos?`<div class="meta" style="margin-top:6px">${it.infos}</div>`:''}
+        `;
+        const right=document.createElement('div');
+        right.className='actions';
+        const del=document.createElement('button');
+        del.className='btn danger';
+        del.textContent='Supprimer';
+        del.onclick=async()=>{
+          if(!confirm('Êtes-vous sûr de vouloir supprimer cette compétition ?')) return;
+          const res=await deleteItem(it.id);
+          if(res&&res.ok){ITEMS=ITEMS.filter(x=>x.id!==it.id);render();}
+          else alert('Suppression impossible.');
+        };
+        right.appendChild(del);
+        card.appendChild(left);card.appendChild(right);
+        root.appendChild(card);
       }
     }
-    document.getElementById("prev").onclick=()=>{currentMonday.setDate(currentMonday.getDate()-7);renderWeek();}
-    document.getElementById("next").onclick=()=>{currentMonday.setDate(currentMonday.getDate()+7);renderWeek();}
-    document.getElementById("today").onclick=()=>{currentMonday=getMonday(new Date());selectedDate=new Date();renderWeek();}
-    renderWeek();
+
+    // Gestion FAB & Bottom sheet
+    const sheetBg=$("#sheetBg");
+    $("#fab").onclick=()=>sheetBg.style.display="flex";
+    sheetBg.onclick=e=>{if(e.target===sheetBg)sheetBg.style.display="none";}
+    $("#save").onclick=async()=>{
+      const date=$("#fDate").value;
+      if(!date){alert('La date est obligatoire');return;}
+      const payload={
+        date, lieu:$("#fLieu").value.trim(),
+        type:$("#fType").value,
+        epreuves:$$(".fEp:checked").map(x=>x.value).join(', '),
+        infos:$("#fInfos").value.trim()
+      };
+      $("#msg").textContent="Envoi…";
+      const res=await createItem(payload);
+      if(res&&res.ok&&res.item){
+        ITEMS.push(res.item);
+        $("#msg").textContent="✅ Ajouté !";
+        sheetBg.style.display="none";
+        render();
+      }else{
+        $("#msg").textContent="❌ Erreur lors de l'ajout";
+      }
+    };
+
+    (function init(){ $("#fDate").value=todayISO(); fetchAll(); })();
   </script>
 </body>
 </html>
