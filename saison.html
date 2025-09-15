@@ -20,6 +20,14 @@
     h1{margin:8px 0 4px;font-size:28px;font-weight:700;text-align:left}
     .subtitle{text-align:left;opacity:.7;font-size:16px;margin-bottom:16px}
 
+    /* Sous-titres de section */
+    .section-title{
+      font-size:18px;
+      font-weight:600;
+      margin:12px 0 8px;
+      color:var(--text);
+    }
+
     /* Liste */
     .list{display:grid;gap:10px;margin-bottom:18px}
     .separator{border-top:1px solid #334155;margin:18px 0;opacity:.5}
@@ -83,8 +91,12 @@
     <div class="subtitle">Toutes les compétitions de la saison</div>
 
     <!-- LISTES -->
+    <div class="section-title">À venir</div>
     <div class="list" id="list-upcoming"></div>
+
     <div class="separator"></div>
+
+    <div class="section-title">Passées</div>
     <div class="list" id="list-past"></div>
 
     <!-- FAB -->
@@ -135,7 +147,6 @@
     function fmtDateFR(s){const d=isoToDate(s);return d.toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'});}
     function todayISO(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 
-    // ---- API calls (GET sans preflight, POST sans headers -> pas de CORS) ----
     async function fetchAll(){
       try{
         const r = await fetch(API + '?resource=competitions');
@@ -150,7 +161,7 @@
       form.append('resource','competitions');
       form.append('action','create');
       form.append('item', JSON.stringify(payload));
-      const r = await fetch(API, { method:'POST', body: form }); // pas de headers !
+      const r = await fetch(API, { method:'POST', body: form });
       return r.json();
     }
 
@@ -159,10 +170,9 @@
       form.append('resource','competitions');
       form.append('action','delete');
       form.append('id', id);
-      const r = await fetch(API, { method:'POST', body: form }); // pas de headers !
+      const r = await fetch(API, { method:'POST', body: form });
       return r.json();
     }
-    // -------------------------------------------------------------------------
 
     function render(){
       const today=todayISO();
@@ -197,7 +207,6 @@
       else alert('Suppression impossible.');
     }
 
-    // FAB & bottom sheet
     const sheetBg=$('#sheetBg');
     $('#fab').onclick=()=>sheetBg.style.display='flex';
     $('#cancel').onclick=()=>sheetBg.style.display='none';
@@ -212,7 +221,6 @@
       const res=await createItem(payload);
       if(res&&res.ok&&res.item){
         ITEMS.push(res.item);render();sheetBg.style.display='none';
-        // reset
         $('#fDate').value='';$('#fLieu').value='';$('#fType').value='Meeting';$$('.fEp').forEach(x=>x.checked=false);$('#fInfos').value='';
       } else $('#msg').textContent='Erreur.';
     };
