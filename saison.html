@@ -141,7 +141,16 @@
     }
 
     async function createItem(payload){
-      const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'create',item:payload})});
+      const form = new URLSearchParams();
+      form.append('resource','competitions'); 
+      form.append('action','create');
+      form.append('item', JSON.stringify(payload));
+    
+      // 🔥 PAS de headers, pas de mode: 'cors', pas de JSON direct :
+      const r = await fetch(API, {
+        method:'POST',
+        body: form
+      });
       return r.json();
     }
     async function deleteItem(id){
