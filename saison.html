@@ -63,7 +63,20 @@
     .checks{display:flex;gap:10px;flex-wrap:wrap}
     .checks label{display:inline-flex;gap:6px;align-items:center}
     @media (max-width:640px){
-      .checks{flex-direction:column;align-items:flex-start;gap:4px;} /* 🔥 plus serré */
+      .checks{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:2px;              /* 🔥 encore plus serré */
+      }
+      .checks label{
+        margin:0;             /* enlève marges par défaut */
+        line-height:1.2;      /* réduit la hauteur de ligne */
+        font-size:14px;       /* texte un peu plus petit pour compacité */
+      }
+      .checks input{
+        transform:scale(0.9); /* case à cocher légèrement plus petite */
+        margin-right:4px;
+      }
     }
     .actions{display:flex;gap:8px;margin-top:8px}
     .btn{border:1px solid var(--line);border-radius:10px;background:#0b1326;color:var(--text);padding:8px 12px;cursor:pointer}
