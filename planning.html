@@ -13,21 +13,23 @@
     body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
     .wrap{max-width:960px;margin:0 auto;padding:16px 16px 96px}
 
-    /* Retour + titre centré */
+    /* Retour en haut */
     .topbar{display:flex;align-items:center;margin-bottom:8px}
     .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px}
     .back svg{width:20px;height:20px;stroke:#fff}
-    h1{margin:4px 0 0;text-align:center;font-size:26px}
-    .subtitle{text-align:center;opacity:.7;font-size:14px;margin-bottom:16px}
 
-    /* Barre semaine : icônes rondes */
+    /* TITRES collés à gauche (même DA que records.html) */
+    h1{margin:8px 0 4px;font-size:28px;font-weight:700;text-align:left}
+    .subtitle{text-align:left;opacity:.7;font-size:16px;margin-bottom:16px}
+
+    /* Barre semaine */
     .weekbar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px}
     .navbtn{
       width:36px;height:36px;border-radius:50%;border:1px solid var(--line);
       background:var(--card);color:var(--text);display:grid;place-items:center;
       font-size:18px;cursor:pointer
     }
-    .navbtn:active{transform:scale(0.98)}
+    .navbtn:active{transform:scale(0.95)}
     .when{font-weight:600;font-size:15px;min-width:190px;text-align:center}
 
     /* Day pills (scrollable) */
@@ -85,9 +87,8 @@
     .btn.ghost{background:transparent}
     .subtitle.small{font-size:12px}
 
-    /* Desktop: un peu plus grand */
     @media (min-width:900px){
-      h1{font-size:28px}
+      h1{font-size:30px}
       .subtitle{font-size:16px}
       .when{font-size:16px;min-width:260px}
     }
@@ -98,21 +99,21 @@
     <!-- Retour -->
     <div class="topbar">
       <a href="index.html" class="back">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
         Retour
       </a>
     </div>
 
-    <!-- Titre -->
+    <!-- TITRES -->
     <h1>Planning</h1>
     <div class="subtitle">Vue de la semaine — créneaux d’entraînement</div>
 
     <!-- Nav semaine -->
     <div class="weekbar">
-      <button class="navbtn" id="prev" aria-label="Semaine précédente">‹</button>
+      <button class="navbtn" id="prev">‹</button>
       <div class="when" id="when"></div>
-      <button class="navbtn" id="today" aria-label="Semaine courante">⌂</button>
-      <button class="navbtn" id="next" aria-label="Semaine suivante">›</button>
+      <button class="navbtn" id="today">⌂</button>
+      <button class="navbtn" id="next">›</button>
     </div>
 
     <!-- Jours -->
@@ -121,13 +122,13 @@
     <!-- Liste du jour actif -->
     <div class="list" id="list"></div>
 
-    <!-- Bouton flottant -->
+    <!-- FAB -->
     <button class="fab" id="fab" title="Ajouter">＋</button>
 
     <!-- Bottom sheet -->
-    <div class="sheet-backdrop" id="sheetBg" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-backdrop" id="sheetBg">
       <div class="sheet">
-        <h3 id="sheetTitle" style="margin:4px 0 8px">Ajouter un créneau</h3>
+        <h3 style="margin:4px 0 8px">Ajouter un créneau</h3>
         <div class="row"><label>Date</label><input id="fDate" type="date"></div>
         <div class="row"><label>Début</label><input id="fStart" placeholder="HH:MM" value="18:00"></div>
         <div class="row"><label>Fin</label><input id="fEnd" placeholder="HH:MM" value="20:00"></div>
@@ -142,142 +143,79 @@
   </div>
 
   <script>
-    const API = 'YOUR_APPS_SCRIPT_URL_HERE'; // <= ton /exec Apps Script
-    // Données: id | date(YYYY-MM-DD) | start(HH:MM) | end(HH:MM) | lieu | color
-    let ITEMS = [];
-    let monday = startOfWeek(new Date());
-    let activeDay = 0; // 0..6 (lundi..dimanche)
+    const daysEl = document.getElementById("days");
+    const listEl = document.getElementById("list");
+    const whenEl = document.getElementById("when");
+    let currentMonday = getMonday(new Date());
+    let selectedDate = new Date();
 
-    // ====== Utils date ======
-    function startOfWeek(d){ const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); const wd=(x.getDay()+6)%7; x.setDate(x.getDate()-wd); x.setHours(0,0,0,0); return x; }
-    function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
-    function ymd(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-    function parseYMD(s){ const [Y,M,D]=s.split('-').map(Number); return new Date(Y,M-1,D); }
-    function frDayShort(d){ return d.toLocaleDateString('fr-FR',{weekday:'short'}).replace('.',''); }
-    function frMonthLong(d){ return d.toLocaleDateString('fr-FR',{month:'long'}); }
-    function frRangeLabel(){
-      const d0 = addDays(monday,0), d6 = addDays(monday,6);
-      const sameMonth = d0.getMonth()===d6.getMonth() && d0.getFullYear()===d6.getFullYear();
-      if (sameMonth) return `${d0.getDate()}–${d6.getDate()} ${frMonthLong(d0)} ${d0.getFullYear()}`;
-      return `${d0.getDate()} ${frMonthLong(d0)} ${d0.getFullYear()} – ${d6.getDate()} ${frMonthLong(d6)} ${d6.getFullYear()}`;
-    }
-    function toMin(t){ if(!t) return 0; const [h,m]=t.split(':').map(Number); return h*60+m; }
+    const events = []; // à remplacer par ton API Google Sheets
 
-    // ====== API ======
-    async function fetchTrainings(){
-      const r = await fetch(API+'?resource=trainings');
-      const j = await r.json();
-      ITEMS = (j.items||[]).map(x=>({ ...x, color: x.color || '#22c55e' }));
-      render();
+    function getMonday(d){
+      d = new Date(d);
+      const day = d.getDay(), diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      return new Date(d.setDate(diff));
     }
-    async function createTraining(payload){
-      const form = new URLSearchParams();
-      form.append('resource','trainings'); form.append('action','create'); form.append('item', JSON.stringify(payload));
-      const r = await fetch(API, {method:'POST', body:form}); return r.json();
+    function formatDate(d){
+      return d.toISOString().split("T")[0];
     }
-    async function deleteTraining(id){
-      const form = new URLSearchParams();
-      form.append('resource','trainings'); form.append('action','delete'); form.append('id', id);
-      const r = await fetch(API, {method:'POST', body:form}); return r.json();
-    }
-
-    // ====== UI build ======
-    function buildDays(){
-      const days = document.getElementById('days'); days.innerHTML='';
+    function renderWeek(){
+      daysEl.innerHTML = "";
+      const days = [];
       for(let i=0;i<7;i++){
-        const d = addDays(monday,i);
-        const btn = document.createElement('button');
-        btn.className = 'daypill'+(i===activeDay?' active':'');
-        btn.innerHTML = `<div>${frDayShort(d).toUpperCase()}</div><small>${d.getDate()} ${frMonthLong(d)}</small>`;
-        btn.onclick = ()=>{ activeDay=i; buildDays(); renderList(); centerActiveDayPill(); };
-        days.appendChild(btn);
+        const day = new Date(currentMonday);
+        day.setDate(day.getDate()+i);
+        const pill = document.createElement("div");
+        pill.className = "daypill";
+        pill.innerHTML = `${day.toLocaleDateString("fr-FR",{weekday:"short"})}<small>${day.getDate()} ${day.toLocaleDateString("fr-FR",{month:"short"})}</small>`;
+        pill.onclick = ()=>{selectedDate = day; renderEvents(); highlightSelected(day);};
+        daysEl.appendChild(pill);
+        days.push({el:pill,date:day});
       }
-      document.getElementById('when').textContent = frRangeLabel();
-      // mobile: centre la pill du jour actif
-      centerActiveDayPill();
-    }
+      const end = new Date(currentMonday); end.setDate(end.getDate()+6);
+      whenEl.textContent = `${currentMonday.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})} – ${end.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}`;
+      highlightSelected(selectedDate);
 
-    function centerActiveDayPill(){
-      const days = document.getElementById('days');
-      if (!days) return;
-      // Seulement si ça déborde (mobile)
-      if (window.innerWidth > 900) return;
-      const pills = Array.from(days.children);
-      const active = pills[activeDay];
-      if (!active) return;
-      const offset = active.offsetLeft - (days.clientWidth - active.offsetWidth)/2;
-      days.scrollLeft = Math.max(0, offset);
-    }
-
-    function renderList(){
-      const root = document.getElementById('list');
-      root.innerHTML = '';
-      const dayDate = ymd(addDays(monday, activeDay));
-      const rows = ITEMS.filter(x=>x.date===dayDate).sort((a,b)=> toMin(a.start)-toMin(b.start));
-      if (rows.length===0){ root.innerHTML = `<div class="empty">Aucun créneau ce jour.</div>`; return; }
-      for(const ev of rows){
-        const li = document.createElement('div');
-        li.className='ev';
-        li.innerHTML = `
-          <div class="bar" style="background:${ev.color||'#22c55e'}"></div>
-          <div class="info">
-            <div class="title">Entraînement</div>
-            <div class="meta"><strong>${ev.start || ''}${ev.end? '–'+ev.end : ''}</strong> ${ev.lieu? '• '+ev.lieu : ''}</div>
-          </div>
-          <button class="del" title="Supprimer">×</button>
-        `;
-        li.querySelector('.del').onclick = async ()=>{
-          if(!confirm('Supprimer ce créneau ?')) return;
-          const res = await deleteTraining(ev.id);
-          if(res && res.ok){ ITEMS = ITEMS.filter(x=>x.id!==ev.id); renderList(); }
-        };
-        root.appendChild(li);
+      // centrage sur le jour actuel (mobile)
+      const today = formatDate(new Date());
+      const activePill = days.find(d=>formatDate(d.date)===today);
+      if(activePill) {
+        setTimeout(()=>activePill.el.scrollIntoView({inline:"center",behavior:"smooth"}),50);
       }
     }
-
-    function render(){ buildDays(); renderList(); }
-
-    // ====== Bottom sheet ======
-    const sheetBg = document.getElementById('sheetBg');
-    function openSheet(prefillDate){
-      sheetBg.style.display='flex';
-      document.getElementById('fDate').value = prefillDate || ymd(addDays(monday,activeDay));
-      document.getElementById('fStart').focus();
+    function highlightSelected(day){
+      document.querySelectorAll(".daypill").forEach(p=>p.classList.remove("active"));
+      document.querySelectorAll(".daypill").forEach((p,i)=>{
+        if(p.innerText.includes(day.getDate())) p.classList.add("active");
+      });
+      renderEvents();
     }
-    function closeSheet(){ sheetBg.style.display='none'; document.getElementById('msg').textContent=''; }
-
-    // ====== Events ======
-    document.getElementById('prev').onclick  = ()=>{ monday=addDays(monday,-7); render(); };
-    document.getElementById('next').onclick  = ()=>{ monday=addDays(monday, 7); render(); };
-    document.getElementById('today').onclick = ()=>{ monday=startOfWeek(new Date()); activeDay=((new Date().getDay()+6)%7); render(); };
-
-    document.getElementById('fab').onclick   = ()=> openSheet();
-    document.getElementById('cancel').onclick= ()=> closeSheet();
-    sheetBg.addEventListener('click', (e)=>{ if(e.target===sheetBg) closeSheet(); });
-
-    document.getElementById('save').onclick = async ()=>{
-      const date = document.getElementById('fDate').value;
-      const start= document.getElementById('fStart').value.trim();
-      const end  = document.getElementById('fEnd').value.trim();
-      const lieu = document.getElementById('fLieu').value.trim();
-      if (!date || !start){ alert('Date et début obligatoires'); return; }
-      document.getElementById('msg').textContent = 'Envoi…';
-      const res = await createTraining({date,start,end,lieu});
-      if(res && res.ok && res.item){
-        ITEMS.push(res.item);
-        closeSheet();
-        renderList();
-      }else{
-        document.getElementById('msg').textContent='❌ Erreur';
+    function renderEvents(){
+      listEl.innerHTML = "";
+      const dateStr = formatDate(selectedDate);
+      const todaysEvents = events.filter(e=>e.date===dateStr);
+      if(todaysEvents.length===0){
+        listEl.innerHTML = `<div class="empty">Aucun entraînement</div>`;
+      } else {
+        todaysEvents.forEach(e=>{
+          const card=document.createElement("div");
+          card.className="ev";
+          card.innerHTML=`
+            <div class="bar"></div>
+            <div class="info">
+              <div class="title">${e.lieu}</div>
+              <div class="meta"><strong>${e.start}</strong> – ${e.end}</div>
+            </div>
+            <button class="del">×</button>
+          `;
+          listEl.appendChild(card);
+        });
       }
-    };
-
-    // ====== Init ======
-    (function init(){
-      activeDay = (new Date().getDay()+6)%7; // aujourd'hui (lundi=0)
-      fetchTrainings();
-      render();
-    })();
+    }
+    document.getElementById("prev").onclick=()=>{currentMonday.setDate(currentMonday.getDate()-7);renderWeek();}
+    document.getElementById("next").onclick=()=>{currentMonday.setDate(currentMonday.getDate()+7);renderWeek();}
+    document.getElementById("today").onclick=()=>{currentMonday=getMonday(new Date());selectedDate=new Date();renderWeek();}
+    renderWeek();
   </script>
 </body>
 </html>
