@@ -5,258 +5,245 @@
   <title>Planning — Groupe Athlé</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root{--bg:#0f172a;--card:#111827;--text:#e5e7eb;--muted:#94a3b8;--line:#1f2937;--accent:#22c55e;--danger:#ef4444}
+    :root{
+      --bg:#0f172a; --card:#111827; --text:#e5e7eb; --muted:#94a3b8; --line:#1f2937;
+      --accent:#22c55e; --danger:#ef4444; --pill:#0b1326;
+    }
+    *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
-    .wrap{max-width:1100px;margin:0 auto;padding:24px 24px 96px}
+    .wrap{max-width:960px;margin:0 auto;padding:16px 16px 96px}
 
-    a.back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;margin-bottom:16px;font-size:16px}
-    a.back svg{width:20px;height:20px;stroke:#fff}
-    h1{margin:0 0 8px;font-size:28px}
-    .subtitle{opacity:.85;margin-bottom:18px;font-size:16px}
+    /* Back like records.html */
+    .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px}
+    .back svg{width:20px;height:20px;stroke:#fff}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+    h1{margin:8px 0 2px;font-size:24px}
+    .subtitle{opacity:.85;margin-bottom:12px;font-size:14px}
 
-    .bar{display:flex;align-items:center;gap:8px;margin:12px 0 16px}
-    .bar .btn{border:1px solid var(--line);background:#0b1326;color:var(--text);border-radius:8px;padding:6px 10px;cursor:pointer}
-    .bar .when{margin-left:auto;opacity:.9}
+    /* Week bar */
+    .weekbar{display:flex;align-items:center;gap:8px;margin:8px 0 12px}
+    .btn{border:1px solid var(--line);border-radius:10px;background:var(--pill);color:var(--text);padding:6px 10px;cursor:pointer}
+    .when{margin-left:auto;opacity:.9}
 
-    .grid-wrap{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-    .grid{display:grid;grid-template-columns:80px repeat(7,1fr);border-top:1px solid var(--line);overflow-x:auto}
-    .col-head{display:grid;grid-template-columns:80px repeat(7,1fr)}
-    .col-head div{padding:10px;border-right:1px solid var(--line);text-align:center}
-    .col-head div:first-child{text-align:right;padding-right:12px}
-    .col-head .day{font-weight:700}
-    .col-head .date{font-size:12px;opacity:.8}
-    .time-col{border-right:1px solid var(--line)}
-    .time{height:56px;border-bottom:1px solid #14203a;display:flex;justify-content:flex-end;align-items:flex-start;padding-top:4px;padding-right:8px;font-size:12px;color:var(--muted)}
-    .day-col{position:relative;border-right:1px solid var(--line)}
-    .slot-row{height:56px;border-bottom:1px solid #14203a}
+    /* Day pills (scrollable) */
+    .days{display:flex;gap:8px;overflow-x:auto;padding:8px 0;margin-bottom:8px}
+    .daypill{
+      flex:0 0 auto; min-width:68px; text-align:center; padding:8px 10px; border-radius:999px;
+      border:1px solid var(--line); background:var(--pill); color:var(--text); cursor:pointer
+    }
+    .daypill small{display:block;opacity:.8}
+    .daypill.active{background:var(--accent); color:#0b1326; border-color:var(--accent); font-weight:700}
 
-    .event{position:absolute;left:6px;right:6px;border-radius:8px;padding:6px 8px;background:var(--accent);color:#0b1326;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.25);border:1px solid rgba(0,0,0,.15);cursor:default}
-    .event small{display:block;font-weight:600;opacity:.85}
-    .event .del{position:absolute;top:4px;right:6px;background:transparent;border:none;color:#0b1326;cursor:pointer;font-weight:900}
+    /* List */
+    .list{display:grid;gap:10px}
+    .empty{font-size:14px;color:var(--muted);opacity:.9;padding:8px}
 
-    .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:16px 0}
-    .row{display:flex;gap:8px;margin-bottom:10px;align-items:center}
-    .row label{flex:0 0 120px;opacity:.9}
-    .row input,.row select,.row textarea{flex:1;background:#0b1326;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:8px;max-width:100%;min-width:0}
-    .help{font-size:12px;color:var(--muted)}
+    /* Event card */
+    .ev{
+      display:flex; gap:10px; align-items:stretch; background:var(--card); border:1px solid var(--line);
+      border-radius:12px; padding:10px; position:relative; overflow:hidden;
+    }
+    .ev .bar{width:6px; border-radius:8px; background:var(--accent); flex:0 0 6px}
+    .ev .info{flex:1; min-width:0}
+    .ev .title{font-weight:800; margin-bottom:2px}
+    .ev .meta{font-size:13px; color:var(--muted)}
+    .ev .meta strong{color:var(--text)}
+    .ev .del{position:absolute; top:6px; right:8px; border:none; background:transparent; color:#94a3b8; cursor:pointer; font-size:18px}
+    .ev .del:hover{color:#fff}
 
-    @media (max-width:760px){
-      .col-head{grid-template-columns:60px repeat(7,220px)}
-      .grid{grid-template-columns:60px repeat(7,220px)}
-      .time{height:52px}
-      .slot-row{height:52px}
+    /* FAB */
+    .fab{
+      position:fixed; right:18px; bottom:18px; width:56px; height:56px; border-radius:50%;
+      display:grid; place-items:center; background:var(--accent); color:#0b1326;
+      border:1px solid #1a2b1f; box-shadow:0 10px 30px rgba(0,0,0,.4); cursor:pointer; z-index:50;
+      font-size:28px; line-height:0; font-weight:900;
+    }
+
+    /* Bottom sheet (modal) */
+    .sheet-backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.45); backdrop-filter:blur(2px);
+      display:none; align-items:flex-end; z-index:60;
+    }
+    .sheet{width:100%; max-width:960px; margin:0 auto; background:var(--card); border-top-left-radius:16px; border-top-right-radius:16px;
+      border:1px solid var(--line); border-bottom:none; padding:12px 16px 16px;
+      animation:slideup .18s ease-out; max-height:85vh; overflow:auto;
+    }
+    @keyframes slideup{from{transform:translateY(12px); opacity:0}to{transform:translateY(0); opacity:1}}
+
+    .row{display:flex; gap:8px; margin:8px 0; align-items:center}
+    .row label{flex:0 0 110px; opacity:.9}
+    .row input{flex:1; background:#0b1326; border:1px solid var(--line); border-radius:8px; color:var(--text); padding:10px}
+    .sheet .actions{display:flex; gap:8px; margin-top:8px}
+    .btn.ghost{background:transparent}
+
+    /* Desktop slight upscaling */
+    @media (min-width:900px){
+      h1{font-size:28px}
+      .subtitle{font-size:16px}
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <a href="index.html" class="back">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-      Retour
-    </a>
-    <h1>Planning des entraînements</h1>
-    <div class="subtitle">Vue hebdomadaire — ajoute un créneau “Entraînement — lieu”</div>
+    <header>
+      <a href="index.html" class="back">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        Retour
+      </a>
+      <h1>Planning</h1>
+    </header>
+    <div class="subtitle">Vue semaine • créneaux “Entraînement — lieu”</div>
 
-    <div class="bar">
-      <button id="prev" class="btn">‹ Semaine</button>
-      <button id="today" class="btn">Cette semaine</button>
-      <button id="next" class="btn">Semaine ›</button>
+    <div class="weekbar">
+      <button class="btn" id="prev">‹ Semaine</button>
+      <button class="btn" id="today">Cette semaine</button>
+      <button class="btn" id="next">Semaine ›</button>
       <div class="when" id="when"></div>
     </div>
 
-    <!-- En-têtes jours -->
-    <div class="grid-wrap">
-      <div class="col-head" id="head">
-        <!-- rempli par JS -->
-      </div>
-      <div class="grid" id="grid">
-        <!-- colonne heures -->
-        <div class="time-col" id="times"></div>
-        <!-- 7 colonnes jours -->
-        <div class="day-col" data-day="0"></div>
-        <div class="day-col" data-day="1"></div>
-        <div class="day-col" data-day="2"></div>
-        <div class="day-col" data-day="3"></div>
-        <div class="day-col" data-day="4"></div>
-        <div class="day-col" data-day="5"></div>
-        <div class="day-col" data-day="6"></div>
-      </div>
-    </div>
+    <div class="days" id="days"></div>
+    <div class="list" id="list"></div>
 
-    <!-- Formulaire ajout -->
-    <div class="panel">
-      <div class="row"><label>Date</label><input id="fDate" type="date"></div>
-      <div class="row"><label>Début</label><input id="fStart" placeholder="HH:MM" value="18:00"></div>
-      <div class="row"><label>Fin</label><input id="fEnd" placeholder="HH:MM" value="20:00"></div>
-      <div class="row"><label>Lieu</label><input id="fLieu" placeholder="Stade / salle"></div>
-      <div class="row">
-        <span class="help">Le créneau apparaîtra sur le jour/heure. Le titre est “Entraînement”.</span>
-        <span style="flex:1"></span>
-        <button id="btnAdd" class="btn">Ajouter</button>
+    <!-- Bouton flottant -->
+    <button class="fab" id="fab" title="Ajouter">＋</button>
+
+    <!-- Bottom sheet -->
+    <div class="sheet-backdrop" id="sheetBg" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <div class="sheet">
+        <h3 id="sheetTitle" style="margin:4px 0 8px">Ajouter un créneau</h3>
+        <div class="row"><label>Date</label><input id="fDate" type="date"></div>
+        <div class="row"><label>Début</label><input id="fStart" placeholder="HH:MM" value="18:00"></div>
+        <div class="row"><label>Fin</label><input id="fEnd" placeholder="HH:MM" value="20:00"></div>
+        <div class="row"><label>Lieu</label><input id="fLieu" placeholder="Stade / salle"></div>
+        <div class="actions">
+          <button class="btn ghost" id="cancel">Annuler</button>
+          <button class="btn" id="save">Ajouter</button>
+        </div>
+        <div id="msg" class="subtitle" style="margin-top:6px"></div>
       </div>
-      <div id="msg" class="help"></div>
     </div>
   </div>
 
   <script>
-    const API = 'API_URL'; // <= ton /exec
-    const START_H = 8;     // 08:00 → 21:00
-    const END_H = 21;
-    const ROW_H = 56;      // hauteur d'une heure (px)
-    let ITEMS = [];        // trainings {id,date,start,end,lieu,color}
-    let monday = startOfWeek(new Date()); // lundi de la semaine affichée
+    const API = 'API_URL_HERE'; // <= ton /exec Apps Script
+    // Données: id | date(YYYY-MM-DD) | start(HH:MM) | end(HH:MM) | lieu | color
+    let ITEMS = [];
+    let monday = startOfWeek(new Date());
+    let activeDay = 0; // 0..6 (lundi..dimanche)
 
-    // ====== Utils dates ======
-    function startOfWeek(d){
-      const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-      const day = (x.getDay()+6)%7; // 0 = lundi
-      x.setDate(x.getDate()-day);
-      x.setHours(0,0,0,0);
-      return x;
-    }
+    // ====== Utils date ======
+    function startOfWeek(d){ const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); const wd=(x.getDay()+6)%7; x.setDate(x.getDate()-wd); x.setHours(0,0,0,0); return x; }
     function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
     function ymd(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-    function fmtHead(d){
-      const day = d.toLocaleDateString('fr-FR',{weekday:'short'});
-      const date = d.getDate();
-      const month = d.toLocaleDateString('fr-FR',{month:'long'});
-      return {day, date, month};
+    function parseYMD(s){ const [Y,M,D]=s.split('-').map(Number); return new Date(Y,M-1,D); }
+    function frDayShort(d){ return d.toLocaleDateString('fr-FR',{weekday:'short'}).replace('.',''); }
+    function frMonthLong(d){ return d.toLocaleDateString('fr-FR',{month:'long'}); }
+    function frRangeLabel(){
+      const d0 = addDays(monday,0), d6 = addDays(monday,6);
+      const sameMonth = d0.getMonth()===d6.getMonth() && d0.getFullYear()===d6.getFullYear();
+      if (sameMonth) return `${d0.getDate()}–${d6.getDate()} ${frMonthLong(d0)} ${d0.getFullYear()}`;
+      return `${d0.getDate()} ${frMonthLong(d0)} ${d0.getFullYear()} – ${d6.getDate()} ${frMonthLong(d6)} ${d6.getFullYear()}`;
     }
-    function toMin(t){ if(!t) return 0; const [h,m]=t.split(':').map(n=>+n); return h*60+m; }
+    function toMin(t){ if(!t) return 0; const [h,m]=t.split(':').map(Number); return h*60+m; }
 
     // ====== API ======
     async function fetchTrainings(){
-      const r = await fetch(API + '?resource=trainings');
+      const r = await fetch(API+'?resource=trainings');
       const j = await r.json();
-      ITEMS = (j.items||[]);
+      ITEMS = (j.items||[]).map(x=>({ ...x, color: x.color || '#22c55e' }));
       render();
     }
     async function createTraining(payload){
       const form = new URLSearchParams();
-      form.append('resource','trainings');
-      form.append('action','create');
-      form.append('item', JSON.stringify(payload));
-      const r = await fetch(API, {method:'POST', body:form});
-      return r.json();
+      form.append('resource','trainings'); form.append('action','create'); form.append('item', JSON.stringify(payload));
+      const r = await fetch(API, {method:'POST', body:form}); return r.json();
     }
     async function deleteTraining(id){
       const form = new URLSearchParams();
-      form.append('resource','trainings');
-      form.append('action','delete');
-      form.append('id', id);
-      const r = await fetch(API, {method:'POST', body:form});
-      return r.json();
+      form.append('resource','trainings'); form.append('action','delete'); form.append('id', id);
+      const r = await fetch(API, {method:'POST', body:form}); return r.json();
     }
 
-    // ====== Rendu ======
-    function buildHeads(){
-      const head = document.getElementById('head');
-      head.innerHTML = '';
-      const first = document.createElement('div'); first.textContent = ''; head.appendChild(first);
-      for (let i=0;i<7;i++){
+    // ====== UI build ======
+    function buildDays(){
+      const days = document.getElementById('days'); days.innerHTML='';
+      for(let i=0;i<7;i++){
         const d = addDays(monday,i);
-        const {day, date, month} = fmtHead(d);
-        const cell = document.createElement('div');
-        cell.innerHTML = `<div class="day">${day.toUpperCase()}</div><div class="date">${date} ${month}</div>`;
-        head.appendChild(cell);
+        const btn = document.createElement('button');
+        btn.className = 'daypill'+(i===activeDay?' active':'');
+        btn.innerHTML = `<div>${frDayShort(d).toUpperCase()}</div><small>${d.getDate()} ${frMonthLong(d)}</small>`;
+        btn.onclick = ()=>{ activeDay=i; buildDays(); renderList(); };
+        days.appendChild(btn);
       }
-      document.getElementById('when').textContent = rangeLabel();
-    }
-    function buildTimeCol(){
-      const t = document.getElementById('times');
-      t.innerHTML = '';
-      for (let h=START_H; h<END_H; h++){
-        const row = document.createElement('div');
-        row.className='time';
-        row.style.height = ROW_H+'px';
-        row.textContent = `${String(h).padStart(2,'0')}h`;
-        t.appendChild(row);
-      }
-    }
-    function clearDayCols(){
-      document.querySelectorAll('.day-col').forEach(col=>{
-        col.innerHTML = '';
-        for (let h=START_H; h<END_H; h++){
-          const row = document.createElement('div');
-          row.className='slot-row';
-          row.style.height = ROW_H+'px';
-          col.appendChild(row);
-        }
-      });
-    }
-    function rangeLabel(){
-      const d0 = addDays(monday,0), d6 = addDays(monday,6);
-      const fmt = (d)=>`${d.getDate()} ${d.toLocaleDateString('fr-FR',{month:'short'})}`;
-      if (d0.getMonth() === d6.getMonth()){
-        return `${d0.getDate()}–${d6.getDate()} ${d0.toLocaleDateString('fr-FR',{month:'long', year:'numeric'})}`;
-      }
-      return `${fmt(d0)} – ${fmt(d6)} ${d6.getFullYear()}`;
+      document.getElementById('when').textContent = frRangeLabel();
     }
 
-    function render(){
-      buildHeads();
-      buildTimeCol();
-      clearDayCols();
-
-      const weekDates = new Set([...Array(7)].map((_,i)=> ymd(addDays(monday,i))));
-      const weekItems = ITEMS.filter(ev=> weekDates.has(ev.date));
-
-      weekItems.forEach(ev=>{
-        const dayIdx = (new Date(ev.date+'T00:00:00')).getDay(); // 0=dim…6=sam
-        const col = document.querySelector(`.day-col[data-day="${(dayIdx+6)%7}"]`); // map lundi=0
-        if (!col) return;
-
-        const startMin = Math.max(START_H*60, toMin(ev.start));
-        const endMin   = Math.min(END_H*60, Math.max(startMin+30, toMin(ev.end)|| (startMin+60)));
-        const top = ((startMin - START_H*60) / 60) * ROW_H;
-        const height = Math.max(28, ((endMin - startMin)/60)*ROW_H - 4);
-
-        const card = document.createElement('div');
-        card.className='event';
-        card.style.top = `${top}px`;
-        card.style.height = `${height}px`;
-        card.style.background = ev.color || '#22c55e';
-        card.innerHTML = `
-          <button class="del" title="Supprimer" aria-label="Supprimer">×</button>
-          Entraînement
-          ${ev.lieu ? `<small>${ev.lieu}</small>` : ''}
-          ${ev.start ? `<small>${ev.start}${ev.end?'–'+ev.end:''}</small>` : ''}
+    function renderList(){
+      const root = document.getElementById('list');
+      root.innerHTML = '';
+      const dayDate = ymd(addDays(monday, activeDay));
+      const rows = ITEMS.filter(x=>x.date===dayDate).sort((a,b)=> toMin(a.start)-toMin(b.start));
+      if (rows.length===0){ root.innerHTML = `<div class="empty">Aucun créneau ce jour.</div>`; return; }
+      for(const ev of rows){
+        const li = document.createElement('div');
+        li.className='ev';
+        li.innerHTML = `
+          <div class="bar" style="background:${ev.color||'#22c55e'}"></div>
+          <div class="info">
+            <div class="title">Entraînement</div>
+            <div class="meta"><strong>${ev.start || ''}${ev.end? '–'+ev.end : ''}</strong> ${ev.lieu? '• '+ev.lieu : ''}</div>
+          </div>
+          <button class="del" title="Supprimer">×</button>
         `;
-        card.querySelector('.del').onclick = async ()=>{
-          if (!confirm('Supprimer ce créneau ?')) return;
+        li.querySelector('.del').onclick = async ()=>{
+          if(!confirm('Supprimer ce créneau ?')) return;
           const res = await deleteTraining(ev.id);
-          if (res && res.ok){ ITEMS = ITEMS.filter(x=>x.id!==ev.id); render(); }
+          if(res && res.ok){ ITEMS = ITEMS.filter(x=>x.id!==ev.id); renderList(); }
         };
-        col.appendChild(card);
-      });
+        root.appendChild(li);
+      }
     }
 
-    // ====== Actions UI ======
-    document.getElementById('prev').onclick = ()=>{ monday = addDays(monday,-7); render(); };
-    document.getElementById('next').onclick = ()=>{ monday = addDays(monday, 7); render(); };
-    document.getElementById('today').onclick= ()=>{ monday = startOfWeek(new Date()); render(); };
+    function render(){ buildDays(); renderList(); }
 
-    document.getElementById('btnAdd').onclick = async ()=>{
+    // ====== Bottom sheet ======
+    const sheetBg = document.getElementById('sheetBg');
+    function openSheet(prefillDate){
+      sheetBg.style.display='flex';
+      document.getElementById('fDate').value = prefillDate || ymd(addDays(monday,activeDay));
+      document.getElementById('fStart').focus();
+    }
+    function closeSheet(){ sheetBg.style.display='none'; document.getElementById('msg').textContent=''; }
+
+    // ====== Events ======
+    document.getElementById('prev').onclick  = ()=>{ monday=addDays(monday,-7); render(); };
+    document.getElementById('next').onclick  = ()=>{ monday=addDays(monday, 7); render(); };
+    document.getElementById('today').onclick = ()=>{ monday=startOfWeek(new Date()); activeDay=((new Date().getDay()+6)%7); render(); };
+
+    document.getElementById('fab').onclick   = ()=> openSheet();
+    document.getElementById('cancel').onclick= ()=> closeSheet();
+    sheetBg.addEventListener('click', (e)=>{ if(e.target===sheetBg) closeSheet(); });
+
+    document.getElementById('save').onclick = async ()=>{
       const date = document.getElementById('fDate').value;
       const start= document.getElementById('fStart').value.trim();
       const end  = document.getElementById('fEnd').value.trim();
       const lieu = document.getElementById('fLieu').value.trim();
-      if (!date || !start){ alert('Date et heure de début obligatoires'); return; }
+      if (!date || !start){ alert('Date et début obligatoires'); return; }
       document.getElementById('msg').textContent = 'Envoi…';
-      const res = await createTraining({date, start, end, lieu});
-      if (res && res.ok && res.item){
+      const res = await createTraining({date,start,end,lieu});
+      if(res && res.ok && res.item){
         ITEMS.push(res.item);
-        document.getElementById('msg').textContent = '✅ Ajouté !';
-        render();
-      } else {
-        document.getElementById('msg').textContent = '❌ Erreur';
+        closeSheet();
+        renderList();
+      }else{
+        document.getElementById('msg').textContent='❌ Erreur';
       }
     };
 
     // ====== Init ======
     (function init(){
-      const today = new Date();
-      document.getElementById('fDate').value = ymd(today);
+      activeDay = (new Date().getDay()+6)%7; // set active to today
       fetchTrainings();
       render();
     })();
