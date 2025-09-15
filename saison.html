@@ -31,23 +31,13 @@
     .row{display:flex;gap:8px;margin-bottom:10px;align-items:center}
     .row label{flex:0 0 120px;opacity:.9}
     .row input,.row select,.row textarea{flex:1;background:#0b1326;border:1px solid #1f2937;border-radius:8px;color:var(--text);padding:8px}
+    .checks{display:flex;gap:10px;flex-wrap:wrap}
+    .checks label{display:inline-flex;gap:6px;align-items:center}
     .help{font-size:12px;color:var(--muted)}
-
-    /* Dropdown multi-choix (épreuves) */
-    .dd{position:relative;flex:1}
-    .dd-btn{width:100%;background:#0b1326;border:1px solid #1f2937;border-radius:8px;color:var(--text);padding:8px;text-align:left;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
-    .dd-btn:after{content:'▾';opacity:.8}
-    .dd-menu{position:absolute;z-index:20;top:100%;left:0;right:0;background:#0b1326;border:1px solid #1f2937;border-radius:10px;margin-top:6px;padding:8px;display:none;box-shadow:0 10px 30px rgba(0,0,0,.3)}
-    .dd.open .dd-menu{display:block}
-    .dd-menu label{display:flex;align-items:center;gap:8px;padding:6px 6px;border-radius:8px;cursor:pointer}
-    .dd-menu label:hover{background:#111a33}
-    .dd-menu input{accent-color:var(--accent)}
 
     @media (max-width:640px){
       .card{grid-template-columns:1fr}
       .actions{justify-content:flex-end}
-      .row{align-items:flex-start}
-      .row label{flex-basis:110px}
     }
   </style>
 </head>
@@ -64,50 +54,52 @@
       <button class="tab" data-view="new">Nouvelle compétition</button>
     </div>
 
-    <!-- Listes -->
-    <div id="list-upcoming" class="list"></div>
-    <div id="list-past" class="list" style="display:none"></div>
+    <!-- Liste -->
+    <div id="lists">
+      <div id="list-upcoming" class="list"></div>
+      <div id="list-past" class="list" style="display:none"></div>
 
-    <!-- Formulaire ajout -->
-    <div id="panel-new" class="panel" style="display:none">
-      <div class="row">
-        <label>Date</label>
-        <input id="fDate" type="date">
-      </div>
-      <div class="row">
-        <label>Lieu</label>
-        <input id="fLieu" placeholder="Ville / stade">
-      </div>
-      <div class="row">
-        <label>Type</label>
-        <select id="fType">
-          <option value="Meeting">Meeting</option>
-          <option value="Championnats">Championnats</option>
-          <option value="Interclubs">Interclubs</option>
-        </select>
-      </div>
-      <div class="row">
-        <label>Épreuves</label>
-        <div class="dd" id="ddEpreuves">
-          <button type="button" class="dd-btn" id="ddBtn">Sélectionner les épreuves</button>
-          <div class="dd-menu">
+      <!-- Formulaire d'ajout -->
+      <div id="panel-new" class="panel" style="display:none">
+        <div class="row">
+          <label>Date</label>
+          <input id="fDate" type="date">
+        </div>
+        <div class="row">
+          <label>Lieu</label>
+          <input id="fLieu" placeholder="Ville / stade">
+        </div>
+        <div class="row">
+          <label>Type</label>
+          <select id="fType">
+            <option value="Meeting">Meeting</option>
+            <option value="Championnats">Championnats</option>
+            <option value="Interclubs">Interclubs</option>
+            <option value="Stage">Stage</option>
+            <option value="Test">Test</option>
+            <option value="Autre">Autre</option>
+          </select>
+        </div>
+        <div class="row">
+          <label>Épreuves</label>
+          <div class="checks">
             <label><input type="checkbox" value="Disque" class="fEp"> Disque</label>
             <label><input type="checkbox" value="Poids" class="fEp"> Poids</label>
             <label><input type="checkbox" value="Javelot" class="fEp"> Javelot</label>
             <label><input type="checkbox" value="Marteau" class="fEp"> Marteau</label>
           </div>
         </div>
+        <div class="row">
+          <label>Infos</label>
+          <textarea id="fInfos" rows="3" placeholder="Détails, lien…"></textarea>
+        </div>
+        <div class="row">
+          <span class="help">Tout le monde peut ajouter/supprimer. Merci d’éviter les doublons 🙏</span>
+          <span style="flex:1"></span>
+          <button id="btnAdd" class="btn">Ajouter</button>
+        </div>
+        <div id="msg" class="help"></div>
       </div>
-      <div class="row">
-        <label>Infos</label>
-        <textarea id="fInfos" rows="3" placeholder="Détails, lien…"></textarea>
-      </div>
-      <div class="row">
-        <span class="help">Tout le monde peut ajouter/supprimer. Merci d’éviter les doublons 🙏</span>
-        <span style="flex:1"></span>
-        <button id="btnAdd" class="btn">Ajouter</button>
-      </div>
-      <div id="msg" class="help"></div>
     </div>
   </div>
 
@@ -117,49 +109,98 @@
     // State
     let ITEMS = [];
 
-    // Utils
+    // Helpers
     const $ = (q,root=document)=>root.querySelector(q);
     const $$ = (q,root=document)=>Array.from(root.querySelectorAll(q));
+
     function isoToDate(s){ const p=s.split('-'); return new Date(+p[0], p[1]-1, +p[2]); }
-    function fmtDateFR(s){ const d=isoToDate(s); return d.toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'}); }
-    function todayISO(){ const d=new Date(); const m=String(d.getMonth()+1).padStart(2,'0'); const day=String(d.getDate()).padStart(2,'0'); return `${d.getFullYear()}-${m}-${day}`; }
+    function fmtDateFR(s){
+      const d = isoToDate(s);
+      return d.toLocaleDateString('fr-FR', { year:'numeric', month:'long', day:'numeric' });
+    }
+    function todayISO(){
+      const d=new Date();
+      const m=String(d.getMonth()+1).padStart(2,'0');
+      const day=String(d.getDate()).padStart(2,'0');
+      return `${d.getFullYear()}-${m}-${day}`;
+    }
 
-    // API
-    async function fetchAll(){ const r=await fetch(API); const j=await r.json(); ITEMS=(j.items||[]).filter(x=>x.date); render(); }
+    async function fetchAll(){
+      const r = await fetch(API);
+      const j = await r.json();
+      ITEMS = (j.items||[]).filter(x=>x.date); // sécurité
+      render();
+    }
+
     async function createItem(payload){
-      const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'create',item:payload})});
-      return r.json();
-    }
-    async function deleteItem(id){
-      const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',id})});
+      const r = await fetch(API, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({action:'create', item:payload})
+      });
       return r.json();
     }
 
-    // Rendu listes
+    async function deleteItem(id){
+      const r = await fetch(API, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({action:'delete', id})
+      });
+      return r.json();
+    }
+
     function render(){
-      const today=todayISO();
-      const upcoming = ITEMS.filter(x=>x.date>=today).sort((a,b)=>a.date.localeCompare(b.date));
-      const past     = ITEMS.filter(x=>x.date< today).sort((a,b)=>b.date.localeCompare(a.date));
+      const today = todayISO();
+      const upcoming = ITEMS
+        .filter(x => x.date >= today)
+        .sort((a,b)=> a.date.localeCompare(b.date));
+      const past = ITEMS
+        .filter(x => x.date < today)
+        .sort((a,b)=> b.date.localeCompare(a.date));
+
       renderList($('#list-upcoming'), upcoming, false);
       renderList($('#list-past'), past, true);
     }
+
     function renderList(root, arr, isPast){
-      root.innerHTML='';
-      if(arr.length===0){ root.innerHTML=`<div class="help">${isPast?'Aucune compétition passée.':'Aucune compétition à venir.'}</div>`; return; }
-      for(const it of arr){
-        const card=document.createElement('div'); card.className='card';
-        const left=document.createElement('div');
-        left.innerHTML=`
-          <div class="title">${fmtDateFR(it.date)} — ${it.lieu||''}</div>
-          <div class="meta">${it.type||'Compétition'}</div>
-          ${it.epreuves?`<div class="chips">${it.epreuves.split(',').map(s=>s.trim()).filter(Boolean).map(s=>`<span class="chip">${s}</span>`).join('')}</div>`:''}
-          ${it.infos?`<div class="meta" style="margin-top:6px">${it.infos}</div>`:''}
+      root.innerHTML = '';
+      if (arr.length === 0) {
+        root.innerHTML = `<div class="help">${isPast ? 'Aucune compétition passée.' : 'Aucune compétition à venir.'}</div>`;
+        return;
+      }
+      for (const it of arr){
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const left = document.createElement('div');
+        left.innerHTML = `
+          <div class="title">${fmtDateFR(it.date)} — ${it.lieu || ''}</div>
+          <div class="meta">${it.type || 'Compétition'}</div>
+          ${it.epreuves ? `<div class="chips">${it.epreuves.split(',').map(s=>s.trim()).filter(Boolean).map(s=>`<span class="chip">${s}</span>`).join('')}</div>` : ''}
+          ${it.infos ? `<div class="meta" style="margin-top:6px">${it.infos}</div>` : ''}
         `;
-        const right=document.createElement('div'); right.className='actions';
-        const del=document.createElement('button'); del.className='btn danger'; del.textContent='Supprimer';
-        del.onclick=async()=>{ if(!confirm('Êtes-vous sûr de vouloir supprimer cette compétition ?'))return; const res=await deleteItem(it.id); if(res&&res.ok){ ITEMS=ITEMS.filter(x=>x.id!==it.id); render(); } else alert('Suppression impossible.'); };
+
+        const right = document.createElement('div');
+        right.className = 'actions';
+        const del = document.createElement('button');
+        del.className = 'btn danger';
+        del.textContent = 'Supprimer';
+        del.onclick = async ()=>{
+          if (!confirm('Êtes-vous sûr de vouloir supprimer cette compétition ?')) return;
+          const res = await deleteItem(it.id);
+          if (res && res.ok){
+            ITEMS = ITEMS.filter(x=>x.id !== it.id);
+            render();
+          } else {
+            alert('Suppression impossible.');
+          }
+        };
         right.appendChild(del);
-        card.appendChild(left); card.appendChild(right); root.appendChild(card);
+
+        card.appendChild(left);
+        card.appendChild(right);
+        root.appendChild(card);
       }
     }
 
@@ -168,54 +209,44 @@
       t.addEventListener('click', ()=>{
         $$('.tab').forEach(x=>x.classList.remove('active'));
         t.classList.add('active');
-        const v=t.dataset.view;
-        $('#list-upcoming').style.display=(v==='upcoming')?'':'none';
-        $('#list-past').style.display=(v==='past')?'':'none';
-        $('#panel-new').style.display=(v==='new')?'':'none';
+        const v = t.dataset.view;
+        $('#list-upcoming').style.display = (v==='upcoming') ? '' : 'none';
+        $('#list-past').style.display     = (v==='past') ? '' : 'none';
+        $('#panel-new').style.display     = (v==='new') ? '' : 'none';
       });
     });
 
-    // Dropdown épreuves
-    (function initDropdown(){
-      const dd = $('#ddEpreuves');
-      const btn = $('#ddBtn');
-      btn.addEventListener('click', ()=>{ dd.classList.toggle('open'); updateBtnLabel(); });
-      document.addEventListener('click', (e)=>{ if(!dd.contains(e.target)) dd.classList.remove('open'); });
-      $$('.fEp', dd).forEach(chk=>chk.addEventListener('change', updateBtnLabel));
-      function updateBtnLabel(){
-        const vals = $$('.fEp:checked', dd).map(x=>x.value);
-        btn.textContent = vals.length ? vals.join(' · ') : 'Sélectionner les épreuves';
-      }
-    })();
-
-    // Ajouter
+    // Ajout
     $('#btnAdd').addEventListener('click', async ()=>{
       const date = $('#fDate').value;
       const lieu = $('#fLieu').value.trim();
-      const type = $('#fType').value; // Meeting / Championnats / Interclubs
+      const type = $('#fType').value;
       const epreuves = $$('.fEp:checked').map(x=>x.value).join(', ');
       const infos = $('#fInfos').value.trim();
-      if(!date){ alert('La date est obligatoire'); return; }
 
-      $('#msg').textContent='Envoi…';
-      const res = await createItem({ date, lieu, type, epreuves, infos });
-      if(res && res.ok && res.item){
+      if (!date) { alert('La date est obligatoire'); return; }
+      const payload = { date, lieu, type, epreuves, infos };
+      $('#msg').textContent = 'Envoi…';
+      const res = await createItem(payload);
+      if (res && res.ok && res.item){
         ITEMS.push(res.item);
         // reset
-        $('#fDate').value=''; $('#fLieu').value=''; $('#fType').value='Meeting'; $$('.fEp').forEach(x=>x.checked=false); $('#fInfos').value='';
-        $('#ddBtn').textContent='Sélectionner les épreuves';
-        $('#msg').textContent='✅ Ajouté !';
+        $('#fDate').value = '';
+        $('#fLieu').value = '';
+        $('#fType').value = 'Meeting';
+        $$('.fEp').forEach(x=>x.checked=false);
+        $('#fInfos').value = '';
+        $('#msg').textContent = '✅ Ajouté !';
         render();
-
-        // Retourner vers l’onglet pertinent
-        const toUpcoming = (res.item.date >= todayISO());
+        // retour à l’onglet "À venir" si la date >= aujourd’hui
         $$('.tab').forEach(x=>x.classList.remove('active'));
-        $('[data-view="'+(toUpcoming?'upcoming':'past')+'"]').classList.add('active');
-        $('#list-upcoming').style.display = toUpcoming ? '' : 'none';
-        $('#list-past').style.display     = toUpcoming ? 'none' : '';
+        const tab = (payload.date >= todayISO()) ? $('[data-view="upcoming"]') : $('[data-view="past"]');
+        tab.classList.add('active');
+        $('#list-upcoming').style.display = (payload.date >= todayISO()) ? '' : 'none';
+        $('#list-past').style.display     = (payload.date <  todayISO()) ? '' : 'none';
         $('#panel-new').style.display     = 'none';
       } else {
-        $('#msg').textContent='❌ Erreur lors de l’ajout';
+        $('#msg').textContent = '❌ Erreur lors de l’ajout';
       }
     });
 
