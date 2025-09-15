@@ -32,14 +32,27 @@
     .panel{background:var(--card);border:1px solid #1f2937;border-radius:12px;padding:12px;margin:16px 0}
     .row{display:flex;gap:8px;margin-bottom:10px;align-items:center}
     .row label{flex:0 0 120px;opacity:.9}
-    .row input,.row select,.row textarea{flex:1;background:#0b1326;border:1px solid #1f2937;border-radius:8px;color:var(--text);padding:8px}
+    .row input,.row select,.row textarea{
+      flex:1;background:#0b1326;border:1px solid #1f2937;border-radius:8px;color:var(--text);padding:8px;
+      max-width:100%; min-width:0; /* évite tout dépassement */
+    }
     .checks{display:flex;gap:10px;flex-wrap:wrap}
     .checks label{display:inline-flex;gap:6px;align-items:center}
+
     .help{font-size:12px;color:var(--muted)}
 
+    /* ===== Mobile ===== */
     @media (max-width:640px){
       .card{grid-template-columns:1fr}
       .actions{justify-content:flex-end}
+
+      /* Formulaire en colonne sur mobile */
+      .row{flex-direction:column; align-items:stretch}
+      .row label{flex:0 0 auto; margin-bottom:6px}
+
+      /* Épreuves en vertical et à 100% de largeur */
+      .checks{flex-direction:column; gap:8px}
+      .checks label{width:100%}
     }
   </style>
 </head>
@@ -145,30 +158,23 @@
     async function createItem(payload){
       const form = new URLSearchParams();
       form.append('action', 'create');
-      form.append('item', JSON.stringify(payload)); // on sérialise l'objet
-    
+      form.append('item', JSON.stringify(payload));
       const r = await fetch(API, { method:'POST', body: form });
       return r.json();
     }
-    
+
     async function deleteItem(id){
       const form = new URLSearchParams();
       form.append('action', 'delete');
       form.append('id', id);
-    
       const r = await fetch(API, { method:'POST', body: form });
       return r.json();
     }
 
     function render(){
       const today = todayISO();
-      const upcoming = ITEMS
-        .filter(x => x.date >= today)
-        .sort((a,b)=> a.date.localeCompare(b.date));
-      const past = ITEMS
-        .filter(x => x.date < today)
-        .sort((a,b)=> b.date.localeCompare(a.date));
-
+      const upcoming = ITEMS.filter(x => x.date >= today).sort((a,b)=> a.date.localeCompare(b.date));
+      const past     = ITEMS.filter(x => x.date <  today).sort((a,b)=> b.date.localeCompare(a.date));
       renderList($('#list-upcoming'), upcoming, false);
       renderList($('#list-past'), past, true);
     }
