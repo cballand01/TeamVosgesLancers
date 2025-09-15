@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Planning — Groupe Athlé</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{--bg:#0f172a;--card:#111827;--text:#e5e7eb;--muted:#94a3b8;--line:#1f2937;--accent:#22c55e;--danger:#ef4444}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
+    .wrap{max-width:1100px;margin:0 auto;padding:24px 24px 96px}
+
+    a.back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;margin-bottom:16px;font-size:16px}
+    a.back svg{width:20px;height:20px;stroke:#fff}
+    h1{margin:0 0 8px;font-size:28px}
+    .subtitle{opacity:.85;margin-bottom:18px;font-size:16px}
+
+    .bar{display:flex;align-items:center;gap:8px;margin:12px 0 16px}
+    .bar .btn{border:1px solid var(--line);background:#0b1326;color:var(--text);border-radius:8px;padding:6px 10px;cursor:pointer}
+    .bar .when{margin-left:auto;opacity:.9}
+
+    .grid-wrap{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    .grid{display:grid;grid-template-columns:80px repeat(7,1fr);border-top:1px solid var(--line);overflow-x:auto}
+    .col-head{display:grid;grid-template-columns:80px repeat(7,1fr)}
+    .col-head div{padding:10px;border-right:1px solid var(--line);text-align:center}
+    .col-head div:first-child{text-align:right;padding-right:12px}
+    .col-head .day{font-weight:700}
+    .col-head .date{font-size:12px;opacity:.8}
+    .time-col{border-right:1px solid var(--line)}
+    .time{height:56px;border-bottom:1px solid #14203a;display:flex;justify-content:flex-end;align-items:flex-start;padding-top:4px;padding-right:8px;font-size:12px;color:var(--muted)}
+    .day-col{position:relative;border-right:1px solid var(--line)}
+    .slot-row{height:56px;border-bottom:1px solid #14203a}
+
+    .event{position:absolute;left:6px;right:6px;border-radius:8px;padding:6px 8px;background:var(--accent);color:#0b1326;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.25);border:1px solid rgba(0,0,0,.15);cursor:default}
+    .event small{display:block;font-weight:600;opacity:.85}
+    .event .del{position:absolute;top:4px;right:6px;background:transparent;border:none;color:#0b1326;cursor:pointer;font-weight:900}
+
+    .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:16px 0}
+    .row{display:flex;gap:8px;margin-bottom:10px;align-items:center}
+    .row label{flex:0 0 120px;opacity:.9}
+    .row input,.row select,.row textarea{flex:1;background:#0b1326;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:8px;max-width:100%;min-width:0}
+    .help{font-size:12px;color:var(--muted)}
+
+    @media (max-width:760px){
+      .col-head{grid-template-columns:60px repeat(7,220px)}
+      .grid{grid-template-columns:60px repeat(7,220px)}
+      .time{height:52px}
+      .slot-row{height:52px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="index.html" class="back">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      Retour
+    </a>
+    <h1>Planning des entraînements</h1>
+    <div class="subtitle">Vue hebdomadaire — ajoute un créneau “Entraînement — lieu”</div>
+
+    <div class="bar">
+      <button id="prev" class="btn">‹ Semaine</button>
+      <button id="today" class="btn">Cette semaine</button>
+      <button id="next" class="btn">Semaine ›</button>
+      <div class="when" id="when"></div>
+    </div>
+
+    <!-- En-têtes jours -->
+    <div class="grid-wrap">
+      <div class="col-head" id="head">
+        <!-- rempli par JS -->
+      </div>
+      <div class="grid" id="grid">
+        <!-- colonne heures -->
+        <div class="time-col" id="times"></div>
+        <!-- 7 colonnes jours -->
+        <div class="day-col" data-day="0"></div>
+        <div class="day-col" data-day="1"></div>
+        <div class="day-col" data-day="2"></div>
+        <div class="day-col" data-day="3"></div>
+        <div class="day-col" data-day="4"></div>
+        <div class="day-col" data-day="5"></div>
+        <div class="day-col" data-day="6"></div>
+      </div>
+    </div>
+
+    <!-- Formulaire ajout -->
+    <div class="panel">
+      <div class="row"><label>Date</label><input id="fDate" type="date"></div>
+      <div class="row"><label>Début</label><input id="fStart" placeholder="HH:MM" value="18:00"></div>
+      <div class="row"><label>Fin</label><input id="fEnd" placeholder="HH:MM" value="20:00"></div>
+      <div class="row"><label>Lieu</label><input id="fLieu" placeholder="Stade / salle"></div>
+      <div class="row">
+        <span class="help">Le créneau apparaîtra sur le jour/heure. Le titre est “Entraînement”.</span>
+        <span style="flex:1"></span>
+        <button id="btnAdd" class="btn">Ajouter</button>
+      </div>
+      <div id="msg" class="help"></div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'API_URL'; // <= ton /exec
+    const START_H = 8;     // 08:00 → 21:00
+    const END_H = 21;
+    const ROW_H = 56;      // hauteur d'une heure (px)
+    let ITEMS = [];        // trainings {id,date,start,end,lieu,color}
+    let monday = startOfWeek(new Date()); // lundi de la semaine affichée
+
+    // ====== Utils dates ======
+    function startOfWeek(d){
+      const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const day = (x.getDay()+6)%7; // 0 = lundi
+      x.setDate(x.getDate()-day);
+      x.setHours(0,0,0,0);
+      return x;
+    }
+    function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+    function ymd(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+    function fmtHead(d){
+      const day = d.toLocaleDateString('fr-FR',{weekday:'short'});
+      const date = d.getDate();
+      const month = d.toLocaleDateString('fr-FR',{month:'long'});
+      return {day, date, month};
+    }
+    function toMin(t){ if(!t) return 0; const [h,m]=t.split(':').map(n=>+n); return h*60+m; }
+
+    // ====== API ======
+    async function fetchTrainings(){
+      const r = await fetch(API + '?resource=trainings');
+      const j = await r.json();
+      ITEMS = (j.items||[]);
+      render();
+    }
+    async function createTraining(payload){
+      const form = new URLSearchParams();
+      form.append('resource','trainings');
+      form.append('action','create');
+      form.append('item', JSON.stringify(payload));
+      const r = await fetch(API, {method:'POST', body:form});
+      return r.json();
+    }
+    async function deleteTraining(id){
+      const form = new URLSearchParams();
+      form.append('resource','trainings');
+      form.append('action','delete');
+      form.append('id', id);
+      const r = await fetch(API, {method:'POST', body:form});
+      return r.json();
+    }
+
+    // ====== Rendu ======
+    function buildHeads(){
+      const head = document.getElementById('head');
+      head.innerHTML = '';
+      const first = document.createElement('div'); first.textContent = ''; head.appendChild(first);
+      for (let i=0;i<7;i++){
+        const d = addDays(monday,i);
+        const {day, date, month} = fmtHead(d);
+        const cell = document.createElement('div');
+        cell.innerHTML = `<div class="day">${day.toUpperCase()}</div><div class="date">${date} ${month}</div>`;
+        head.appendChild(cell);
+      }
+      document.getElementById('when').textContent = rangeLabel();
+    }
+    function buildTimeCol(){
+      const t = document.getElementById('times');
+      t.innerHTML = '';
+      for (let h=START_H; h<END_H; h++){
+        const row = document.createElement('div');
+        row.className='time';
+        row.style.height = ROW_H+'px';
+        row.textContent = `${String(h).padStart(2,'0')}h`;
+        t.appendChild(row);
+      }
+    }
+    function clearDayCols(){
+      document.querySelectorAll('.day-col').forEach(col=>{
+        col.innerHTML = '';
+        for (let h=START_H; h<END_H; h++){
+          const row = document.createElement('div');
+          row.className='slot-row';
+          row.style.height = ROW_H+'px';
+          col.appendChild(row);
+        }
+      });
+    }
+    function rangeLabel(){
+      const d0 = addDays(monday,0), d6 = addDays(monday,6);
+      const fmt = (d)=>`${d.getDate()} ${d.toLocaleDateString('fr-FR',{month:'short'})}`;
+      if (d0.getMonth() === d6.getMonth()){
+        return `${d0.getDate()}–${d6.getDate()} ${d0.toLocaleDateString('fr-FR',{month:'long', year:'numeric'})}`;
+      }
+      return `${fmt(d0)} – ${fmt(d6)} ${d6.getFullYear()}`;
+    }
+
+    function render(){
+      buildHeads();
+      buildTimeCol();
+      clearDayCols();
+
+      const weekDates = new Set([...Array(7)].map((_,i)=> ymd(addDays(monday,i))));
+      const weekItems = ITEMS.filter(ev=> weekDates.has(ev.date));
+
+      weekItems.forEach(ev=>{
+        const dayIdx = (new Date(ev.date+'T00:00:00')).getDay(); // 0=dim…6=sam
+        const col = document.querySelector(`.day-col[data-day="${(dayIdx+6)%7}"]`); // map lundi=0
+        if (!col) return;
+
+        const startMin = Math.max(START_H*60, toMin(ev.start));
+        const endMin   = Math.min(END_H*60, Math.max(startMin+30, toMin(ev.end)|| (startMin+60)));
+        const top = ((startMin - START_H*60) / 60) * ROW_H;
+        const height = Math.max(28, ((endMin - startMin)/60)*ROW_H - 4);
+
+        const card = document.createElement('div');
+        card.className='event';
+        card.style.top = `${top}px`;
+        card.style.height = `${height}px`;
+        card.style.background = ev.color || '#22c55e';
+        card.innerHTML = `
+          <button class="del" title="Supprimer" aria-label="Supprimer">×</button>
+          Entraînement
+          ${ev.lieu ? `<small>${ev.lieu}</small>` : ''}
+          ${ev.start ? `<small>${ev.start}${ev.end?'–'+ev.end:''}</small>` : ''}
+        `;
+        card.querySelector('.del').onclick = async ()=>{
+          if (!confirm('Supprimer ce créneau ?')) return;
+          const res = await deleteTraining(ev.id);
+          if (res && res.ok){ ITEMS = ITEMS.filter(x=>x.id!==ev.id); render(); }
+        };
+        col.appendChild(card);
+      });
+    }
+
+    // ====== Actions UI ======
+    document.getElementById('prev').onclick = ()=>{ monday = addDays(monday,-7); render(); };
+    document.getElementById('next').onclick = ()=>{ monday = addDays(monday, 7); render(); };
+    document.getElementById('today').onclick= ()=>{ monday = startOfWeek(new Date()); render(); };
+
+    document.getElementById('btnAdd').onclick = async ()=>{
+      const date = document.getElementById('fDate').value;
+      const start= document.getElementById('fStart').value.trim();
+      const end  = document.getElementById('fEnd').value.trim();
+      const lieu = document.getElementById('fLieu').value.trim();
+      if (!date || !start){ alert('Date et heure de début obligatoires'); return; }
+      document.getElementById('msg').textContent = 'Envoi…';
+      const res = await createTraining({date, start, end, lieu});
+      if (res && res.ok && res.item){
+        ITEMS.push(res.item);
+        document.getElementById('msg').textContent = '✅ Ajouté !';
+        render();
+      } else {
+        document.getElementById('msg').textContent = '❌ Erreur';
+      }
+    };
+
+    // ====== Init ======
+    (function init(){
+      const today = new Date();
+      document.getElementById('fDate').value = ymd(today);
+      fetchTrainings();
+      render();
+    })();
+  </script>
+</body>
+</html>
