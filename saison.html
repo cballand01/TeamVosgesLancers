@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>Compétitions — Groupe Athlé</title>
+  <title>Saison — Groupe Athlé</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
@@ -21,26 +21,23 @@
     .subtitle{text-align:left;opacity:.7;font-size:16px;margin-bottom:16px}
 
     /* Liste */
-    .list{display:grid;gap:12px}
-    .card{
-      background:var(--card);border:1px solid var(--line);border-radius:12px;
-      padding:12px;display:grid;grid-template-columns:1fr auto;gap:8px
-    }
+    .list{display:grid;gap:10px;margin-bottom:18px}
+    .separator{border-top:1px solid #334155;margin:18px 0;opacity:.5}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;grid-template-columns:1fr auto;gap:8px}
     .title{font-weight:700}
     .meta{font-size:13px;color:var(--muted)}
     .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
     .chip{font-size:12px;border:1px solid #334155;border-radius:999px;padding:3px 8px;color:#cbd5e1}
-
-    /* Séparateur */
-    .divider{margin:24px 0 8px;border-top:1px solid var(--line);opacity:.5;text-align:center}
-    .divider span{position:relative;top:-0.8em;background:var(--bg);padding:0 8px;color:var(--muted);font-size:14px}
+    .actions{display:flex;align-items:center}
+    .btn.danger{border:1px solid var(--danger);border-radius:8px;background:#0b1326;color:var(--danger);padding:4px 8px;cursor:pointer}
 
     /* FAB */
     .fab{
       position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;
-      display:grid;place-items:center;background:var(--accent);color:#0b1326;
-      border:1px solid #1a2b1f;box-shadow:0 10px 30px rgba(0,0,0,.4);
-      cursor:pointer;z-index:50;font-size:32px;font-weight:900;line-height:0;
+      display:flex;align-items:center;justify-content:center;
+      background:var(--accent);color:#0b1326;
+      border:1px solid #1a2b1f;box-shadow:0 10px 30px rgba(0,0,0,.4);cursor:pointer;z-index:50;
+      font-size:28px;font-weight:900;
     }
 
     /* Bottom sheet */
@@ -51,41 +48,29 @@
     .sheet{
       width:100%;max-width:960px;margin:0 auto;background:var(--card);
       border-top-left-radius:16px;border-top-right-radius:16px;border:1px solid var(--line);
-      border-bottom:none;padding:12px 16px 16px;animation:slideup .18s ease-out;
-      max-height:85vh;overflow:auto
+      border-bottom:none;padding:12px 16px 16px;animation:slideup .18s ease-out;max-height:85vh;overflow:auto
     }
     @keyframes slideup{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+
     .row{display:flex;gap:8px;margin:8px 0;align-items:center}
     .row label{flex:0 0 110px;opacity:.9}
-    .row input,.row select,.row textarea{
-      flex:1;background:#0b1326;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:10px
-    }
-    .checks{display:flex;gap:10px;flex-wrap:wrap}
-    .checks label{display:inline-flex;gap:6px;align-items:center}
-    @media (max-width:640px){
-      .checks{
-        flex-direction:column;
-        align-items:flex-start;
-        gap:2px;              /* 🔥 encore plus serré */
-      }
-      .checks label{
-        margin:0;             /* enlève marges par défaut */
-        line-height:1.2;      /* réduit la hauteur de ligne */
-        font-size:14px;       /* texte un peu plus petit pour compacité */
-      }
-      .checks input{
-        transform:scale(0.9); /* case à cocher légèrement plus petite */
-        margin-right:4px;
-      }
-    }
-    .actions{display:flex;gap:8px;margin-top:8px}
+    .row input,.row select,.row textarea{flex:1;background:#0b1326;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:8px}
+
+    /* Grid pour épreuves (2 colonnes compactes) */
+    .checks{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+    .checks label{display:flex;align-items:center;gap:4px;font-size:14px;line-height:1.2}
+    .checks input{margin:0;transform:scale(0.9)}
+
+    .sheet .actions{display:flex;gap:8px;margin-top:8px}
     .btn{border:1px solid var(--line);border-radius:10px;background:#0b1326;color:var(--text);padding:8px 12px;cursor:pointer}
     .btn.ghost{background:transparent}
     .subtitle.small{font-size:12px}
+
   </style>
 </head>
 <body>
   <div class="wrap">
+    <!-- Retour -->
     <div class="topbar">
       <a href="index.html" class="back">
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
@@ -93,17 +78,22 @@
       </a>
     </div>
 
-    <h1>Compétitions</h1>
-    <div class="subtitle">Toutes les compétitions, triées par date</div>
+    <!-- TITRES -->
+    <h1>Calendrier</h1>
+    <div class="subtitle">Toutes les compétitions de la saison</div>
 
-    <div id="list" class="list"></div>
+    <!-- LISTES -->
+    <div class="list" id="list-upcoming"></div>
+    <div class="separator"></div>
+    <div class="list" id="list-past"></div>
 
+    <!-- FAB -->
     <button class="fab" id="fab" title="Ajouter">＋</button>
 
     <!-- Bottom sheet -->
     <div class="sheet-backdrop" id="sheetBg">
-      <div class="sheet" id="sheet">
-        <h3 style="margin:4px 0 8px">Nouvelle compétition</h3>
+      <div class="sheet">
+        <h3 style="margin:4px 0 8px">Ajouter une compétition</h3>
         <div class="row"><label>Date</label><input id="fDate" type="date"></div>
         <div class="row"><label>Lieu</label><input id="fLieu" placeholder="Ville / stade"></div>
         <div class="row"><label>Type</label>
@@ -116,8 +106,7 @@
             <option value="Autre">Autre</option>
           </select>
         </div>
-        <div class="row">
-          <label>Épreuves</label>
+        <div class="row"><label>Épreuves</label>
           <div class="checks">
             <label><input type="checkbox" value="Disque" class="fEp"> Disque</label>
             <label><input type="checkbox" value="Poids" class="fEp"> Poids</label>
@@ -125,91 +114,93 @@
             <label><input type="checkbox" value="Marteau" class="fEp"> Marteau</label>
           </div>
         </div>
-        <div class="row">
-          <label>Infos</label>
-          <textarea id="fInfos" rows="3" placeholder="Détails, lien…"></textarea>
-        </div>
+        <div class="row"><label>Infos</label><textarea id="fInfos" rows="3" placeholder="Détails, lien…"></textarea></div>
         <div class="actions">
           <button class="btn ghost" id="cancel">Annuler</button>
           <button class="btn" id="save">Ajouter</button>
         </div>
-        <div id="msg" class="subtitle small"></div>
+        <div id="msg" class="subtitle small" style="margin-top:6px"></div>
       </div>
     </div>
   </div>
 
   <script>
-    const API = "YOUR_APPS_SCRIPT_URL_HERE";
-    let ITEMS = [];
-    const listEl = document.getElementById("list");
-    const sheetBg = document.getElementById("sheetBg");
+    const API = 'YOUR_APPS_SCRIPT_URL_HERE'; // colle ton URL
 
-    function todayISO(){
-      const d=new Date();const m=String(d.getMonth()+1).padStart(2,'0');
-      const day=String(d.getDate()).padStart(2,'0');return `${d.getFullYear()}-${m}-${day}`;
-    }
+    let ITEMS = [];
+    const $ = (q,root=document)=>root.querySelector(q);
+    const $$ = (q,root=document)=>Array.from(root.querySelectorAll(q));
+
     function isoToDate(s){const p=s.split('-');return new Date(+p[0],p[1]-1,+p[2]);}
     function fmtDateFR(s){const d=isoToDate(s);return d.toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'});}
+    function todayISO(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 
     async function fetchAll(){
-      const r = await fetch(API); const j = await r.json();
-      ITEMS = (j.items||[]).filter(x=>x.date);
-      render();
+      try{const r=await fetch(API);const j=await r.json();ITEMS=(j.items||[]).filter(x=>x.date);render();}
+      catch(e){console.error(e);}
+    }
+
+    async function createItem(payload){
+      const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'create',item:payload})});
+      return r.json();
+    }
+    async function deleteItem(id){
+      const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',id})});
+      return r.json();
     }
 
     function render(){
-      listEl.innerHTML = "";
-      const today = todayISO();
-      const upcoming = ITEMS.filter(x=>x.date>=today).sort((a,b)=>a.date.localeCompare(b.date));
-      const past = ITEMS.filter(x=>x.date<today).sort((a,b)=>b.date.localeCompare(a.date));
-
-      upcoming.forEach(addCard);
-      if(past.length>0){
-        const div = document.createElement("div");
-        div.className = "divider"; div.innerHTML = "<span>Compétitions passées</span>";
-        listEl.appendChild(div);
-        past.forEach(addCard);
-      }
+      const today=todayISO();
+      const upcoming=ITEMS.filter(x=>x.date>=today).sort((a,b)=>a.date.localeCompare(b.date));
+      const past=ITEMS.filter(x=>x.date<today).sort((a,b)=>b.date.localeCompare(a.date));
+      renderList($('#list-upcoming'),upcoming);
+      renderList($('#list-past'),past);
     }
 
-    function addCard(it){
-      const card=document.createElement("div");
-      card.className="card";
-      card.innerHTML=`
-        <div>
-          <div class="title">${fmtDateFR(it.date)} — ${it.lieu||''}</div>
-          <div class="meta">${it.type||'Compétition'}</div>
-          ${it.epreuves?`<div class="chips">${it.epreuves.split(',').map(s=>`<span class="chip">${s}</span>`).join('')}</div>`:''}
-          ${it.infos?`<div class="meta" style="margin-top:6px">${it.infos}</div>`:''}
-        </div>
-      `;
-      listEl.appendChild(card);
+    function renderList(root,arr){
+      root.innerHTML='';
+      if(arr.length===0){root.innerHTML='<div class="meta">Aucune compétition.</div>';return;}
+      arr.forEach(it=>{
+        const card=document.createElement('div');
+        card.className='card';
+        card.innerHTML=`
+          <div>
+            <div class="title">${fmtDateFR(it.date)} — ${it.lieu||''}</div>
+            <div class="meta">${it.type||'Compétition'}</div>
+            ${it.epreuves?`<div class="chips">${it.epreuves.split(',').map(s=>`<span class="chip">${s.trim()}</span>`).join('')}</div>`:''}
+            ${it.infos?`<div class="meta" style="margin-top:6px">${it.infos}</div>`:''}
+          </div>
+          <div class="actions"><button class="btn danger" onclick="onDelete('${it.id}')">Supprimer</button></div>`;
+        root.appendChild(card);
+      });
     }
 
-    // Gestion du + et fermeture
-    document.getElementById("fab").onclick=()=>{sheetBg.style.display="flex";}
-    document.getElementById("cancel").onclick=()=>{sheetBg.style.display="none";}
-    sheetBg.addEventListener("click",e=>{
-      if(e.target===sheetBg) sheetBg.style.display="none"; // 🔥 fermer en cliquant dehors
-    });
+    async function onDelete(id){
+      if(!confirm("Êtes-vous sûr ?"))return;
+      const res=await deleteItem(id);
+      if(res&&res.ok){ITEMS=ITEMS.filter(x=>x.id!==id);render();}
+    }
 
-    document.getElementById("save").onclick=async ()=>{
-      const date=document.getElementById("fDate").value;
-      const lieu=document.getElementById("fLieu").value.trim();
-      const type=document.getElementById("fType").value;
-      const epreuves=[...document.querySelectorAll(".fEp:checked")].map(x=>x.value).join(", ");
-      const infos=document.getElementById("fInfos").value.trim();
+    // FAB et bottom sheet
+    const sheetBg=$('#sheetBg');
+    $('#fab').onclick=()=>sheetBg.style.display='flex';
+    $('#cancel').onclick=()=>sheetBg.style.display='none';
+    sheetBg.addEventListener('click',e=>{if(e.target===sheetBg)sheetBg.style.display='none';});
 
-      if(!date){alert("La date est obligatoire");return;}
+    $('#save').onclick=async()=>{
+      const date=$('#fDate').value, lieu=$('#fLieu').value.trim(), type=$('#fType').value;
+      const epreuves=$$('.fEp:checked').map(x=>x.value).join(', '), infos=$('#fInfos').value.trim();
+      if(!date){alert('La date est obligatoire');return;}
       const payload={date,lieu,type,epreuves,infos};
-      document.getElementById("msg").textContent="Envoi...";
-      const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"create",item:payload})});
-      const j=await r.json();
-      if(j.ok){ITEMS.push(j.item);render();sheetBg.style.display="none";}
-      else document.getElementById("msg").textContent="❌ Erreur";
-    }
+      $('#msg').textContent='Envoi...';
+      const res=await createItem(payload);
+      if(res&&res.ok&&res.item){
+        ITEMS.push(res.item);render();sheetBg.style.display='none';
+        $('#fDate').value='';$('#fLieu').value='';$('#fType').value='Meeting';$$('.fEp').forEach(x=>x.checked=false);$('#fInfos').value='';
+      } else $('#msg').textContent='Erreur.';
+    };
 
-    fetchAll();
+    (function init(){$('#fDate').value=todayISO();fetchAll();})();
   </script>
 </body>
 </html>
