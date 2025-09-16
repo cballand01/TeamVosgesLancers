@@ -9,6 +9,8 @@
       --bg:#0f172a;
       --card:#111827;
       --text:#e5e7eb;
+      --muted:#94a3b8;
+      --line:#1f2937;
       --accent:#22c55e;
     }
     body {
@@ -33,13 +35,29 @@
       margin-bottom: 16px;
     }
     .back svg { width: 20px; height: 20px; stroke: white; }
-    h1 { font-size: 28px; margin: 0 0 4px; }
+
+    /* Titre + soulignement vert */
+    h1 {
+      font-size: 28px;
+      margin: 0 0 4px;
+      position: relative;
+      padding-bottom: 6px;
+    }
+    h1::after{
+      content:"";
+      position:absolute;
+      left:0; bottom:0;
+      width:72px; height:3px;
+      background:var(--accent);
+      border-radius:999px;
+      box-shadow:0 0 0 1px rgba(34,197,94,.15);
+    }
     .subtitle { font-size: 16px; opacity: 0.8; margin-bottom: 24px; }
 
     /* === Bloc podium === */
     .podium-card {
       background: var(--card);
-      border: 1px solid #1f2937;
+      border: 1px solid var(--line);
       border-radius: 12px;
       padding: 16px;
       margin-bottom: 24px;
@@ -47,16 +65,28 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
+      position: relative;
     }
+    /* fine barre d’accent sur la carte podium */
+    .podium-card::before{
+      content:"";
+      position:absolute; left:0; top:0; bottom:0; width:6px;
+      background:var(--accent);
+      border-radius:12px 0 0 12px;
+    }
+
     .podium-nav {
       background: none;
-      border: none;
-      font-size: 28px;
+      border: 1px solid var(--line);
+      width:36px; height:36px; border-radius:50%;
+      display:grid; place-items:center;
+      font-size: 18px;
       color: var(--text);
       cursor: pointer;
-      transition: opacity 0.2s;
+      transition: transform .12s ease, border-color .2s ease;
+      background:#0b1326;
     }
-    .podium-nav:hover { opacity: 0.7; }
+    .podium-nav:hover { transform: translateY(-1px); border-color: var(--accent); }
 
     .podium-content {
       flex: 1;
@@ -65,21 +95,15 @@
       align-items: center;
     }
 
-    /* viewport + slide pour l’animation */
-    .podium-viewport {
-      width: 100%;
-      max-width: 460px;
-      overflow: hidden;
-    }
-    .podium-slide {
-      will-change: transform, opacity;
-    }
+    .podium-viewport { width: 100%; max-width: 460px; overflow: hidden; }
+    .podium-slide { will-change: transform, opacity; }
 
     .podium-content h2 {
       margin: 0 0 12px;
       font-size: 20px;
       text-align: center;
     }
+
     .podium {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -94,6 +118,7 @@
       flex-direction: column;
       align-items: center;
       gap: 6px;
+      min-width: 0; /* permet l’ellipsis */
     }
     .bar {
       background: var(--accent);
@@ -108,7 +133,17 @@
     .place.first .bar { height: 100px; }
     .place.second .bar { height: 70px; }
     .place.third .bar { height: 50px; }
-    .athlete { font-size: 14px; text-align: center; }
+
+    /* Une seule ligne + ellipsis pour éviter le wrap qui décale tout */
+    .athlete {
+      font-size: 14px;
+      text-align: center;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.25;
+    }
 
     /* Animations slide */
     @keyframes slideOutLeft { from {opacity:1; transform:translateX(0);} to {opacity:0; transform:translateX(-24px);} }
@@ -130,13 +165,22 @@
     .athlete-card {
       position: relative;
       background: var(--card);
-      border: 1px solid #1f2937;
+      border: 1px solid var(--line);
       border-radius: 12px;
-      padding: 16px;
+      padding: 16px 16px 16px 20px; /* léger décalage pour la barre */
       display: flex;
       flex-direction: column;
       align-items: center;
+      overflow:hidden;
     }
+    /* petite barre verte à gauche comme les autres pages */
+    .athlete-card::before{
+      content:"";
+      position:absolute; left:0; top:0; bottom:0; width:6px;
+      background:var(--accent);
+      border-radius:12px 0 0 12px;
+    }
+
     .ffa-link {
       position: absolute;
       top: 10px;
@@ -147,10 +191,11 @@
       justify-content: center;
       align-items: center;
       background: rgba(255,255,255,0.08);
+      border: 1px solid var(--line);
       border-radius: 6px;
-      transition: background 0.2s;
+      transition: background 0.2s, border-color .2s;
     }
-    .ffa-link:hover { background: rgba(255,255,255,0.2); }
+    .ffa-link:hover { background: rgba(34,197,94,0.15); border-color: var(--accent); }
     .ffa-link svg { width: 100%; height: 100%; }
 
     .athlete-photo {
@@ -164,6 +209,7 @@
       font-weight: 700;
       font-size: 18px;
       margin-bottom: 12px;
+      text-align:center;
     }
     .records {
       width: 100%;
@@ -180,6 +226,20 @@
       opacity: 0.7;
       text-align: right;
       margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    /* --- Responsive tweaks smartphone --- */
+    @media (max-width: 480px){
+      .podium-content h2{ font-size:18px; }
+      .athlete{ font-size:12px; }
+
+      .place.first .bar { height: 72px; }
+      .place.second .bar { height: 52px; }
+      .place.third .bar { height: 40px; }
+
+      .podium { max-width: 100%; gap:6px; }
+      .podium-nav{ width:32px; height:32px; font-size:16px; }
     }
   </style>
 </head>
@@ -207,15 +267,15 @@
             <div class="podium">
               <div class="place second">
                 <div class="bar">2</div>
-                <div class="athlete" id="secondPlace">Paul — 14.10 m</div>
+                <div class="athlete" id="secondPlace" title="Paul — 14.10 m">Paul — 14.10 m</div>
               </div>
               <div class="place first">
                 <div class="bar">1</div>
-                <div class="athlete" id="firstPlace">Alex — 15.20 m</div>
+                <div class="athlete" id="firstPlace" title="Alex — 15.20 m">Alex — 15.20 m</div>
               </div>
               <div class="place third">
                 <div class="bar">3</div>
-                <div class="athlete" id="thirdPlace">Julien — 13.80 m</div>
+                <div class="athlete" id="thirdPlace" title="Julien — 13.80 m">Julien — 13.80 m</div>
               </div>
             </div>
           </div>
@@ -338,7 +398,6 @@
         </div>
       </div>
 
-
       <!-- Athlète 3 -->
       <div class="athlete-card">
         <a href="https://www.athle.fr/athletes/516706/bilans" class="ffa-link" target="_blank" title="Voir sur FFA">
@@ -367,12 +426,11 @@
           </svg>
         </a>
         <img src="https://storage.cloud.google.com/vosgeslancers/Images/Photo_id/Rosie.png" alt="Athlète 6" class="athlete-photo">
-        <div class="athlete-name">Rosie Pretre</div>
+        <div class="athlete-name">Rosie Prêtre</div>
         <div class="records">
           <div class="record-label">Disque</div>
           <div class="record-value">29.36 m</div>
           <div class="record-meta" data-date="2025-07-18" data-lieu="Epinal"></div>
-          
         </div>
       </div>
 
@@ -430,16 +488,16 @@
       if (days > 0) parts.push(`${days} j`);
       if (parts.length === 0) parts.push("aujourd'hui");
       meta.textContent = `${lieu} • ${parts.join(' ')}`;
+      meta.title = `${lieu} • ${d.toLocaleDateString('fr-FR')}`; // tooltip utile
     });
 
     // --- Podiums (à remplir manuellement) ---
     const podiums = [
       { title: "Podium — Poids Hommes",   first: "Charles — 14.74 m",  second: "Daniel — 14.23 m",  third: "Maxime — 12.33 m" },
-      { title: "Podium — Disque Hommes",  first: "Daniel — 50.16 m", second: "Franck — 49.72 m",  third: "Maxime — 48.67 m" },
-      { title: "Podium — Disque Femmes", first: "Fanny — 44.90 m", second: "Laura — 39.97 m",  third: "Rosie — 29.36 m" },
-      { title: "Podium — Javelot Femmes", first: "Fanny — 33.40 m", second: "Laura — 28.95 m",  third: "- — -" },
-      { title: "Podium — Marteau Femmes", first: "Fanny — 35.29 m", second: "Laura — 23.09 m",  third: "- — -" }
-      // Ajoute ici Poids Femmes, Disque Femmes, etc.
+      { title: "Podium — Disque Hommes",  first: "Daniel — 50.16 m",   second: "Franck — 49.72 m",  third: "Maxime — 48.67 m" },
+      { title: "Podium — Disque Femmes",  first: "Fanny — 44.90 m",    second: "Laura — 39.97 m",   third: "Rosie — 29.36 m" },
+      { title: "Podium — Javelot Femmes", first: "Fanny — 33.40 m",    second: "Laura — 28.95 m",   third: "- — -" },
+      { title: "Podium — Marteau Femmes", first: "Fanny — 35.29 m",    second: "Laura — 23.09 m",   third: "- — -" }
     ];
 
     let currentPodium = 0;
@@ -452,13 +510,12 @@
     function setPodium(index){
       const p = podiums[index];
       titleEl.textContent = p.title;
-      firstEl.textContent = p.first;
-      secondEl.textContent = p.second;
-      thirdEl.textContent = p.third;
+      firstEl.textContent = p.first;  firstEl.title = p.first;
+      secondEl.textContent = p.second; secondEl.title = p.second;
+      thirdEl.textContent = p.third;  thirdEl.title = p.third;
     }
 
     function animateTo(index, dir){
-      // dir: 'next' ou 'prev'
       const outClass = dir === 'next' ? 'out-left' : 'out-right';
       const inClass  = dir === 'next' ? 'in-right' : 'in-left';
 
@@ -466,9 +523,7 @@
       slideEl.addEventListener('animationend', function handleOut(){
         slideEl.removeEventListener('animationend', handleOut);
         slideEl.classList.remove(outClass);
-        // mettre à jour le contenu
         setPodium(index);
-        // animer l'entrée
         slideEl.classList.add(inClass);
         slideEl.addEventListener('animationend', function handleIn(){
           slideEl.removeEventListener('animationend', handleIn);
