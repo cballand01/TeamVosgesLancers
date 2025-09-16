@@ -13,15 +13,24 @@
     body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
     .wrap{max-width:960px;margin:0 auto;padding:16px 16px 96px}
 
-    /* Retour + titres */
-    .topbar{display:flex;align-items:center;margin-bottom:8px}
+    /* Retour */
+    .topbar{display:flex;align-items:center;margin-bottom:12px}
     .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px}
     .back svg{width:20px;height:20px;stroke:#fff}
-    h1{margin:8px 0 4px;font-size:28px;font-weight:700;text-align:left}
-    .subtitle{text-align:left;opacity:.7;font-size:16px;margin-bottom:10px}
+
+    /* ===== Header commun (même DA que Records) ===== */
+    .page-header h1{
+      font-size:28px; font-weight:700; margin:0 0 4px; position:relative; padding-bottom:6px; text-align:left;
+    }
+    .page-header h1::after{
+      content:""; position:absolute; left:0; bottom:0; width:72px; height:3px; background:var(--accent); border-radius:999px;
+    }
+    .page-header .subtitle{
+      text-align:left; opacity:.8; font-size:16px; margin:0 0 24px;   /* même espacement vertical que Records */
+    }
 
     /* Spinner compact */
-    .loading{display:none;align-items:center;gap:8px;margin:6px 0 12px}
+    .loading{display:none;align-items:center;gap:8px;margin:12px 0 16px} /* + marge verticale */
     .loading .dot{
       width:14px;height:14px;border-radius:50%;
       border:2px solid rgba(34,197,94,.25);
@@ -32,16 +41,17 @@
     .loading .txt{font-size:13px;color:var(--muted)}
 
     /* Week bar */
-    .weekbar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px}
+    .weekbar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px} /* + marge */
     .navbtn{
       width:36px;height:36px;border-radius:50%;border:1px solid var(--line);
       background:var(--card);color:var(--text);display:grid;place-items:center;
-      font-size:18px;cursor:pointer
+      font-size:18px;cursor:pointer;transition:border-color .2s, transform .1s
     }
+    .navbtn:hover{ border-color:var(--accent); transform:translateY(-1px) }
     .when{font-weight:600;font-size:15px;min-width:190px;text-align:center}
 
     /* Days pills */
-    .days{display:flex;gap:8px;overflow-x:auto;padding:6px 0 10px;margin-bottom:8px;scroll-behavior:smooth}
+    .days{display:flex;gap:8px;overflow-x:auto;padding:6px 0 10px;margin-bottom:16px;scroll-behavior:smooth} /* + marge */
     .daypill{
       flex:0 0 auto; min-width:72px; text-align:center; padding:10px 12px; border-radius:999px;
       border:1px solid var(--line); background:#0b1326; color:#fff; cursor:pointer; font-weight:500
@@ -50,7 +60,7 @@
     .daypill.active{background:var(--accent); color:#0b1326; border-color:var(--accent); font-weight:700}
 
     /* List & events */
-    .list{display:grid;gap:10px}
+    .list{display:grid;gap:12px} /* + gap uniforme */
     .empty{font-size:14px;color:var(--muted);opacity:.9;padding:8px}
 
     .ev{
@@ -105,8 +115,11 @@
       </a>
     </div>
 
-    <h1>Planning</h1>
-    <div class="subtitle">Vue de la semaine — Créneaux d’entraînement</div>
+    <!-- ===== Header commun ===== -->
+    <header class="page-header">
+      <h1>Planning</h1>
+      <div class="subtitle">Vue de la semaine — Créneaux d’entraînement</div>
+    </header>
 
     <!-- Spinner compact -->
     <div id="loading" class="loading">
@@ -168,7 +181,6 @@
       return new Date(d.setDate(diff));
     }
     function formatDate(d){
-      // toujours en local minuit pour éviter les décalages TZ
       const d2 = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
       return d2.toISOString().split("T")[0];
     }
@@ -197,7 +209,6 @@
       end.setDate(end.getDate()+6);
       whenEl.textContent = `${currentMonday.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})} – ${end.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}`;
 
-      // sélection initiale + scroll vers aujourd'hui
       highlightSelected(formatDate(selectedDate));
       const today = formatDate(new Date());
       const todayPill = pills.find(p=>p.dataset.date===today);
@@ -253,9 +264,9 @@
         if(!j.ok) throw new Error(j.error || 'Erreur API');
         events = (j.items || []).map(x => ({
           id: x.id,
-          date: x.date,          // ISO 'YYYY-MM-DD' (normalisé par l’API)
-          start: x.start,        // 'HH:mm'
-          end: x.end,            // 'HH:mm'
+          date: x.date,
+          start: x.start,
+          end: x.end,
           lieu: x.lieu || ''
         }));
         renderEvents();
