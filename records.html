@@ -67,14 +67,6 @@
       gap: 12px;
       position: relative;
     }
-    /* fine barre d’accent sur la carte podium */
-    .podium-card::before{
-      content:"";
-      position:absolute; left:0; top:0; bottom:0; width:6px;
-      background:var(--accent);
-      border-radius:12px 0 0 12px;
-    }
-
     .podium-nav {
       background: none;
       border: 1px solid var(--line);
@@ -134,27 +126,42 @@
     .place.second .bar { height: 70px; }
     .place.third .bar { height: 50px; }
 
-    /* Une seule ligne + ellipsis pour éviter le wrap qui décale tout */
-    .athlete {
-      font-size: 14px;
-      text-align: center;
-      max-width: 100%;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      line-height: 1.25;
+    /* libellé podium -> 2 lignes sur mobile: nom (ellipsis) + perf en badge vert */
+    .athlete{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      max-width:100%;
+      text-align:center;
+      line-height:1.25;
     }
+    .ath-name, .ath-perf{ white-space:nowrap; }
 
-    /* Animations slide */
-    @keyframes slideOutLeft { from {opacity:1; transform:translateX(0);} to {opacity:0; transform:translateX(-24px);} }
-    @keyframes slideInRight { from {opacity:0; transform:translateX(24px);} to {opacity:1; transform:translateX(0);} }
-    @keyframes slideOutRight { from {opacity:1; transform:translateX(0);} to {opacity:0; transform:translateX(24px);} }
-    @keyframes slideInLeft { from {opacity:0; transform:translateX(-24px);} to {opacity:1; transform:translateX(0);} }
-
-    .out-left  { animation: slideOutLeft 200ms ease both; }
-    .in-right  { animation: slideInRight 220ms ease both; }
-    .out-right { animation: slideOutRight 200ms ease both; }
-    .in-left   { animation: slideInLeft 220ms ease both; }
+    @media (max-width: 480px){
+      .podium-content h2{ font-size:18px; }
+      .athlete{
+        flex-direction:column;
+        gap:2px;
+      }
+      .ath-name{
+        max-width:100%;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+      .ath-perf{
+        font-weight:800;
+        background:var(--accent);
+        color:#0f172a;
+        padding:2px 6px;
+        border-radius:999px;
+      }
+      .place.first .bar { height: 72px; }
+      .place.second .bar { height: 52px; }
+      .place.third .bar { height: 40px; }
+      .podium { max-width: 100%; gap:6px; }
+      .podium-nav{ width:32px; height:32px; font-size:16px; }
+    }
 
     /* Grille d'athlètes */
     .athlete-grid {
@@ -173,7 +180,7 @@
       align-items: center;
       overflow:hidden;
     }
-    /* petite barre verte à gauche comme les autres pages */
+    /* petite barre verte à gauche des cartes (DA homogène) */
     .athlete-card::before{
       content:"";
       position:absolute; left:0; top:0; bottom:0; width:6px;
@@ -227,19 +234,6 @@
       text-align: right;
       margin-bottom: 6px;
       color: var(--muted);
-    }
-
-    /* --- Responsive tweaks smartphone --- */
-    @media (max-width: 480px){
-      .podium-content h2{ font-size:18px; }
-      .athlete{ font-size:12px; }
-
-      .place.first .bar { height: 72px; }
-      .place.second .bar { height: 52px; }
-      .place.third .bar { height: 40px; }
-
-      .podium { max-width: 100%; gap:6px; }
-      .podium-nav{ width:32px; height:32px; font-size:16px; }
     }
   </style>
 </head>
@@ -488,7 +482,7 @@
       if (days > 0) parts.push(`${days} j`);
       if (parts.length === 0) parts.push("aujourd'hui");
       meta.textContent = `${lieu} • ${parts.join(' ')}`;
-      meta.title = `${lieu} • ${d.toLocaleDateString('fr-FR')}`; // tooltip utile
+      meta.title = `${lieu} • ${d.toLocaleDateString('fr-FR')}`;
     });
 
     // --- Podiums (à remplir manuellement) ---
@@ -507,12 +501,29 @@
     const secondEl = document.getElementById('secondPlace');
     const thirdEl = document.getElementById('thirdPlace');
 
+    function splitNamePerf(str){
+      // coupe sur em-dash (—) ou tiret (-)
+      const parts = String(str).split(/—|-/);
+      const name = (parts[0]||'').trim();
+      const perf = (parts[1]||'').trim();
+      return { name, perf };
+    }
+
     function setPodium(index){
       const p = podiums[index];
       titleEl.textContent = p.title;
-      firstEl.textContent = p.first;  firstEl.title = p.first;
-      secondEl.textContent = p.second; secondEl.title = p.second;
-      thirdEl.textContent = p.third;  thirdEl.title = p.third;
+
+      const a = splitNamePerf(p.first);
+      const b = splitNamePerf(p.second);
+      const c = splitNamePerf(p.third);
+
+      firstEl.innerHTML  = `<span class="ath-name">${a.name}</span>${a.perf?` <span class="ath-perf">${a.perf}</span>`:''}`;
+      secondEl.innerHTML = `<span class="ath-name">${b.name}</span>${b.perf?` <span class="ath-perf">${b.perf}</span>`:''}`;
+      thirdEl.innerHTML  = `<span class="ath-name">${c.name}</span>${c.perf?` <span class="ath-perf">${c.perf}</span>`:''}`;
+
+      firstEl.title  = p.first;
+      secondEl.title = p.second;
+      thirdEl.title  = p.third;
     }
 
     function animateTo(index, dir){
