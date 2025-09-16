@@ -2,200 +2,251 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>Vosges Lancers</title>
+  <title>Vosges Lancers — Accueil</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
       --bg:#0f172a;
+      --surface:#0b1326;         /* léger fond interne */
       --card:#111827;
       --text:#e5e7eb;
+      --muted:#94a3b8;
+      --line:#1f2937;
       --accent:#22c55e;
-      --icon-size: 24px;   /* taille des icônes */
-      --icon-dim: #d9dde3; /* gris clair (si vos SVG sont déjà gris clair, laissez comme ça) */
+
+      --radius:16px;
+      --space-1:8px;
+      --space-2:12px;
+      --space-3:16px;
+      --space-4:24px;
+      --space-5:32px;
+
+      --icon:24px;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
     }
-    *{box-sizing:border-box}html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
-    .wrap{max-width:960px;margin:0 auto;padding:24px}
-    .hero{display:flex;flex-direction:column;align-items:center;gap:12px;margin:12px 0 24px}
-    .logo{width:96px;height:96px;border-radius:24px;overflow:hidden;border:2px solid #334155;background:#fff;display:grid;place-items:center}
-    .logo img{max-width:100%;max-height:100%;object-fit:contain}
-    h1{margin:0;font-size:24px}
-    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    @media (min-width:720px){.grid{grid-template-columns:repeat(3,1fr)}}
-    a.card{display:block;background:var(--card);padding:18px;border-radius:16px;text-decoration:none;color:var(--text);border:1px solid #1f2937}
-    a.card:hover{outline:2px solid var(--accent)}
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:
+        radial-gradient(800px 500px at 80% -100px, rgba(34,197,94,.12), transparent 60%),
+        radial-gradient(700px 400px at -100px 40%, rgba(34,197,94,.08), transparent 60%),
+        var(--bg);
+      color:var(--text);
+      font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial;
+    }
+
+    .wrap{max-width:1000px;margin:0 auto;padding:24px 24px 96px}
+
+    /* Header / hero */
+    .hero{
+      display:flex;align-items:center;gap:16px;margin:12px 0 var(--space-4);
+    }
+    .logo{
+      width:84px;height:84px;border-radius:20px;overflow:hidden;border:1px solid #334155;
+      background:#fff;display:grid;place-items:center;box-shadow: var(--shadow);
+    }
+    .logo img{max-width:100%;max-height:100%;object-fit:cover}
+
+    .title-wrap{flex:1;min-width:0}
+    h1{
+      margin:0 0 6px;
+      font-size:28px;line-height:1.15;font-weight:800;letter-spacing:.2px;
+      position:relative;padding-bottom:8px;
+    }
+    h1::after{
+      content:"";position:absolute;left:0;bottom:0;width:88px;height:3px;
+      background:var(--accent);border-radius:999px;
+      box-shadow:0 0 0 1px rgba(34,197,94,.15), 0 8px 18px rgba(34,197,94,.18);
+    }
+    .subtitle{opacity:.85;color:var(--muted)}
+
+    /* Bandeau principal (CTA) */
+    .mega{
+      background:linear-gradient(180deg, rgba(34,197,94,.10), rgba(34,197,94,.06)) , var(--card);
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:18px;
+      margin: var(--space-3) 0 var(--space-4);
+      box-shadow: var(--shadow);
+      transition: transform .15s ease, box-shadow .15s ease, border-color .2s ease;
+      display:block; color:inherit; text-decoration:none;
+    }
+    .mega:hover{ transform:translateY(-2px); box-shadow:0 18px 44px rgba(0,0,0,.5); border-color:#25402f; }
+    .mega .inner{ display:flex; gap:14px; align-items:center; }
+    .mega .icon{
+      width:64px;height:64px;flex:0 0 64px;border-radius:14px;overflow:hidden;
+      background:#0a121f;border:1px solid #253041;display:grid;place-items:center;
+    }
+    .mega .icon img{width:70%;height:70%;object-fit:contain;filter:brightness(1.15) contrast(.95)}
+    .mega .title{font-weight:800;font-size:20px;margin:0 0 4px;display:flex;align-items:center;gap:8px}
+    .mega .desc{opacity:.9;color:#cbd5e1}
+    .mega .chev{margin-left:auto;font-size:22px;opacity:.9}
+
+    /* Section grid */
+    .section-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 var(--space-2)}
+    .section-title{font-size:18px;font-weight:700}
+    .section-line{height:1px;background:#243043;border:none;margin:0 0 var(--space-3);opacity:.6}
+
+    .grid{
+      display:grid;gap:12px;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+    @media (min-width:760px){ .grid{grid-template-columns:repeat(3,1fr)} }
+
+    /* Cards */
+    a.card{
+      position:relative;
+      display:block;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:14px 14px 14px 18px;
+      text-decoration:none;color:var(--text);
+      transition: transform .15s ease, box-shadow .15s ease, border-color .2s ease, background .2s ease;
+      overflow:hidden;
+    }
+    a.card::before{
+      content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--accent);
+      border-radius:var(--radius) 0 0 var(--radius);opacity:.9;
+    }
+    a.card:hover{ transform: translateY(-2px); box-shadow: var(--shadow); border-color:#25402f; }
+    a.card:focus-visible{ outline:2px solid var(--accent); outline-offset:2px }
+
     .card-inner{display:flex;gap:12px;align-items:flex-start}
-    .title{font-weight:700;margin:0;display:flex;align-items:center;gap:8px}
-    .desc{opacity:.8;font-size:14px;margin-top:6px}
-    footer{margin-top:28px;opacity:.7;font-size:12px;text-align:center}
-
-    /* Icônes externes (SVG en <img>) */
-    .icon {
-      width: var(--icon-size);
-      height: var(--icon-size);
-      display: inline-block;
-      flex: 0 0 var(--icon-size);
+    .icon{
+      width:var(--icon);height:var(--icon);flex:0 0 var(--icon);
+      display:grid;place-items:center;border-radius:10px;background:#0a121f;border:1px solid #263143;
     }
-    .icon img {
-      width: 100%;
-      height: 100%;
-      display: block;
-      /* Si les SVG sont trop foncés, éclaircir un peu visuellement : */
-      filter: brightness(1.3) contrast(0.9);
+    .icon img{width:70%;height:70%;object-fit:contain;filter:brightness(1.15) contrast(.95)}
+    .text{min-width:0}
+    .title{
+      font-weight:800;margin:0;display:flex;align-items:center;gap:8px;
+      letter-spacing:.2px;
     }
+    .desc{opacity:.85;color:#cbd5e1;font-size:14px;margin-top:6px}
 
-    /* Footer fixe */
-    .site-footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: #111;
-      color: #fff;
-      text-align: center;
-      padding: 10px 0;
-      font-size: 14px;
-      z-index: 100;
+    /* Chevrons animés */
+    .title .chev{margin-left:auto;opacity:.7;transition:transform .15s ease, opacity .15s ease;font-size:18px}
+    a.card:hover .chev{ transform:translateX(2px); opacity:1 }
+
+    /* Footer */
+    footer.site-footer{
+      position:fixed;left:0;right:0;bottom:0;
+      background:#0b0f16;border-top:1px solid #202a38;color:#cbd5e1;
+      text-align:center;padding:10px 12px;font-size:12px;z-index:10
     }
 
-    /* Carte principale large */
-    .card-large {
-      display: block;
-      margin-bottom: 16px;
-      width: 100%;
-    }
-    .card-large .card-inner {
-      align-items: center;
-    }
-    .card-large .title {
-      font-size: 1.2rem;
-    }
-
-    .wrap {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 24px;
-      padding-bottom: 80px; /* <-- AJOUT : espace réservé pour le footer */
-    }
-
-    /* Icône plus grande pour la carte principale */
-    .icon-large {
-      width: 60px;
-      height: 60px;
-    }
-    .icon-large img {
-      width: 100%;
-      height: 100%;
-      display: block;
-      filter: brightness(1.3) contrast(0.9);
-    }
+    /* Spacing util */
+    .mb-6{margin-bottom:var(--space-4)}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="hero">
-      <div class="logo">
-        <img src="IMG_20250401_225839_471.webp" alt="Logo du club">
-      </div>
-      <h1>Accueil — Vosges Lancers</h1>
-    </div>
 
-    <!-- Carte principale : Séances de sport -->
-      <a class="card card-large" href="seances.html">
-        <div class="card-inner">
-          <span class="icon icon-large" aria-hidden="true">
-            <!-- Icône "Séances" en plus grand -->
-            <img src="dumbbell-svgrepo-com.svg" alt="">
-          </span>
-          <div>
-            <div class="title" style="font-size:1.3rem;">Séances de sport</div>
-            <div class="desc">Voir, ajouter et partager les entraînements du groupe</div>
-          </div>
+    <!-- HERO -->
+    <header class="hero" aria-label="En-tête">
+      <div class="logo" aria-hidden="true">
+        <img src="IMG_20250401_225839_471.webp" alt="">
+      </div>
+      <div class="title-wrap">
+        <h1>Accueil — Vosges Lancers</h1>
+        <p class="subtitle">Toutes les pages du groupe au même endroit</p>
+      </div>
+    </header>
+
+    <!-- CARTE PRINCIPALE -->
+    <a class="mega" href="seances.html">
+      <div class="inner">
+        <div class="icon" aria-hidden="true">
+          <img src="dumbbell-svgrepo-com.svg" alt="">
         </div>
-      </a>
+        <div class="text">
+          <div class="title">Séances de sport</div>
+          <div class="desc">Voir, ajouter et partager les entraînements du groupe</div>
+        </div>
+        <div class="chev" aria-hidden="true">›</div>
+      </div>
+    </a>
+
+    <!-- SECTION CARTES -->
+    <div class="section-head">
+      <div class="section-title">Navigation</div>
+    </div>
+    <hr class="section-line" />
 
     <div class="grid">
-      <!-- 4. Planning de la semaine -->
+
+      <!-- Planning -->
       <a class="card" href="planning.html">
         <div class="card-inner">
-          <span class="icon" aria-hidden="true">
-            <img src="time1.svg" alt="">
-          </span>
-          <div>
-            <div class="title">Planning de la semaine</div>
-            <div class="desc">Créneaux & disponibilités</div>
+          <span class="icon" aria-hidden="true"><img src="time1.svg" alt=""></span>
+          <div class="text">
+            <p class="title">Planning de la semaine <span class="chev">›</span></p>
+            <p class="desc">Créneaux & disponibilités</p>
           </div>
         </div>
       </a>
-      
-      <!-- 1. Calendrier de la saison -->
+
+      <!-- Saison -->
       <a class="card" href="saison.html">
         <div class="card-inner">
-          <span class="icon" aria-hidden="true">
-            <img src="Calendrier2.svg" alt="">
-          </span>
-          <div>
-            <div class="title">Calendrier de la saison</div>
-            <div class="desc">Meetings, championnats, stages…</div>
+          <span class="icon" aria-hidden="true"><img src="Calendrier2.svg" alt=""></span>
+          <div class="text">
+            <p class="title">Calendrier de la saison <span class="chev">›</span></p>
+            <p class="desc">Meetings, championnats, stages…</p>
           </div>
         </div>
       </a>
 
-      <!-- 2. Records -->
+      <!-- Records -->
       <a class="card" href="records.html">
         <div class="card-inner">
-          <span class="icon" aria-hidden="true">
-            <img src="Records2.svg" alt="">
-          </span>
-          <div>
-            <div class="title">Records</div>
-            <div class="desc">Perso & records du groupe</div>
+          <span class="icon" aria-hidden="true"><img src="Records2.svg" alt=""></span>
+          <div class="text">
+            <p class="title">Records <span class="chev">›</span></p>
+            <p class="desc">Perso & records du groupe</p>
           </div>
         </div>
       </a>
 
-      <!-- 3. Médailles aux France -->
+      <!-- Médailles -->
       <a class="card" href="medailles.html">
         <div class="card-inner">
-          <span class="icon" aria-hidden="true">
-            <img src="Medailles1.svg" alt="">
-          </span>
-          <div>
-            <div class="title">Médailles aux France</div>
-            <div class="desc">Podiums et résultats marquants</div>
+          <span class="icon" aria-hidden="true"><img src="Medailles1.svg" alt=""></span>
+          <div class="text">
+            <p class="title">Médailles aux France <span class="chev">›</span></p>
+            <p class="desc">Podiums et résultats marquants</p>
           </div>
         </div>
       </a>
 
-      <!-- 5. Vidéos -->
+      <!-- Photos & Vidéos -->
       <a class="card" href="videos.html">
         <div class="card-inner">
-          <span class="icon" aria-hidden="true">
-            <img src="Videos1.svg" alt="">
-          </span>
-          <div>
-            <div class="title">Photos & Vidéos</div>
-            <div class="desc">YouTube, Drive, serveur perso…</div>
+          <span class="icon" aria-hidden="true"><img src="Videos1.svg" alt=""></span>
+          <div class="text">
+            <p class="title">Photos & Vidéos <span class="chev">›</span></p>
+            <p class="desc">YouTube, Drive, serveur perso…</p>
           </div>
         </div>
       </a>
 
-      <!-- 6. Inspirations techniques -->
+      <!-- Athlètes / Inspirations -->
       <a class="card" href="athletes.html">
         <div class="card-inner">
-          <span class="icon" aria-hidden="true">
-            <img src="Athletes1.svg" alt="">
-          </span>
-          <div>
-            <div class="title">Athlètes</div>
-            <div class="desc">Vidéos Youtube des meilleurs athlètes mondiaux</div>
+          <span class="icon" aria-hidden="true"><img src="Athletes1.svg" alt=""></span>
+          <div class="text">
+            <p class="title">Athlètes <span class="chev">›</span></p>
+            <p class="desc">Vidéos des meilleurs athlètes mondiaux</p>
           </div>
         </div>
       </a>
     </div>
 
     <footer class="site-footer">
-      © Team Vosges Lancers - 2025
+      © Team Vosges Lancers — 2025
     </footer>
   </div>
 </body>
