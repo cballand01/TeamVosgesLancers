@@ -18,7 +18,7 @@
     .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px}
     .back svg{width:20px;height:20px;stroke:#fff}
 
-    /* ===== Header commun (même DA que Records) ===== */
+    /* Header commun */
     .page-header h1{
       font-size:28px; font-weight:700; margin:0 0 4px; position:relative; padding-bottom:6px; text-align:left;
     }
@@ -29,7 +29,7 @@
       text-align:left; opacity:.8; font-size:16px; margin:0 0 24px;
     }
 
-    /* Spinner compact */
+    /* Spinner */
     .loading{display:none;align-items:center;gap:8px;margin:12px 0 16px}
     .loading .dot{
       width:14px;height:14px;border-radius:50%;
@@ -114,19 +114,16 @@
       </a>
     </div>
 
-    <!-- ===== Header commun ===== -->
     <header class="page-header">
       <h1>Planning</h1>
       <div class="subtitle">Vue de la semaine — Créneaux d’entraînement</div>
     </header>
 
-    <!-- Spinner compact -->
     <div id="loading" class="loading">
-      <div class="dot" aria-hidden="true"></div>
+      <div class="dot"></div>
       <div class="txt">Chargement…</div>
     </div>
 
-    <!-- Semaine -->
     <div class="weekbar">
       <button class="navbtn" id="prev">‹</button>
       <div class="when" id="when"></div>
@@ -139,27 +136,27 @@
 
     <button class="fab" id="fab" title="Ajouter">＋</button>
 
-    <!-- Bottom sheet -->
     <div class="sheet-backdrop" id="sheetBg">
       <div class="sheet">
         <h3 style="margin:4px 0 8px">Ajouter un créneau</h3>
         <div class="row"><label>Date</label><input id="fDate" type="date"></div>
-        <!-- ⬇️ time pickers + step à la minute -->
-        <div class="row"><label>Début</label><input id="fStart" type="time" step="60" value="18:00" inputmode="numeric"></div>
-        <div class="row"><label>Fin</label><input id="fEnd" type="time" step="60" value="19:00" inputmode="numeric"></div>
+        <div class="row"><label>Début</label><input id="fStart" placeholder="HH:MM"></div>
+        <div class="row"><label>Fin</label><input id="fEnd" placeholder="HH:MM"></div>
         <div class="row"><label>Lieu</label><input id="fLieu" placeholder="Ville / Stade"></div>
         <div class="actions">
           <button class="btn ghost" id="cancel">Annuler</button>
           <button class="btn" id="save">Ajouter</button>
         </div>
-        <div id="msg" class="subtitle small" style="margin-top:6px"></div>
+        <div id="msg" class="subtitle small"></div>
       </div>
     </div>
   </div>
 
   <script>
+    /***** API *****/
     const API = 'https://script.google.com/macros/s/AKfycbx-gKwaUkf6Ewo17HMYPadDaRpGlYNbXrok5Ng42zL7mrNuUldoVCYRw3sjDx7V8GZG/exec';
 
+    /***** DOM *****/
     const daysEl = document.getElementById("days");
     const listEl = document.getElementById("list");
     const whenEl = document.getElementById("when");
@@ -170,45 +167,12 @@
     const fEnd = document.getElementById("fEnd");
     const fLieu = document.getElementById("fLieu");
 
+    /***** State *****/
     let currentMonday = getMonday(new Date());
     let selectedDate = new Date();
     let events = [];
-    let endTouched = false; // ← si l’utilisateur a modifié l’heure de fin à la main
 
-    /* ==== Helpers time ==== */
-    function clamp(n,min,max){ return Math.max(min,Math.min(max,n)); }
-    function parseTimeToMinutes(str){
-      if(!str) return null;
-      let s = String(str).trim().toLowerCase().replace(/[h]/,' : ');
-      // cas simples: "18", "9", "1830", "18 30"
-      if(/^\d{1,2}$/.test(s)) return clamp(parseInt(s,10),0,23)*60;
-      if(/^\d{3,4}$/.test(s)){ // 930 ou 0930 ou 1830
-        const pad = s.padStart(4,'0'); const hh = +pad.slice(0,2), mm = +pad.slice(2);
-        return clamp(hh,0,23)*60 + clamp(mm,0,59);
-      }
-      const m = s.match(/(\d{1,2})\D+(\d{1,2})/);
-      if(m){ const hh = clamp(parseInt(m[1],10),0,23); const mm = clamp(parseInt(m[2],10),0,59); return hh*60+mm; }
-      const m2 = s.match(/(\d{1,2})/);
-      if(m2){ return clamp(parseInt(m2[1],10),0,23)*60; }
-      return null;
-    }
-    function minutesToHHMM(min){
-      const h = Math.floor(min/60), m = min%60;
-      return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
-    }
-    function normalizeTimeInput(input){
-      const mins = parseTimeToMinutes(input.value);
-      if(mins===null) return; // on ne touche pas si vide/invalide
-      input.value = minutesToHHMM(mins);
-    }
-    function addMinutesHHMM(hhmm, delta){
-      const mins = parseTimeToMinutes(hhmm);
-      if(mins===null) return hhmm;
-      const newM = (mins + delta + 24*60) % (24*60);
-      return minutesToHHMM(newM);
-    }
-
-    /* ==== Semaine ==== */
+    /***** Dates *****/
     function getMonday(d){
       d = new Date(d);
       const day = d.getDay(), diff = d.getDate() - day + (day === 0 ? -6 : 1);
@@ -219,6 +183,48 @@
       return d2.toISOString().split("T")[0];
     }
 
+    /***** Heures: parsing/formatting *****/
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+    function parseTimeToMinutes(str){
+      if(!str) return null;
+      let s = String(str).trim().toLowerCase();
+      if(/^\d{1,2}$/.test(s)) return clamp(parseInt(s,10),0,23)*60;                 // "18"
+      if(/^\d{3,4}$/.test(s)){                                                      // "930" / "0930" / "1830"
+        const pad = s.padStart(4,'0');
+        return clamp(+pad.slice(0,2),0,23)*60 + clamp(+pad.slice(2),0,59);
+      }
+      const m = s.match(/(\d{1,2})\D+(\d{1,2})/);                                   // "18h30" / "18 30" / "18:30"
+      if(m) return clamp(+m[1],0,23)*60 + clamp(+m[2],0,59);
+      const m2 = s.match(/(\d{1,2})/);                                              // "18h"
+      if(m2) return clamp(+m2[1],0,23)*60;
+      return null;
+    }
+    function minutesToHHMM(min){
+      const h = Math.floor(min/60), m = min%60;
+      return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+    }
+    function normalizeTimeInput(input){
+      const mins = parseTimeToMinutes(input.value);
+      if(mins!==null) input.value = minutesToHHMM(mins);
+    }
+    function addMinutesHHMM(hhmm, delta){
+      const mins = parseTimeToMinutes(hhmm);
+      if(mins===null) return hhmm;
+      return minutesToHHMM((mins + delta + 1440) % 1440);
+    }
+
+    // Auto-normalisation + fin = début + 1h
+    fStart.addEventListener('input', () => {
+      normalizeTimeInput(fStart);
+      fEnd.value = addMinutesHHMM(fStart.value || '00:00', 60);
+    });
+    fStart.addEventListener('blur', () => {
+      normalizeTimeInput(fStart);
+      fEnd.value = addMinutesHHMM(fStart.value || '00:00', 60);
+    });
+    fEnd.addEventListener('blur', () => normalizeTimeInput(fEnd));
+
+    /***** Rendu semaine *****/
     function renderWeek(){
       daysEl.innerHTML = "";
       const pills = [];
@@ -255,6 +261,7 @@
       if(target) target.classList.add("active");
     }
 
+    /***** Rendu événements *****/
     function renderEvents(){
       const dateStr = formatDate(selectedDate);
       const todays = events
@@ -290,6 +297,7 @@
       });
     }
 
+    /***** API *****/
     async function apiFetchAll(){
       loadingEl.style.display='flex';
       try{
@@ -297,11 +305,7 @@
         const j = await r.json();
         if(!j.ok) throw new Error(j.error || 'Erreur API');
         events = (j.items || []).map(x => ({
-          id: x.id,
-          date: x.date,
-          start: x.start,
-          end: x.end,
-          lieu: x.lieu || ''
+          id: x.id, date: x.date, start: x.start, end: x.end, lieu: x.lieu || ''
         }));
         renderEvents();
       }catch(err){
@@ -311,7 +315,6 @@
         loadingEl.style.display='none';
       }
     }
-
     async function apiCreate(item){
       const form = new URLSearchParams();
       form.append('resource','planning');
@@ -320,7 +323,6 @@
       const r = await fetch(API, { method:'POST', body: form });
       return r.json();
     }
-
     async function apiDelete(id){
       const form = new URLSearchParams();
       form.append('resource','planning');
@@ -331,9 +333,15 @@
       return !!(j && j.ok);
     }
 
-    // Navigation semaine
-    document.getElementById("prev").onclick = () => { currentMonday.setDate(currentMonday.getDate()-7); renderWeek(); renderEvents(); };
-    document.getElementById("next").onclick = () => { currentMonday.setDate(currentMonday.getDate()+7); renderWeek(); renderEvents(); };
+    /***** Navigation semaine *****/
+    document.getElementById("prev").onclick = () => {
+      currentMonday.setDate(currentMonday.getDate()-7);
+      renderWeek(); renderEvents();
+    };
+    document.getElementById("next").onclick = () => {
+      currentMonday.setDate(currentMonday.getDate()+7);
+      renderWeek(); renderEvents();
+    };
     document.getElementById("today").onclick = () => {
       currentMonday = getMonday(new Date());
       selectedDate = new Date();
@@ -342,11 +350,12 @@
       renderEvents();
     };
 
-    // Bottom sheet (ajout)
+    /***** Bottom sheet *****/
     document.getElementById("fab").onclick = () => {
       fDate.value = formatDate(selectedDate);
+      if(!fStart.value) fStart.value = "18:00";
+      fEnd.value = addMinutesHHMM(fStart.value, 60);
       document.getElementById("msg").textContent = '';
-      endTouched = false; // reset
       sheetBg.style.display = "flex";
     };
     document.getElementById("cancel").onclick = () => {
@@ -360,29 +369,7 @@
       }
     });
 
-    // ===== Auto-format & fin +1h =====
-    // Normalise HH:mm si l’utilisateur tape "18", "1830", "18h", etc.
-    fStart.addEventListener('blur', ()=> {
-      normalizeTimeInput(fStart);
-      if(!endTouched){ // ne pas écraser si l’utilisateur a touché la fin
-        fEnd.value = addMinutesHHMM(fStart.value||'00:00', 60);
-      }
-    });
-    fEnd.addEventListener('blur', ()=> normalizeTimeInput(fEnd));
-    fEnd.addEventListener('input', ()=> { endTouched = true; });
-    fEnd.addEventListener('focus', ()=> { endTouched = true; });
-
-    // Si on change l’heure de début via le picker "time"
-    fStart.addEventListener('input', ()=> {
-      // La valeur input d’un type="time" est déjà HH:mm, mais on sécurise.
-      normalizeTimeInput(fStart);
-      if(!endTouched){
-        fEnd.value = addMinutesHHMM(fStart.value||'00:00', 60);
-      }
-    });
-
     document.getElementById("save").onclick = async () => {
-      // normalise une dernière fois
       normalizeTimeInput(fStart);
       normalizeTimeInput(fEnd);
 
@@ -390,10 +377,12 @@
             start = fStart.value.trim(),
             end   = fEnd.value.trim(),
             lieu  = fLieu.value.trim();
+
       if(!date || !start || !end || !lieu){
         document.getElementById("msg").textContent = "Merci de remplir tous les champs.";
         return;
       }
+
       const item = { id:String(Date.now()), date, start, end, lieu };
       document.getElementById("msg").textContent = "Envoi…";
       try{
@@ -404,9 +393,8 @@
           sheetBg.style.display = "none";
           // reset
           fStart.value = "18:00";
-          fEnd.value   = "19:00";
-          fLieu.value  = "";
-          endTouched = false;
+          fEnd.value = addMinutesHHMM(fStart.value, 60);
+          fLieu.value = "";
           if(formatDate(selectedDate) === date) renderEvents();
         }else{
           document.getElementById("msg").textContent = "Erreur: " + (res && res.error ? res.error : 'API');
@@ -416,13 +404,10 @@
       }
     };
 
-    // Init
+    /***** Init *****/
     (function init(){
       renderWeek();
       fDate.value = formatDate(selectedDate);
-      // valeurs par défaut cohérentes
-      fStart.value = fStart.value || "18:00";
-      fEnd.value   = fEnd.value   || "19:00";
       apiFetchAll();
     })();
   </script>
