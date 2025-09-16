@@ -111,6 +111,7 @@
     <!-- Spinner compact -->
     <div id="loading" class="loading">
       <div class="dot" aria-hidden="true"></div>
+      <div class="txt">Chargement…</div>
     </div>
 
     <!-- Semaine -->
@@ -144,7 +145,8 @@
   </div>
 
   <script>
-    const API = 'https://script.google.com/macros/s/AKfycbxli6hghB4RYfJxh9s_gC-8v9TARVKudvhuVhgaHW-gZ-c7v0ye3kSk0nGnkCL9onJG/exec'; // colle ton URL
+    /***** RENSEIGNE ICI l’URL DE TA WEB APP (même URL que pour saison.html) *****/
+    const API = 'https://script.google.com/macros/s/AKfycbxli6hghB4RYfJxh9s_gC-8v9TARVKudvhuVhgaHW-gZ-c7v0ye3kSk0nGnkCL9onJG/exec';
 
     const daysEl = document.getElementById("days");
     const listEl = document.getElementById("list");
@@ -160,99 +162,199 @@
     let selectedDate = new Date();
     let events = [];
 
-    function getMonday(d){ d=new Date(d); const day=d.getDay(),diff=d.getDate()-day+(day===0?-6:1); return new Date(d.setDate(diff)); }
-    function formatDate(d){ return d.toISOString().split("T")[0]; }
-
-    function renderWeek(){
-      daysEl.innerHTML="";
-      const days=[];
-      for(let i=0;i<7;i++){
-        const day=new Date(currentMonday); day.setDate(day.getDate()+i);
-        const pill=document.createElement("div");
-        pill.className="daypill";
-        pill.innerHTML=`${day.toLocaleDateString("fr-FR",{weekday:"short"})}<small>${day.getDate()} ${day.toLocaleDateString("fr-FR",{month:"short"})}</small>`;
-        pill.onclick=()=>{ selectedDate=new Date(day); fDate.value=formatDate(selectedDate); highlightSelected(day); renderEvents(); };
-        daysEl.appendChild(pill);
-        days.push({el:pill,date:day});
-      }
-      const end=new Date(currentMonday); end.setDate(end.getDate()+6);
-      whenEl.textContent=`${currentMonday.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})} – ${end.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}`;
-      highlightSelected(selectedDate);
-      const today=formatDate(new Date());
-      const active=days.find(d=>formatDate(d.date)===today);
-      if(active) setTimeout(()=>active.el.scrollIntoView({inline:"center",behavior:"smooth"}),50);
+    function getMonday(d){
+      d = new Date(d);
+      const day = d.getDay(), diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      return new Date(d.setDate(diff));
+    }
+    function formatDate(d){
+      // toujours en local minuit pour éviter les décalages TZ
+      const d2 = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+      return d2.toISOString().split("T")[0];
     }
 
-    function highlightSelected(day){
+    function renderWeek(){
+      daysEl.innerHTML = "";
+      const pills = [];
+      for(let i=0;i<7;i++){
+        const day = new Date(currentMonday);
+        day.setDate(day.getDate()+i);
+        const pill = document.createElement("div");
+        pill.className = "daypill";
+        pill.dataset.date = formatDate(day);
+        pill.innerHTML = `${day.toLocaleDateString("fr-FR",{weekday:"short"})}<small>${day.getDate()} ${day.toLocaleDateString("fr-FR",{month:"short"})}</small>`;
+        pill.onclick = () => {
+          selectedDate = new Date(day);
+          fDate.value = formatDate(selectedDate);
+          highlightSelected(pill.dataset.date);
+          renderEvents();
+          pill.scrollIntoView({ inline:"center", behavior:"smooth", block:"nearest" });
+        };
+        daysEl.appendChild(pill);
+        pills.push(pill);
+      }
+      const end = new Date(currentMonday);
+      end.setDate(end.getDate()+6);
+      whenEl.textContent = `${currentMonday.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})} – ${end.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}`;
+
+      // sélection initiale + scroll vers aujourd'hui
+      highlightSelected(formatDate(selectedDate));
+      const today = formatDate(new Date());
+      const todayPill = pills.find(p=>p.dataset.date===today);
+      if(todayPill) setTimeout(()=>todayPill.scrollIntoView({inline:"center",behavior:"smooth"}), 50);
+    }
+
+    function highlightSelected(dateStr){
       document.querySelectorAll(".daypill").forEach(p=>p.classList.remove("active"));
-      const target=Array.from(document.querySelectorAll(".daypill")).find(p=>p.innerText.includes(String(day.getDate())));
+      const target = Array.from(document.querySelectorAll(".daypill")).find(p=>p.dataset.date===dateStr);
       if(target) target.classList.add("active");
     }
 
     function renderEvents(){
-      const dateStr=formatDate(selectedDate);
-      const todays=events.filter(e=>e.date===dateStr).sort((a,b)=>a.start.localeCompare(b.start));
-      listEl.innerHTML="";
-      if(todays.length===0){ listEl.innerHTML=`<div class="empty">Aucun entraînement</div>`; return; }
+      const dateStr = formatDate(selectedDate);
+      const todays = events
+        .filter(e=>e.date===dateStr)
+        .sort((a,b)=>a.start.localeCompare(b.start));
+      listEl.innerHTML = "";
+      if(todays.length===0){
+        listEl.innerHTML = `<div class="empty">Aucun entraînement</div>`;
+        return;
+      }
       todays.forEach(e=>{
-        const card=document.createElement("div");
-        card.className="ev";
-        card.innerHTML=`
+        const card = document.createElement("div");
+        card.className = "ev";
+        card.innerHTML = `
           <div class="bar"></div>
           <div class="info">
-            <div class="title">${e.lieu}</div>
+            <div class="title">${e.lieu || ''}</div>
             <div class="meta"><strong>${e.start}</strong> – ${e.end}</div>
           </div>
-          <button class="del">×</button>
+          <button class="del" title="Supprimer">×</button>
         `;
-        card.querySelector(".del").onclick=async()=>{ const ok=await apiDelete(e.id); if(ok){ events=events.filter(x=>x.id!==e.id); renderEvents(); } };
+        card.querySelector(".del").onclick = async () => {
+          if(!confirm("Supprimer ce créneau ?")) return;
+          const ok = await apiDelete(e.id);
+          if(ok){
+            events = events.filter(x=>x.id!==e.id);
+            renderEvents();
+          }else{
+            alert("Suppression impossible.");
+          }
+        };
         listEl.appendChild(card);
       });
     }
 
     async function apiFetchAll(){
-      if(!API||API.includes('https://script.google.com/macros/s/AKfycbxli6hghB4RYfJxh9s_gC-8v9TARVKudvhuVhgaHW-gZ-c7v0ye3kSk0nGnkCL9onJG/exec')) return;
+      loadingEl.style.display='flex';
       try{
-        loadingEl.style.display='flex';
-        const r=await fetch(API+'?resource=planning');
-        const j=await r.json();
-        events=(j.items||[]).map(x=>({id:x.id||Date.now(),date:x.date,start:x.start,end:x.end,lieu:x.lieu}));
+        const r = await fetch(API+'?resource=planning', { method: 'GET' });
+        const j = await r.json();
+        if(!j.ok) throw new Error(j.error || 'Erreur API');
+        events = (j.items || []).map(x => ({
+          id: x.id,
+          date: x.date,          // ISO 'YYYY-MM-DD' (normalisé par l’API)
+          start: x.start,        // 'HH:mm'
+          end: x.end,            // 'HH:mm'
+          lieu: x.lieu || ''
+        }));
         renderEvents();
-      }catch(e){console.error(e);}
-      finally{loadingEl.style.display='none';}
+      }catch(err){
+        console.error(err);
+        listEl.innerHTML = `<div class="empty">Erreur de chargement : ${String(err.message || err)}</div>`;
+      }finally{
+        loadingEl.style.display='none';
+      }
     }
 
     async function apiCreate(item){
-      if(!API||API.includes('https://script.google.com/macros/s/AKfycbxli6hghB4RYfJxh9s_gC-8v9TARVKudvhuVhgaHW-gZ-c7v0ye3kSk0nGnkCL9onJG/exec')) return {ok:true,item};
-      const form=new URLSearchParams(); form.append('resource','planning'); form.append('action','create'); form.append('item',JSON.stringify(item));
-      const r=await fetch(API,{method:'POST',body:form}); return r.json();
+      const form = new URLSearchParams();
+      form.append('resource','planning');
+      form.append('action','create');
+      form.append('item', JSON.stringify(item));
+      const r = await fetch(API, { method:'POST', body: form });
+      return r.json();
     }
 
     async function apiDelete(id){
-      if(!API||API.includes('https://script.google.com/macros/s/AKfycbxli6hghB4RYfJxh9s_gC-8v9TARVKudvhuVhgaHW-gZ-c7v0ye3kSk0nGnkCL9onJG/exec')) return true;
-      const form=new URLSearchParams(); form.append('resource','planning'); form.append('action','delete'); form.append('id',id);
-      const r=await fetch(API,{method:'POST',body:form}); const j=await r.json(); return !!(j&&j.ok);
+      const form = new URLSearchParams();
+      form.append('resource','planning');
+      form.append('action','delete');
+      form.append('id', id);
+      const r = await fetch(API, { method:'POST', body: form });
+      const j = await r.json();
+      return !!(j && j.ok);
     }
 
-    document.getElementById("prev").onclick=()=>{currentMonday.setDate(currentMonday.getDate()-7);renderWeek();renderEvents();};
-    document.getElementById("next").onclick=()=>{currentMonday.setDate(currentMonday.getDate()+7);renderWeek();renderEvents();};
-    document.getElementById("today").onclick=()=>{currentMonday=getMonday(new Date());selectedDate=new Date();renderWeek();fDate.value=formatDate(selectedDate);renderEvents();};
-
-    document.getElementById("fab").onclick=()=>{fDate.value=formatDate(selectedDate);document.getElementById("msg").textContent='';sheetBg.style.display="flex";};
-    document.getElementById("cancel").onclick=()=>{sheetBg.style.display="none";document.getElementById("msg").textContent='';};
-    sheetBg.addEventListener("click",(e)=>{if(e.target===sheetBg){sheetBg.style.display="none";document.getElementById("msg").textContent='';}});
-
-    document.getElementById("save").onclick=async()=>{
-      const date=fDate.value.trim(),start=fStart.value.trim(),end=fEnd.value.trim(),lieu=fLieu.value.trim();
-      if(!date||!start||!end||!lieu){document.getElementById("msg").textContent="Merci de remplir tous les champs.";return;}
-      const item={id:String(Date.now()),date,start,end,lieu};
-      document.getElementById("msg").textContent="Envoi…";
-      const res=await apiCreate(item);
-      if(res&&res.ok){events.push(res.item||item);document.getElementById("msg").textContent="";sheetBg.style.display="none";fStart.value="18:00";fEnd.value="20:00";fLieu.value="";if(formatDate(selectedDate)===date)renderEvents();}
-      else document.getElementById("msg").textContent="Erreur.";
+    // Navigation semaine
+    document.getElementById("prev").onclick = () => {
+      currentMonday.setDate(currentMonday.getDate()-7);
+      renderWeek(); renderEvents();
+    };
+    document.getElementById("next").onclick = () => {
+      currentMonday.setDate(currentMonday.getDate()+7);
+      renderWeek(); renderEvents();
+    };
+    document.getElementById("today").onclick = () => {
+      currentMonday = getMonday(new Date());
+      selectedDate = new Date();
+      renderWeek();
+      fDate.value = formatDate(selectedDate);
+      renderEvents();
     };
 
-    (function init(){renderWeek();fDate.value=formatDate(selectedDate);apiFetchAll();})();
+    // Bottom sheet (ajout)
+    document.getElementById("fab").onclick = () => {
+      fDate.value = formatDate(selectedDate);
+      document.getElementById("msg").textContent = '';
+      sheetBg.style.display = "flex";
+    };
+    document.getElementById("cancel").onclick = () => {
+      sheetBg.style.display = "none";
+      document.getElementById("msg").textContent = '';
+    };
+    sheetBg.addEventListener("click",(e)=>{
+      if(e.target===sheetBg){
+        sheetBg.style.display="none";
+        document.getElementById("msg").textContent='';
+      }
+    });
+
+    document.getElementById("save").onclick = async () => {
+      const date = fDate.value.trim(),
+            start = fStart.value.trim(),
+            end   = fEnd.value.trim(),
+            lieu  = fLieu.value.trim();
+      if(!date || !start || !end || !lieu){
+        document.getElementById("msg").textContent = "Merci de remplir tous les champs.";
+        return;
+      }
+      const item = { id:String(Date.now()), date, start, end, lieu };
+      document.getElementById("msg").textContent = "Envoi…";
+      try{
+        const res = await apiCreate(item);
+        if(res && res.ok){
+          events.push(res.item || item);
+          document.getElementById("msg").textContent = "";
+          sheetBg.style.display = "none";
+          fStart.value = "18:00";
+          fEnd.value = "20:00";
+          fLieu.value = "";
+          if(formatDate(selectedDate) === date) renderEvents();
+        }else{
+          document.getElementById("msg").textContent = "Erreur: " + (res && res.error ? res.error : 'API');
+        }
+      }catch(err){
+        document.getElementById("msg").textContent = "Erreur: " + String(err.message || err);
+      }
+    };
+
+    // Init
+    (function init(){
+      renderWeek();
+      fDate.value = formatDate(selectedDate);
+      apiFetchAll();
+    })();
   </script>
 </body>
 </html>
