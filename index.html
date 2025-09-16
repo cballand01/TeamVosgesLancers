@@ -27,13 +27,13 @@
     html,body{height:100%}
     body{
       margin:0;
-      background-color: var(--bg); /* Couleur de base solide pour éviter toute démarcation */
+      background-color: var(--bg); /* base solide */
       background-image:
         radial-gradient(800px 500px at 80% -100px, rgba(34,197,94,.12), transparent 60%),
         radial-gradient(700px 400px at -100px 40%, rgba(34,197,94,.08), transparent 60%);
       background-repeat: no-repeat;
-      background-attachment: scroll;  /* évite les artefacts de “fixed” sur mobile */
-      background-size: cover, cover;  /* couvre toute la zone d’affichage */
+      background-attachment: scroll;
+      background-size: cover, cover;
       color:var(--text);
       font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial;
     }
@@ -114,7 +114,7 @@
     a.card:hover{ transform: translateY(-2px); box-shadow: var(--shadow); border-color:#25402f; }
     a.card:focus-visible{ outline:2px solid var(--accent); outline-offset:2px }
 
-    /* >>> Fix layout des cartes : grille icône + texte, safe-zone droite, clamps */
+    /* Grille interne icône + texte */
     .card-inner{
       display: grid;
       grid-template-columns: 48px 1fr; /* icône fixe + texte fluide */
@@ -137,11 +137,11 @@
       filter: brightness(1.1) contrast(.95);
     }
     .card .text{
-      min-width: 0;          /* indispensable pour l’ellipsis/clamp */
+      min-width: 0;
       display: flex;
       flex-direction: column;
       gap: 4px;
-      padding-right: 8px;    /* safe-zone à droite */
+      padding-right: 8px; /* safe-zone droite */
     }
     .card .title{
       margin:0;
@@ -150,7 +150,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      white-space: nowrap;
+      white-space: nowrap;          /* desktop : une ligne + ellipsis */
       overflow: hidden;
       text-overflow: ellipsis;
     }
@@ -169,15 +169,42 @@
       opacity:.9;
 
       display: -webkit-box;
-      -webkit-line-clamp: 2;        /* coupe à 2 lignes */
+      -webkit-line-clamp: 2;        /* desktop : coupe à 2 lignes */
       -webkit-box-orient: vertical;
       overflow: hidden;
       word-break: break-word;
       hyphens: auto;
     }
+
+    /* ====== ADAPTATION MOBILE ====== */
+    @media (max-width: 640px){
+      .grid{ grid-template-columns: 1fr; }  /* 1 colonne sur téléphone */
+
+      /* Titre des cartes : autoriser le retour à la ligne au lieu des "..." */
+      .card .title{
+        white-space: normal;       /* wrap */
+        overflow: visible;
+        text-overflow: clip;
+        line-height: 1.25;
+      }
+
+      /* Description : afficher tout (plus de clamp) */
+      .card .desc{
+        display: block;            /* annule le flexbox clamp */
+        -webkit-line-clamp: unset;
+        -webkit-box-orient: unset;
+        overflow: visible;
+        max-width: 100%;
+      }
+
+      /* Ajuster légèrement la grille interne pour gagner de la place */
+      .card-inner{ grid-template-columns: 44px 1fr; gap: 10px }
+      .card .icon{ width:40px; height:40px }
+    }
+
     @media (max-width: 380px){
-      .card-inner{ grid-template-columns: 40px 1fr; gap:10px }
-      .card .icon{ width:38px; height:38px }
+      .card-inner{ grid-template-columns: 40px 1fr; gap: 10px }
+      .card .icon{ width:36px; height:36px }
     }
 
     /* Footer */
