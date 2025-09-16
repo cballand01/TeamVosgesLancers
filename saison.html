@@ -20,6 +20,17 @@
     h1{margin:8px 0 4px;font-size:28px;font-weight:700;text-align:left}
     .subtitle{text-align:left;opacity:.7;font-size:16px;margin-bottom:16px}
 
+    /* Loader */
+    .loading{display:none;align-items:center;gap:8px;margin:8px 0 14px}
+    .spinner{
+      width:16px;height:16px;border-radius:50%;
+      border:2px solid rgba(34,197,94,.25);
+      border-top-color:var(--accent);
+      animation:spin .7s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading-text{font-size:14px;color:var(--muted)}
+
     /* Sous-titres de section */
     .section-title{
       font-size:18px;
@@ -73,7 +84,6 @@
     .btn{border:1px solid var(--line);border-radius:10px;background:#0b1326;color:var(--text);padding:8px 12px;cursor:pointer}
     .btn.ghost{background:transparent}
     .subtitle.small{font-size:12px}
-
   </style>
 </head>
 <body>
@@ -89,6 +99,11 @@
     <!-- TITRES -->
     <h1>Calendrier</h1>
     <div class="subtitle">Toutes les compétitions de la saison</div>
+
+    <!-- LOADER -->
+    <div id="loading" class="loading">
+      <div class="spinner" aria-hidden="true"></div>
+    </div>
 
     <!-- LISTES -->
     <div class="section-title">À venir</div>
@@ -148,12 +163,18 @@
     function todayISO(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 
     async function fetchAll(){
+      const loader = $('#loading');
       try{
+        loader.style.display = 'flex';                 // ⬅️ affiche le spinner
         const r = await fetch(API + '?resource=competitions');
         const j = await r.json();
         ITEMS = (j.items||[]).filter(x=>x.date);
         render();
-      }catch(e){ console.error(e); }
+      }catch(e){
+        console.error(e);
+      }finally{
+        loader.style.display = 'none';                 // ⬅️ cache le spinner
+      }
     }
 
     async function createItem(payload){
@@ -207,11 +228,13 @@
       else alert('Suppression impossible.');
     }
 
+    // FAB & bottom sheet
     const sheetBg=$('#sheetBg');
-    $('#fab').onclick=()=>sheetBg.style.display='flex';
-    $('#cancel').onclick=()=>sheetBg.style.display='none';
-    sheetBg.addEventListener('click',e=>{if(e.target===sheetBg)sheetBg.style.display='none';});
+    $('#fab').onclick=()=>{ $('#msg').textContent=''; sheetBg.style.display='flex'; };
+    $('#cancel').onclick=()=>{ sheetBg.style.display='none'; $('#msg').textContent=''; };
+    sheetBg.addEventListener('click',e=>{ if(e.target===sheetBg){ sheetBg.style.display='none'; $('#msg').textContent=''; } });
 
+    // Sauvegarde
     $('#save').onclick=async()=>{
       const date=$('#fDate').value, lieu=$('#fLieu').value.trim(), type=$('#fType').value;
       const epreuves=$$('.fEp:checked').map(x=>x.value).join(', '), infos=$('#fInfos').value.trim();
@@ -220,12 +243,25 @@
       $('#msg').textContent='Envoi...';
       const res=await createItem(payload);
       if(res&&res.ok&&res.item){
-        ITEMS.push(res.item);render();sheetBg.style.display='none';
-        $('#fDate').value='';$('#fLieu').value='';$('#fType').value='Meeting';$$('.fEp').forEach(x=>x.checked=false);$('#fInfos').value='';
-      } else $('#msg').textContent='Erreur.';
+        ITEMS.push(res.item);
+        render();
+        // reset + nettoyage du message + date du jour
+        $('#msg').textContent='';
+        $('#fDate').value=todayISO();
+        $('#fLieu').value='';
+        $('#fType').value='Meeting';
+        $$('.fEp').forEach(x=>x.checked=false);
+        $('#fInfos').value='';
+        sheetBg.style.display='none';
+      } else {
+        $('#msg').textContent='Erreur.';
+      }
     };
 
-    (function init(){$('#fDate').value=todayISO();fetchAll();})();
+    (function init(){
+      $('#fDate').value=todayISO();
+      fetchAll();
+    })();
   </script>
 </body>
 </html>
