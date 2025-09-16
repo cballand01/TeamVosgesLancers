@@ -88,6 +88,12 @@
     .row{display:flex;gap:8px;margin:8px 0;align-items:center}
     .row label{flex:0 0 110px;opacity:.9}
     .row input{flex:1;background:#0b1326;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:10px}
+
+    /* Actions style comme saison.html */
+    .sheet .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+    .btn{border:1px solid var(--line);border-radius:10px;background:#0b1326;color:var(--text);padding:8px 12px;cursor:pointer}
+    .btn.ghost{background:transparent}
+    .subtitle.small{font-size:12px;color:var(--muted)}
   </style>
 </head>
 <body>
@@ -102,10 +108,8 @@
     <h1>Planning</h1>
     <div class="subtitle">Vue de la semaine — créneaux d’entraînement</div>
 
-    <!-- Spinner -->
     <div id="loading" class="spinner"></div>
 
-    <!-- Semaine -->
     <div class="weekbar">
       <button class="navbtn" id="prev">‹</button>
       <div class="when" id="when"></div>
@@ -147,7 +151,7 @@
     function formatDate(d){return d.toISOString().split("T")[0];}
 
     function renderWeek(){
-      loading.style.display="none"; // cache le spinner
+      loading.style.display="none";
       daysEl.innerHTML="";
       const days=[];
       for(let i=0;i<7;i++){
@@ -193,7 +197,7 @@
     document.getElementById("today").onclick=()=>{currentMonday=getMonday(new Date());selectedDate=new Date();renderWeek();fDate.value=formatDate(selectedDate);};
 
     document.getElementById("fab").onclick=()=>{fDate.value=formatDate(selectedDate);sheetBg.style.display="flex";}
-    document.getElementById("cancel").onclick=()=>{sheetBg.style.display="none";}
+    document.getElementById("cancel").onclick=()=>{sheetBg.style.display="none";};
     sheetBg.addEventListener("click",(e)=>{if(e.target===sheetBg)sheetBg.style.display="none";});
 
     document.getElementById("save").onclick=()=>{
@@ -209,7 +213,7 @@
 
     (function init(){
       loading.style.display="flex";
-      setTimeout(()=>renderWeek(),400); // petit délai pour voir le spinner
+      setTimeout(()=>renderWeek(),400);
       fDate.value=formatDate(selectedDate);
     })();
   </script>
