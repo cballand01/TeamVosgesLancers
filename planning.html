@@ -144,7 +144,7 @@
   </div>
 
   <script>
-    const API = 'https://script.google.com/macros/s/AKfycbzD4NrguWXjA4iC7okQGhquZ8qrMkD1EXN24GblQitrIJ2iZEaEEvMYjExBheaAB2s/exec'; // colle ton URL
+    const API = 'https://script.google.com/macros/s/AKfycbyxbbCkukHTmm9H6qgz4L8ZPbrbaUrGqhioKdB_TendAzLACH7-VxAfMLzNFvsqLXw/exec'; // colle ton URL
 
     const daysEl = document.getElementById("days");
     const listEl = document.getElementById("list");
@@ -211,7 +211,7 @@
     }
 
     async function apiFetchAll(){
-      if(!API||API.includes('https://script.google.com/macros/s/AKfycbzD4NrguWXjA4iC7okQGhquZ8qrMkD1EXN24GblQitrIJ2iZEaEEvMYjExBheaAB2s/exec')) return;
+      if(!API||API.includes('https://script.google.com/macros/s/AKfycbyxbbCkukHTmm9H6qgz4L8ZPbrbaUrGqhioKdB_TendAzLACH7-VxAfMLzNFvsqLXw/exec')) return;
       try{
         loadingEl.style.display='flex';
         const r=await fetch(API+'?resource=planning');
@@ -223,13 +223,13 @@
     }
 
     async function apiCreate(item){
-      if(!API||API.includes('https://script.google.com/macros/s/AKfycbzD4NrguWXjA4iC7okQGhquZ8qrMkD1EXN24GblQitrIJ2iZEaEEvMYjExBheaAB2s/exec')) return {ok:true,item};
+      if(!API||API.includes('https://script.google.com/macros/s/AKfycbyxbbCkukHTmm9H6qgz4L8ZPbrbaUrGqhioKdB_TendAzLACH7-VxAfMLzNFvsqLXw/exec')) return {ok:true,item};
       const form=new URLSearchParams(); form.append('resource','planning'); form.append('action','create'); form.append('item',JSON.stringify(item));
       const r=await fetch(API,{method:'POST',body:form}); return r.json();
     }
 
     async function apiDelete(id){
-      if(!API||API.includes('https://script.google.com/macros/s/AKfycbzD4NrguWXjA4iC7okQGhquZ8qrMkD1EXN24GblQitrIJ2iZEaEEvMYjExBheaAB2s/exec')) return true;
+      if(!API||API.includes('https://script.google.com/macros/s/AKfycbyxbbCkukHTmm9H6qgz4L8ZPbrbaUrGqhioKdB_TendAzLACH7-VxAfMLzNFvsqLXw/exec')) return true;
       const form=new URLSearchParams(); form.append('resource','planning'); form.append('action','delete'); form.append('id',id);
       const r=await fetch(API,{method:'POST',body:form}); const j=await r.json(); return !!(j&&j.ok);
     }
