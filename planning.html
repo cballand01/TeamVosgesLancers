@@ -13,26 +13,34 @@
     body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
     .wrap{max-width:960px;margin:0 auto;padding:16px 16px 96px}
 
-    /* Retour en haut */
+    /* Retour + titres */
     .topbar{display:flex;align-items:center;margin-bottom:8px}
     .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px}
     .back svg{width:20px;height:20px;stroke:#fff}
-
-    /* TITRES collés à gauche */
     h1{margin:8px 0 4px;font-size:28px;font-weight:700;text-align:left}
     .subtitle{text-align:left;opacity:.7;font-size:16px;margin-bottom:16px}
 
-    /* Barre semaine */
+    /* Spinner */
+    .spinner{
+      display:flex;align-items:center;justify-content:center;
+      height:50px;margin:12px 0;color:var(--accent);
+    }
+    .spinner:after{
+      content:"";width:28px;height:28px;border:3px solid var(--accent);
+      border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Week bar */
     .weekbar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px}
     .navbtn{
       width:36px;height:36px;border-radius:50%;border:1px solid var(--line);
       background:var(--card);color:var(--text);display:grid;place-items:center;
       font-size:18px;cursor:pointer
     }
-    .navbtn:active{transform:scale(0.95)}
     .when{font-weight:600;font-size:15px;min-width:190px;text-align:center}
 
-    /* Day pills (scrollable) */
+    /* Days pills */
     .days{display:flex;gap:8px;overflow-x:auto;padding:6px 0 10px;margin-bottom:8px;scroll-behavior:smooth}
     .daypill{
       flex:0 0 auto; min-width:72px; text-align:center; padding:10px 12px; border-radius:999px;
@@ -42,7 +50,7 @@
     .daypill small{display:block;opacity:.7}
     .daypill.active{background:var(--accent); color:#0b1326; border-color:var(--accent); font-weight:700}
 
-    /* Liste des créneaux */
+    /* List & events */
     .list{display:grid;gap:10px}
     .empty{font-size:14px;color:var(--muted);opacity:.9;padding:8px}
 
@@ -63,7 +71,7 @@
       position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;
       display:grid;place-items:center;background:var(--accent);color:#0b1326;
       border:1px solid #1a2b1f;box-shadow:0 10px 30px rgba(0,0,0,.4);cursor:pointer;z-index:50;
-      font-size:28px;line-height:0;font-weight:900
+      font-size:28px;font-weight:900
     }
 
     /* Bottom sheet */
@@ -76,27 +84,14 @@
       border-top-left-radius:16px;border-top-right-radius:16px;border:1px solid var(--line);
       border-bottom:none;padding:12px 16px 16px;animation:slideup .18s ease-out;max-height:85vh;overflow:auto
     }
-    @keyframes slideup{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
 
     .row{display:flex;gap:8px;margin:8px 0;align-items:center}
     .row label{flex:0 0 110px;opacity:.9}
     .row input{flex:1;background:#0b1326;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:10px}
-
-    .sheet .actions{display:flex;gap:8px;margin-top:8px}
-    .btn{border:1px solid var(--line);border-radius:10px;background:#0b1326;color:var(--text);padding:8px 12px;cursor:pointer}
-    .btn.ghost{background:transparent}
-    .subtitle.small{font-size:12px}
-
-    @media (min-width:900px){
-      h1{font-size:30px}
-      .subtitle{font-size:16px}
-      .when{font-size:16px;min-width:260px}
-    }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <!-- Retour -->
     <div class="topbar">
       <a href="index.html" class="back">
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
@@ -104,11 +99,13 @@
       </a>
     </div>
 
-    <!-- TITRES -->
     <h1>Planning</h1>
     <div class="subtitle">Vue de la semaine — créneaux d’entraînement</div>
 
-    <!-- Nav semaine -->
+    <!-- Spinner -->
+    <div id="loading" class="spinner"></div>
+
+    <!-- Semaine -->
     <div class="weekbar">
       <button class="navbtn" id="prev">‹</button>
       <div class="when" id="when"></div>
@@ -116,18 +113,14 @@
       <button class="navbtn" id="next">›</button>
     </div>
 
-    <!-- Jours -->
     <div class="days" id="days"></div>
-
-    <!-- Liste du jour actif -->
     <div class="list" id="list"></div>
 
-    <!-- FAB -->
-    <button class="fab" id="fab" title="Ajouter">＋</button>
+    <button class="fab" id="fab">＋</button>
 
     <!-- Bottom sheet -->
     <div class="sheet-backdrop" id="sheetBg">
-      <div class="sheet" id="sheet">
+      <div class="sheet">
         <h3 style="margin:4px 0 8px">Ajouter un créneau</h3>
         <div class="row"><label>Date</label><input id="fDate" type="date"></div>
         <div class="row"><label>Début</label><input id="fStart" placeholder="HH:MM" value="18:00"></div>
@@ -137,155 +130,87 @@
           <button class="btn ghost" id="cancel">Annuler</button>
           <button class="btn" id="save">Ajouter</button>
         </div>
-        <div id="msg" class="subtitle small" style="margin-top:6px"></div>
+        <div id="msg" class="subtitle small"></div>
       </div>
     </div>
   </div>
 
   <script>
-    const daysEl = document.getElementById("days");
-    const listEl = document.getElementById("list");
-    const whenEl = document.getElementById("when");
-    const sheetBg = document.getElementById("sheetBg");
-    const fabBtn = document.getElementById("fab");
-    const cancelBtn = document.getElementById("cancel");
-    const saveBtn = document.getElementById("save");
-    const fDate = document.getElementById("fDate");
-    const fStart = document.getElementById("fStart");
-    const fEnd = document.getElementById("fEnd");
-    const fLieu = document.getElementById("fLieu");
+    const daysEl=document.getElementById("days"),listEl=document.getElementById("list"),
+          whenEl=document.getElementById("when"),sheetBg=document.getElementById("sheetBg"),
+          fDate=document.getElementById("fDate"),fStart=document.getElementById("fStart"),
+          fEnd=document.getElementById("fEnd"),fLieu=document.getElementById("fLieu"),
+          loading=document.getElementById("loading");
+    let currentMonday=getMonday(new Date()),selectedDate=new Date(),events=[];
 
-    let currentMonday = getMonday(new Date());
-    let selectedDate = new Date();
-
-    // Données locales (à brancher plus tard sur Google Sheets)
-    let events = []; // {id, date:'YYYY-MM-DD', start:'HH:MM', end:'HH:MM', lieu:'...'}
-
-    function getMonday(d){
-      d = new Date(d);
-      const day = d.getDay(), diff = d.getDate() - day + (day === 0 ? -6 : 1);
-      return new Date(d.setDate(diff));
-    }
-    function formatDate(d){
-      return d.toISOString().split("T")[0];
-    }
+    function getMonday(d){d=new Date(d);const day=d.getDay(),diff=d.getDate()-day+(day===0?-6:1);return new Date(d.setDate(diff));}
+    function formatDate(d){return d.toISOString().split("T")[0];}
 
     function renderWeek(){
-      daysEl.innerHTML = "";
-      const days = [];
+      loading.style.display="none"; // cache le spinner
+      daysEl.innerHTML="";
+      const days=[];
       for(let i=0;i<7;i++){
-        const day = new Date(currentMonday);
-        day.setDate(day.getDate()+i);
-        const pill = document.createElement("div");
-        pill.className = "daypill";
-        pill.innerHTML = `${day.toLocaleDateString("fr-FR",{weekday:"short"})}<small>${day.getDate()} ${day.toLocaleDateString("fr-FR",{month:"short"})}</small>`;
-        pill.onclick = ()=>{
-          selectedDate = new Date(day);
-          renderEvents();
-          highlightSelected(day);
-          // Pré-remplir le champ date du formulaire
-          fDate.value = formatDate(selectedDate);
-        };
+        const day=new Date(currentMonday);day.setDate(day.getDate()+i);
+        const pill=document.createElement("div");
+        pill.className="daypill";
+        pill.innerHTML=`${day.toLocaleDateString("fr-FR",{weekday:"short"})}<small>${day.getDate()} ${day.toLocaleDateString("fr-FR",{month:"short"})}</small>`;
+        pill.onclick=()=>{selectedDate=day;renderEvents();highlightSelected(day);fDate.value=formatDate(selectedDate);};
         daysEl.appendChild(pill);
         days.push({el:pill,date:day});
       }
-      const end = new Date(currentMonday); end.setDate(end.getDate()+6);
-      whenEl.textContent = `${currentMonday.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})} – ${end.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}`;
+      const end=new Date(currentMonday);end.setDate(end.getDate()+6);
+      whenEl.textContent=`${currentMonday.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})} – ${end.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}`;
       highlightSelected(selectedDate);
-
-      // centrage sur le jour actuel (mobile)
-      const today = formatDate(new Date());
-      const activePill = days.find(d=>formatDate(d.date)===today);
-      if(activePill) {
-        setTimeout(()=>activePill.el.scrollIntoView({inline:"center",behavior:"smooth"}),50);
-      }
+      const today=formatDate(new Date());
+      const activePill=days.find(d=>formatDate(d.date)===today);
+      if(activePill) setTimeout(()=>activePill.el.scrollIntoView({inline:"center",behavior:"smooth"}),50);
     }
 
     function highlightSelected(day){
       document.querySelectorAll(".daypill").forEach(p=>p.classList.remove("active"));
-      // Active sur la date exacte
-      const target = Array.from(document.querySelectorAll(".daypill")).find(p=>{
-        // on lit le petit nombre affiché (pas ultra robuste mais OK ici)
-        return p.innerText.includes(String(day.getDate()));
-      });
+      const target=Array.from(document.querySelectorAll(".daypill")).find(p=>p.innerText.includes(String(day.getDate())));
       if(target) target.classList.add("active");
       renderEvents();
     }
 
     function renderEvents(){
-      listEl.innerHTML = "";
-      const dateStr = formatDate(selectedDate);
-      const todaysEvents = events.filter(e=>e.date===dateStr).sort((a,b)=>a.start.localeCompare(b.start));
-
-      if(todaysEvents.length===0){
-        listEl.innerHTML = `<div class="empty">Aucun entraînement</div>`;
-        return;
-      }
+      listEl.innerHTML="";
+      const dateStr=formatDate(selectedDate);
+      const todaysEvents=events.filter(e=>e.date===dateStr).sort((a,b)=>a.start.localeCompare(b.start));
+      if(todaysEvents.length===0){listEl.innerHTML=`<div class="empty">Aucun entraînement</div>`;return;}
       todaysEvents.forEach(e=>{
         const card=document.createElement("div");
         card.className="ev";
-        card.innerHTML=`
-          <div class="bar"></div>
-          <div class="info">
-            <div class="title">${e.lieu}</div>
-            <div class="meta"><strong>${e.start}</strong> – ${e.end}</div>
-          </div>
-          <button class="del" title="Supprimer" aria-label="Supprimer">×</button>
-        `;
-        // suppression
-        card.querySelector(".del").onclick = ()=>{
-          events = events.filter(x=>x.id !== e.id);
-          renderEvents();
-        };
+        card.innerHTML=`<div class="bar"></div><div class="info"><div class="title">${e.lieu}</div><div class="meta"><strong>${e.start}</strong> – ${e.end}</div></div><button class="del">×</button>`;
+        card.querySelector(".del").onclick=()=>{events=events.filter(x=>x.id!==e.id);renderEvents();};
         listEl.appendChild(card);
       });
     }
 
-    // Navigation semaine
     document.getElementById("prev").onclick=()=>{currentMonday.setDate(currentMonday.getDate()-7);renderWeek();};
     document.getElementById("next").onclick=()=>{currentMonday.setDate(currentMonday.getDate()+7);renderWeek();};
-    document.getElementById("today").onclick=()=>{currentMonday=getMonday(new Date());selectedDate=new Date();renderWeek(); fDate.value=formatDate(selectedDate);};
+    document.getElementById("today").onclick=()=>{currentMonday=getMonday(new Date());selectedDate=new Date();renderWeek();fDate.value=formatDate(selectedDate);};
 
-    // ---- Bottom sheet open/close ----
-    fabBtn.onclick = ()=>{
-      // Pré-remplir la date avec le jour sélectionné
-      fDate.value = formatDate(selectedDate);
-      sheetBg.style.display = "flex";
-    };
-    cancelBtn.onclick = ()=>{ sheetBg.style.display = "none"; };
-    // Fermer en cliquant en dehors de la sheet
-    sheetBg.addEventListener("click", (e)=>{
-      if(e.target === sheetBg) sheetBg.style.display = "none";
-    });
+    document.getElementById("fab").onclick=()=>{fDate.value=formatDate(selectedDate);sheetBg.style.display="flex";}
+    document.getElementById("cancel").onclick=()=>{sheetBg.style.display="none";}
+    sheetBg.addEventListener("click",(e)=>{if(e.target===sheetBg)sheetBg.style.display="none";});
 
-    // ---- Save event ----
-    saveBtn.onclick = ()=>{
-      const date = fDate.value;
-      const start = (fStart.value||"").trim();
-      const end = (fEnd.value||"").trim();
-      const lieu = (fLieu.value||"").trim();
-
-      if(!date || !start || !end || !lieu){
-        document.getElementById("msg").textContent = "Merci de remplir tous les champs.";
-        return;
+    document.getElementById("save").onclick=()=>{
+      if(!fDate.value||!fStart.value||!fEnd.value||!fLieu.value){
+        document.getElementById("msg").textContent="Merci de remplir tous les champs.";return;
       }
-      const id = String(Date.now()) + Math.random().toString(36).slice(2,6);
-      events.push({id, date, start, end, lieu});
-      // Reset & close
-      document.getElementById("msg").textContent = "";
-      sheetBg.style.display = "none";
-      fStart.value = "18:00";
-      fEnd.value = "20:00";
-      fLieu.value = "";
-      // Re-render si on est sur ce jour
-      if(formatDate(selectedDate) === date) renderEvents();
+      const id=String(Date.now());
+      events.push({id,date:fDate.value,start:fStart.value,end:fEnd.value,lieu:fLieu.value});
+      sheetBg.style.display="none";
+      fStart.value="18:00";fEnd.value="20:00";fLieu.value="";
+      renderEvents();
     };
 
-    // Init
     (function init(){
-      renderWeek();
-      // Préparer le formulaire sur le jour courant
-      fDate.value = formatDate(selectedDate);
+      loading.style.display="flex";
+      setTimeout(()=>renderWeek(),400); // petit délai pour voir le spinner
+      fDate.value=formatDate(selectedDate);
     })();
   </script>
 </body>
