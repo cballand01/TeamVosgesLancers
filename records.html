@@ -19,221 +19,106 @@
       color: var(--text);
       font-family: ui-sans-serif, system-ui, Segoe UI, Roboto, Arial;
     }
-    .wrap {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 24px;
-      padding-bottom: 80px;
-    }
-    .back {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--text);
-      text-decoration: none;
-      font-size: 16px;
-      margin-bottom: 16px;
-    }
-    .back svg { width: 20px; height: 20px; stroke: white; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 24px; padding-bottom: 80px; }
 
-    /* Titre + soulignement vert */
-    h1 {
-      font-size: 28px;
-      margin: 0 0 4px;
-      position: relative;
-      padding-bottom: 6px;
+    .back { display:inline-flex; align-items:center; gap:6px; color:var(--text); text-decoration:none; font-size:16px; margin-bottom:16px }
+    .back svg { width:20px; height:20px; stroke:#fff }
+
+    /* Titre + petite touche de vert */
+    h1{
+      font-size:28px; margin:0 0 4px; position:relative; padding-bottom:6px;
     }
     h1::after{
-      content:"";
-      position:absolute;
-      left:0; bottom:0;
-      width:72px; height:3px;
-      background:var(--accent);
-      border-radius:999px;
-      box-shadow:0 0 0 1px rgba(34,197,94,.15);
+      content:""; position:absolute; left:0; bottom:0; width:72px; height:3px;
+      background:var(--accent); border-radius:999px;
     }
-    .subtitle { font-size: 16px; opacity: 0.8; margin-bottom: 24px; }
+    .subtitle { font-size:16px; opacity:.8; margin-bottom:24px; }
 
     /* === Bloc podium === */
-    .podium-card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      position: relative;
+    .podium-card{
+      background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; margin-bottom:24px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
     }
-    .podium-nav {
-      background: none;
-      border: 1px solid var(--line);
-      width:36px; height:36px; border-radius:50%;
-      display:grid; place-items:center;
-      font-size: 18px;
-      color: var(--text);
-      cursor: pointer;
-      transition: transform .12s ease, border-color .2s ease;
-      background:#0b1326;
+    .podium-nav{
+      background:none; border:none; font-size:28px; color:var(--text); cursor:pointer; transition:opacity .2s;
     }
-    .podium-nav:hover { transform: translateY(-1px); border-color: var(--accent); }
+    .podium-nav:hover{ opacity:.7; }
 
-    .podium-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+    .podium-content{ flex:1; display:flex; flex-direction:column; align-items:center; }
+    .podium-viewport{ width:100%; max-width:460px; overflow:hidden; }
+    .podium-slide{ will-change:transform,opacity; }
+    .podium-content h2{ margin:0 0 12px; font-size:20px; text-align:center }
 
-    .podium-viewport { width: 100%; max-width: 460px; overflow: hidden; }
-    .podium-slide { will-change: transform, opacity; }
+    .podium{
+      display:grid; grid-template-columns:repeat(3,1fr); align-items:end; gap:8px; width:100%; max-width:400px; margin:0 auto;
+    }
+    .place{ display:flex; flex-direction:column; align-items:center; gap:6px; min-width:0; }
+    .bar{
+      background:var(--accent); width:80%; border-radius:6px 6px 0 0; display:flex; justify-content:center; align-items:flex-end;
+      font-weight:bold; color:#0f172a;
+    }
+    .place.first .bar{ height:100px; }
+    .place.second .bar{ height:70px; }
+    .place.third .bar{ height:50px; }
 
-    .podium-content h2 {
-      margin: 0 0 12px;
-      font-size: 20px;
-      text-align: center;
+    /* Libellé podium */
+    .athlete{ max-width:100%; text-align:center; line-height:1.25; }
+    /* Desktop: une seule ligne "Nom — perf" */
+    .ath-combined{
+      display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
+    /* Mobile: deux lignes (perf plus petit) */
+    .ath-stacked{ display:none; }
+    .ath-stacked .ath-name{
+      max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600;
+    }
+    .ath-stacked .ath-perf{ font-size:12px; opacity:.9; font-weight:600; }
 
-    .podium {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      align-items: end;
-      gap: 8px;
-      width: 100%;
-      max-width: 400px;
-      margin: 0 auto;
-    }
-    .place {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      min-width: 0; /* permet l’ellipsis */
-    }
-    .bar {
-      background: var(--accent);
-      width: 80%;
-      border-radius: 6px 6px 0 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      font-weight: bold;
-      color: #0f172a;
-    }
-    .place.first .bar { height: 100px; }
-    .place.second .bar { height: 70px; }
-    .place.third .bar { height: 50px; }
+    /* Animations slide */
+    @keyframes slideOutLeft { from{opacity:1; transform:translateX(0)} to{opacity:0; transform:translateX(-24px)} }
+    @keyframes slideInRight { from{opacity:0; transform:translateX(24px)} to{opacity:1; transform:translateX(0)} }
+    @keyframes slideOutRight{ from{opacity:1; transform:translateX(0)} to{opacity:0; transform:translateX(24px)} }
+    @keyframes slideInLeft  { from{opacity:0; transform:translateX(-24px)} to{opacity:1; transform:translateX(0)} }
+    .out-left{ animation:slideOutLeft 200ms ease both }
+    .in-right{ animation:slideInRight 220ms ease both }
+    .out-right{ animation:slideOutRight 200ms ease both }
+    .in-left{ animation:slideInLeft 220ms ease both }
 
-    /* libellé podium -> 2 lignes sur mobile: nom (ellipsis) + perf en badge vert */
-    .athlete{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-      max-width:100%;
-      text-align:center;
-      line-height:1.25;
+    /* Grille d'athlètes + touche de vert sur les cartes */
+    .athlete-grid{
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px;
     }
-    .ath-name, .ath-perf{ white-space:nowrap; }
-
-    @media (max-width: 480px){
-      .podium-content h2{ font-size:18px; }
-      .athlete{
-        flex-direction:column;
-        gap:2px;
-      }
-      .ath-name{
-        max-width:100%;
-        overflow:hidden;
-        text-overflow:ellipsis;
-      }
-      .ath-perf{
-        font-weight:800;
-        background:var(--accent);
-        color:#0f172a;
-        padding:2px 6px;
-        border-radius:999px;
-      }
-      .place.first .bar { height: 72px; }
-      .place.second .bar { height: 52px; }
-      .place.third .bar { height: 40px; }
-      .podium { max-width: 100%; gap:6px; }
-      .podium-nav{ width:32px; height:32px; font-size:16px; }
+    .athlete-card{
+      position:relative; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 16px 16px 20px;
+      display:flex; flex-direction:column; align-items:center; overflow:hidden;
     }
-
-    /* Grille d'athlètes */
-    .athlete-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 16px;
-    }
-    .athlete-card {
-      position: relative;
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 16px 16px 16px 20px; /* léger décalage pour la barre */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow:hidden;
-    }
-    /* petite barre verte à gauche des cartes (DA homogène) */
     .athlete-card::before{
-      content:"";
-      position:absolute; left:0; top:0; bottom:0; width:6px;
-      background:var(--accent);
-      border-radius:12px 0 0 12px;
+      content:""; position:absolute; left:0; top:0; bottom:0; width:6px; background:var(--accent); border-radius:12px 0 0 12px;
     }
+    .ffa-link{
+      position:absolute; top:10px; right:10px; width:28px; height:28px; display:inline-flex; justify-content:center; align-items:center;
+      background:rgba(255,255,255,.08); border:1px solid var(--line); border-radius:6px; transition:background .2s, border-color .2s;
+    }
+    .ffa-link:hover{ background:rgba(34,197,94,.15); border-color:var(--accent); }
+    .ffa-link svg{ width:100%; height:100%; }
 
-    .ffa-link {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 28px;
-      height: 28px;
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      transition: background 0.2s, border-color .2s;
-    }
-    .ffa-link:hover { background: rgba(34,197,94,0.15); border-color: var(--accent); }
-    .ffa-link svg { width: 100%; height: 100%; }
+    .athlete-photo{ width:96px; height:96px; border-radius:50%; object-fit:cover; margin-bottom:12px; border:2px solid #334155; }
+    .athlete-name{ font-weight:700; font-size:18px; margin-bottom:12px; text-align:center; }
+    .records{ width:100%; display:grid; grid-template-columns:1fr 1fr; gap:6px 8px; font-size:14px; }
+    .record-label{ opacity:.8; }
+    .record-value{ text-align:right; font-weight:600; }
+    .record-meta{ grid-column:1/-1; font-size:12px; opacity:.7; text-align:right; margin-bottom:6px; color:var(--muted); }
 
-    .athlete-photo {
-      width: 96px; height: 96px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-bottom: 12px;
-      border: 2px solid #334155;
-    }
-    .athlete-name {
-      font-weight: 700;
-      font-size: 18px;
-      margin-bottom: 12px;
-      text-align:center;
-    }
-    .records {
-      width: 100%;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px 8px;
-      font-size: 14px;
-    }
-    .record-label { opacity: 0.8; }
-    .record-value { text-align: right; font-weight: 600; }
-    .record-meta {
-      grid-column: 1 / -1;
-      font-size: 12px;
-      opacity: 0.7;
-      text-align: right;
-      margin-bottom: 6px;
-      color: var(--muted);
+    /* Smartphone */
+    @media (max-width:480px){
+      .podium-content h2{ font-size:18px; }
+      .place.first .bar{ height:72px; }
+      .place.second .bar{ height:52px; }
+      .place.third .bar{ height:40px; }
+      .podium{ max-width:100%; gap:6px; }
+
+      .ath-combined{ display:none; }
+      .ath-stacked{ display:flex; flex-direction:column; gap:2px; }
     }
   </style>
 </head>
@@ -250,7 +135,7 @@
     <h1>Records du Groupe</h1>
     <div class="subtitle">Toutes les meilleures perfs de l’équipe dans chaque discipline</div>
 
-    <!-- === Bloc Podium avec slide === -->
+    <!-- === Podium avec slide === -->
     <div class="podium-card">
       <button class="podium-nav left" onclick="prevPodium()">&#10094;</button>
 
@@ -261,15 +146,24 @@
             <div class="podium">
               <div class="place second">
                 <div class="bar">2</div>
-                <div class="athlete" id="secondPlace" title="Paul — 14.10 m">Paul — 14.10 m</div>
+                <div class="athlete" id="secondPlace">
+                  <span class="ath-combined">Paul — 14.10 m</span>
+                  <span class="ath-stacked"><span class="ath-name">Paul</span><span class="ath-perf">14.10 m</span></span>
+                </div>
               </div>
               <div class="place first">
                 <div class="bar">1</div>
-                <div class="athlete" id="firstPlace" title="Alex — 15.20 m">Alex — 15.20 m</div>
+                <div class="athlete" id="firstPlace">
+                  <span class="ath-combined">Alex — 15.20 m</span>
+                  <span class="ath-stacked"><span class="ath-name">Alex</span><span class="ath-perf">15.20 m</span></span>
+                </div>
               </div>
               <div class="place third">
                 <div class="bar">3</div>
-                <div class="athlete" id="thirdPlace" title="Julien — 13.80 m">Julien — 13.80 m</div>
+                <div class="athlete" id="thirdPlace">
+                  <span class="ath-combined">Julien — 13.80 m</span>
+                  <span class="ath-stacked"><span class="ath-name">Julien</span><span class="ath-perf">13.80 m</span></span>
+                </div>
               </div>
             </div>
           </div>
@@ -420,7 +314,7 @@
           </svg>
         </a>
         <img src="https://storage.cloud.google.com/vosgeslancers/Images/Photo_id/Rosie.png" alt="Athlète 6" class="athlete-photo">
-        <div class="athlete-name">Rosie Prêtre</div>
+        <div class="athlete-name">Rosie Pretre</div>
         <div class="records">
           <div class="record-label">Disque</div>
           <div class="record-value">29.36 m</div>
@@ -447,45 +341,34 @@
           <div class="record-meta" data-date="2025-07-18" data-lieu="Epinal"></div>
         </div>
       </div>
-
     </div>
   </div>
 
   <script>
-    // --- Durée (années / mois / jours) ---
+    // Affichage "il y a X" compact
     function diffYMD(date) {
       const now = new Date();
       let years = now.getFullYear() - date.getFullYear();
       let months = now.getMonth() - date.getMonth();
       let days = now.getDate() - date.getDate();
-      if (days < 0) {
-        months -= 1;
-        const prevMonthDays = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
-        days += prevMonthDays;
-      }
-      if (months < 0) {
-        years -= 1;
-        months += 12;
-      }
+      if (days < 0) { months -= 1; const prevDays = new Date(now.getFullYear(), now.getMonth(), 0).getDate(); days += prevDays; }
+      if (months < 0) { years -= 1; months += 12; }
       return { years, months, days };
     }
-
     document.querySelectorAll('.record-meta').forEach(meta => {
-      const dateStr = meta.dataset.date;
-      const lieu = meta.dataset.lieu;
+      const dateStr = meta.dataset.date, lieu = meta.dataset.lieu || '';
       if (!dateStr) return;
       const d = new Date(dateStr);
       const { years, months, days } = diffYMD(d);
-      let parts = [];
-      if (years > 0) parts.push(`${years} an${years > 1 ? 's' : ''}`);
-      if (months > 0) parts.push(`${months} mois`);
-      if (days > 0) parts.push(`${days} j`);
-      if (parts.length === 0) parts.push("aujourd'hui");
-      meta.textContent = `${lieu} • ${parts.join(' ')}`;
+      const parts = [];
+      if (years) parts.push(`${years} an${years>1?'s':''}`);
+      if (months) parts.push(`${months} mois`);
+      if (days && parts.length<2) parts.push(`${days} j`);
+      meta.textContent = `${lieu} • ${parts.length?parts.join(' '):"aujourd'hui"}`;
       meta.title = `${lieu} • ${d.toLocaleDateString('fr-FR')}`;
     });
 
-    // --- Podiums (à remplir manuellement) ---
+    // --- Podiums ---
     const podiums = [
       { title: "Podium — Poids Hommes",   first: "Charles — 14.74 m",  second: "Daniel — 14.23 m",  third: "Maxime — 12.33 m" },
       { title: "Podium — Disque Hommes",  first: "Daniel — 50.16 m",   second: "Franck — 49.72 m",  third: "Maxime — 48.67 m" },
@@ -497,39 +380,32 @@
     let currentPodium = 0;
     const slideEl = document.getElementById('podiumSlide');
     const titleEl = document.getElementById('podiumTitle');
-    const firstEl = document.getElementById('firstPlace');
+    const firstEl  = document.getElementById('firstPlace');
     const secondEl = document.getElementById('secondPlace');
-    const thirdEl = document.getElementById('thirdPlace');
+    const thirdEl  = document.getElementById('thirdPlace');
 
     function splitNamePerf(str){
-      // coupe sur em-dash (—) ou tiret (-)
       const parts = String(str).split(/—|-/);
-      const name = (parts[0]||'').trim();
-      const perf = (parts[1]||'').trim();
-      return { name, perf };
+      return { name:(parts[0]||'').trim(), perf:(parts[1]||'').trim() };
     }
-
+    function setNamePerf(el, str){
+      const { name, perf } = splitNamePerf(str);
+      el.innerHTML =
+        `<span class="ath-combined">${name}${perf?` — ${perf}`:''}</span>` +
+        `<span class="ath-stacked"><span class="ath-name">${name}</span>${perf?`<span class="ath-perf">${perf}</span>`:''}</span>`;
+      el.title = str;
+    }
     function setPodium(index){
       const p = podiums[index];
       titleEl.textContent = p.title;
-
-      const a = splitNamePerf(p.first);
-      const b = splitNamePerf(p.second);
-      const c = splitNamePerf(p.third);
-
-      firstEl.innerHTML  = `<span class="ath-name">${a.name}</span>${a.perf?` <span class="ath-perf">${a.perf}</span>`:''}`;
-      secondEl.innerHTML = `<span class="ath-name">${b.name}</span>${b.perf?` <span class="ath-perf">${b.perf}</span>`:''}`;
-      thirdEl.innerHTML  = `<span class="ath-name">${c.name}</span>${c.perf?` <span class="ath-perf">${c.perf}</span>`:''}`;
-
-      firstEl.title  = p.first;
-      secondEl.title = p.second;
-      thirdEl.title  = p.third;
+      setNamePerf(firstEl,  p.first);
+      setNamePerf(secondEl, p.second);
+      setNamePerf(thirdEl,  p.third);
     }
 
     function animateTo(index, dir){
       const outClass = dir === 'next' ? 'out-left' : 'out-right';
       const inClass  = dir === 'next' ? 'in-right' : 'in-left';
-
       slideEl.classList.add(outClass);
       slideEl.addEventListener('animationend', function handleOut(){
         slideEl.removeEventListener('animationend', handleOut);
@@ -542,17 +418,8 @@
         });
       });
     }
-
-    function nextPodium(){
-      const next = (currentPodium + 1) % podiums.length;
-      animateTo(next, 'next');
-      currentPodium = next;
-    }
-    function prevPodium(){
-      const prev = (currentPodium - 1 + podiums.length) % podiums.length;
-      animateTo(prev, 'prev');
-      currentPodium = prev;
-    }
+    function nextPodium(){ const next = (currentPodium+1)%podiums.length; animateTo(next,'next'); currentPodium = next; }
+    function prevPodium(){ const prev = (currentPodium-1+podiums.length)%podiums.length; animateTo(prev,'prev'); currentPodium = prev; }
 
     // init
     setPodium(currentPodium);
