@@ -26,11 +26,11 @@
       content:""; position:absolute; left:0; bottom:0; width:72px; height:3px; background:var(--accent); border-radius:999px;
     }
     .page-header .subtitle{
-      text-align:left; opacity:.8; font-size:16px; margin:0 0 24px;   /* même espacement vertical que Records */
+      text-align:left; opacity:.8; font-size:16px; margin:0 0 24px;
     }
 
     /* Spinner compact */
-    .loading{display:none;align-items:center;gap:8px;margin:12px 0 16px} /* + marge verticale */
+    .loading{display:none;align-items:center;gap:8px;margin:12px 0 16px}
     .loading .dot{
       width:14px;height:14px;border-radius:50%;
       border:2px solid rgba(34,197,94,.25);
@@ -41,7 +41,7 @@
     .loading .txt{font-size:13px;color:var(--muted)}
 
     /* Week bar */
-    .weekbar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px} /* + marge */
+    .weekbar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px}
     .navbtn{
       width:36px;height:36px;border-radius:50%;border:1px solid var(--line);
       background:var(--card);color:var(--text);display:grid;place-items:center;
@@ -51,7 +51,7 @@
     .when{font-weight:600;font-size:15px;min-width:190px;text-align:center}
 
     /* Days pills */
-    .days{display:flex;gap:8px;overflow-x:auto;padding:6px 0 10px;margin-bottom:16px;scroll-behavior:smooth} /* + marge */
+    .days{display:flex;gap:8px;overflow-x:auto;padding:6px 0 10px;margin-bottom:16px;scroll-behavior:smooth}
     .daypill{
       flex:0 0 auto; min-width:72px; text-align:center; padding:10px 12px; border-radius:999px;
       border:1px solid var(--line); background:#0b1326; color:#fff; cursor:pointer; font-weight:500
@@ -60,7 +60,7 @@
     .daypill.active{background:var(--accent); color:#0b1326; border-color:var(--accent); font-weight:700}
 
     /* List & events */
-    .list{display:grid;gap:12px} /* + gap uniforme */
+    .list{display:grid;gap:12px}
     .empty{font-size:14px;color:var(--muted);opacity:.9;padding:8px}
 
     .ev{
@@ -99,7 +99,6 @@
     .row label{flex:0 0 110px;opacity:.9}
     .row input{flex:1;background:#0b1326;border:1px solid var(--line);border-radius:8px;color:#e5e7eb;padding:10px}
 
-    /* Actions alignées à gauche */
     .actions{display:flex;gap:8px;justify-content:flex-start;margin-top:8px}
     .btn{border:1px solid var(--line);border-radius:10px;background:#0b1326;color:#e5e7eb;padding:8px 12px;cursor:pointer}
     .btn.ghost{background:transparent}
@@ -145,8 +144,9 @@
       <div class="sheet">
         <h3 style="margin:4px 0 8px">Ajouter un créneau</h3>
         <div class="row"><label>Date</label><input id="fDate" type="date"></div>
-        <div class="row"><label>Début</label><input id="fStart" placeholder="HH:MM" value="18:00"></div>
-        <div class="row"><label>Fin</label><input id="fEnd" placeholder="HH:MM" value="20:00"></div>
+        <!-- ⬇️ time pickers + step à la minute -->
+        <div class="row"><label>Début</label><input id="fStart" type="time" step="60" value="18:00" inputmode="numeric"></div>
+        <div class="row"><label>Fin</label><input id="fEnd" type="time" step="60" value="19:00" inputmode="numeric"></div>
         <div class="row"><label>Lieu</label><input id="fLieu" placeholder="Ville / Stade"></div>
         <div class="actions">
           <button class="btn ghost" id="cancel">Annuler</button>
@@ -158,7 +158,6 @@
   </div>
 
   <script>
-    /***** RENSEIGNE ICI l’URL DE TA WEB APP (même URL que pour saison.html) *****/
     const API = 'https://script.google.com/macros/s/AKfycbx-gKwaUkf6Ewo17HMYPadDaRpGlYNbXrok5Ng42zL7mrNuUldoVCYRw3sjDx7V8GZG/exec';
 
     const daysEl = document.getElementById("days");
@@ -174,7 +173,42 @@
     let currentMonday = getMonday(new Date());
     let selectedDate = new Date();
     let events = [];
+    let endTouched = false; // ← si l’utilisateur a modifié l’heure de fin à la main
 
+    /* ==== Helpers time ==== */
+    function clamp(n,min,max){ return Math.max(min,Math.min(max,n)); }
+    function parseTimeToMinutes(str){
+      if(!str) return null;
+      let s = String(str).trim().toLowerCase().replace(/[h]/,' : ');
+      // cas simples: "18", "9", "1830", "18 30"
+      if(/^\d{1,2}$/.test(s)) return clamp(parseInt(s,10),0,23)*60;
+      if(/^\d{3,4}$/.test(s)){ // 930 ou 0930 ou 1830
+        const pad = s.padStart(4,'0'); const hh = +pad.slice(0,2), mm = +pad.slice(2);
+        return clamp(hh,0,23)*60 + clamp(mm,0,59);
+      }
+      const m = s.match(/(\d{1,2})\D+(\d{1,2})/);
+      if(m){ const hh = clamp(parseInt(m[1],10),0,23); const mm = clamp(parseInt(m[2],10),0,59); return hh*60+mm; }
+      const m2 = s.match(/(\d{1,2})/);
+      if(m2){ return clamp(parseInt(m2[1],10),0,23)*60; }
+      return null;
+    }
+    function minutesToHHMM(min){
+      const h = Math.floor(min/60), m = min%60;
+      return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+    }
+    function normalizeTimeInput(input){
+      const mins = parseTimeToMinutes(input.value);
+      if(mins===null) return; // on ne touche pas si vide/invalide
+      input.value = minutesToHHMM(mins);
+    }
+    function addMinutesHHMM(hhmm, delta){
+      const mins = parseTimeToMinutes(hhmm);
+      if(mins===null) return hhmm;
+      const newM = (mins + delta + 24*60) % (24*60);
+      return minutesToHHMM(newM);
+    }
+
+    /* ==== Semaine ==== */
     function getMonday(d){
       d = new Date(d);
       const day = d.getDay(), diff = d.getDate() - day + (day === 0 ? -6 : 1);
@@ -298,14 +332,8 @@
     }
 
     // Navigation semaine
-    document.getElementById("prev").onclick = () => {
-      currentMonday.setDate(currentMonday.getDate()-7);
-      renderWeek(); renderEvents();
-    };
-    document.getElementById("next").onclick = () => {
-      currentMonday.setDate(currentMonday.getDate()+7);
-      renderWeek(); renderEvents();
-    };
+    document.getElementById("prev").onclick = () => { currentMonday.setDate(currentMonday.getDate()-7); renderWeek(); renderEvents(); };
+    document.getElementById("next").onclick = () => { currentMonday.setDate(currentMonday.getDate()+7); renderWeek(); renderEvents(); };
     document.getElementById("today").onclick = () => {
       currentMonday = getMonday(new Date());
       selectedDate = new Date();
@@ -318,6 +346,7 @@
     document.getElementById("fab").onclick = () => {
       fDate.value = formatDate(selectedDate);
       document.getElementById("msg").textContent = '';
+      endTouched = false; // reset
       sheetBg.style.display = "flex";
     };
     document.getElementById("cancel").onclick = () => {
@@ -331,7 +360,32 @@
       }
     });
 
+    // ===== Auto-format & fin +1h =====
+    // Normalise HH:mm si l’utilisateur tape "18", "1830", "18h", etc.
+    fStart.addEventListener('blur', ()=> {
+      normalizeTimeInput(fStart);
+      if(!endTouched){ // ne pas écraser si l’utilisateur a touché la fin
+        fEnd.value = addMinutesHHMM(fStart.value||'00:00', 60);
+      }
+    });
+    fEnd.addEventListener('blur', ()=> normalizeTimeInput(fEnd));
+    fEnd.addEventListener('input', ()=> { endTouched = true; });
+    fEnd.addEventListener('focus', ()=> { endTouched = true; });
+
+    // Si on change l’heure de début via le picker "time"
+    fStart.addEventListener('input', ()=> {
+      // La valeur input d’un type="time" est déjà HH:mm, mais on sécurise.
+      normalizeTimeInput(fStart);
+      if(!endTouched){
+        fEnd.value = addMinutesHHMM(fStart.value||'00:00', 60);
+      }
+    });
+
     document.getElementById("save").onclick = async () => {
+      // normalise une dernière fois
+      normalizeTimeInput(fStart);
+      normalizeTimeInput(fEnd);
+
       const date = fDate.value.trim(),
             start = fStart.value.trim(),
             end   = fEnd.value.trim(),
@@ -348,9 +402,11 @@
           events.push(res.item || item);
           document.getElementById("msg").textContent = "";
           sheetBg.style.display = "none";
+          // reset
           fStart.value = "18:00";
-          fEnd.value = "20:00";
-          fLieu.value = "";
+          fEnd.value   = "19:00";
+          fLieu.value  = "";
+          endTouched = false;
           if(formatDate(selectedDate) === date) renderEvents();
         }else{
           document.getElementById("msg").textContent = "Erreur: " + (res && res.error ? res.error : 'API');
@@ -364,6 +420,9 @@
     (function init(){
       renderWeek();
       fDate.value = formatDate(selectedDate);
+      // valeurs par défaut cohérentes
+      fStart.value = fStart.value || "18:00";
+      fEnd.value   = fEnd.value   || "19:00";
       apiFetchAll();
     })();
   </script>
