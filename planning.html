@@ -18,18 +18,18 @@
     .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px}
     .back svg{width:20px;height:20px;stroke:#fff}
     h1{margin:8px 0 4px;font-size:28px;font-weight:700;text-align:left}
-    .subtitle{text-align:left;opacity:.7;font-size:16px;margin-bottom:16px}
+    .subtitle{text-align:left;opacity:.7;font-size:16px;margin-bottom:10px}
 
-    /* Spinner */
-    .spinner{
-      display:flex;align-items:center;justify-content:center;
-      height:50px;margin:12px 0;color:var(--accent);
-    }
-    .spinner:after{
-      content:"";width:28px;height:28px;border:3px solid var(--accent);
-      border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;
+    /* Spinner compact */
+    .loading{display:none;align-items:center;gap:8px;margin:6px 0 12px}
+    .loading .dot{
+      width:14px;height:14px;border-radius:50%;
+      border:2px solid rgba(34,197,94,.25);
+      border-top-color:var(--accent);
+      animation:spin .7s linear infinite;
     }
     @keyframes spin{to{transform:rotate(360deg)}}
+    .loading .txt{font-size:13px;color:var(--muted)}
 
     /* Week bar */
     .weekbar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px}
@@ -44,8 +44,7 @@
     .days{display:flex;gap:8px;overflow-x:auto;padding:6px 0 10px;margin-bottom:8px;scroll-behavior:smooth}
     .daypill{
       flex:0 0 auto; min-width:72px; text-align:center; padding:10px 12px; border-radius:999px;
-      border:1px solid var(--line); background:#0b1326; color:var(--text); cursor:pointer;
-      font-weight:500
+      border:1px solid var(--line); background:#0b1326; color:#fff; cursor:pointer; font-weight:500
     }
     .daypill small{display:block;opacity:.7}
     .daypill.active{background:var(--accent); color:#0b1326; border-color:var(--accent); font-weight:700}
@@ -62,7 +61,7 @@
     .ev .info{flex:1;min-width:0}
     .ev .title{font-weight:800;margin-bottom:2px}
     .ev .meta{font-size:13px;color:var(--muted)}
-    .ev .meta strong{color:var(--text)}
+    .ev .meta strong{color:#e5e7eb}
     .ev .del{position:absolute;top:6px;right:8px;border:none;background:transparent;color:#94a3b8;cursor:pointer;font-size:18px}
     .ev .del:hover{color:#fff}
 
@@ -84,14 +83,15 @@
       border-top-left-radius:16px;border-top-right-radius:16px;border:1px solid var(--line);
       border-bottom:none;padding:12px 16px 16px;animation:slideup .18s ease-out;max-height:85vh;overflow:auto
     }
+    @keyframes slideup{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
 
     .row{display:flex;gap:8px;margin:8px 0;align-items:center}
     .row label{flex:0 0 110px;opacity:.9}
-    .row input{flex:1;background:#0b1326;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:10px}
+    .row input{flex:1;background:#0b1326;border:1px solid var(--line);border-radius:8px;color:#e5e7eb;padding:10px}
 
-    /* Actions style comme saison.html */
-    .sheet .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
-    .btn{border:1px solid var(--line);border-radius:10px;background:#0b1326;color:var(--text);padding:8px 12px;cursor:pointer}
+    /* Actions alignées à gauche */
+    .actions{display:flex;gap:8px;justify-content:flex-start;margin-top:8px}
+    .btn{border:1px solid var(--line);border-radius:10px;background:#0b1326;color:#e5e7eb;padding:8px 12px;cursor:pointer}
     .btn.ghost{background:transparent}
     .subtitle.small{font-size:12px;color:var(--muted)}
   </style>
@@ -106,10 +106,14 @@
     </div>
 
     <h1>Planning</h1>
-    <div class="subtitle">Vue de la semaine — créneaux d’entraînement</div>
+    <div class="subtitle">Vue de la semaine — Créneaux d’entraînement</div>
 
-    <div id="loading" class="spinner"></div>
+    <!-- Spinner compact -->
+    <div id="loading" class="loading">
+      <div class="dot" aria-hidden="true"></div>
+    </div>
 
+    <!-- Semaine -->
     <div class="weekbar">
       <button class="navbtn" id="prev">‹</button>
       <div class="when" id="when"></div>
@@ -120,7 +124,7 @@
     <div class="days" id="days"></div>
     <div class="list" id="list"></div>
 
-    <button class="fab" id="fab">＋</button>
+    <button class="fab" id="fab" title="Ajouter">＋</button>
 
     <!-- Bottom sheet -->
     <div class="sheet-backdrop" id="sheetBg">
@@ -129,93 +133,126 @@
         <div class="row"><label>Date</label><input id="fDate" type="date"></div>
         <div class="row"><label>Début</label><input id="fStart" placeholder="HH:MM" value="18:00"></div>
         <div class="row"><label>Fin</label><input id="fEnd" placeholder="HH:MM" value="20:00"></div>
-        <div class="row"><label>Lieu</label><input id="fLieu" placeholder="Stade / salle"></div>
+        <div class="row"><label>Lieu</label><input id="fLieu" placeholder="Ville / Stade"></div>
         <div class="actions">
           <button class="btn ghost" id="cancel">Annuler</button>
           <button class="btn" id="save">Ajouter</button>
         </div>
-        <div id="msg" class="subtitle small"></div>
+        <div id="msg" class="subtitle small" style="margin-top:6px"></div>
       </div>
     </div>
   </div>
 
   <script>
-    const daysEl=document.getElementById("days"),listEl=document.getElementById("list"),
-          whenEl=document.getElementById("when"),sheetBg=document.getElementById("sheetBg"),
-          fDate=document.getElementById("fDate"),fStart=document.getElementById("fStart"),
-          fEnd=document.getElementById("fEnd"),fLieu=document.getElementById("fLieu"),
-          loading=document.getElementById("loading");
-    let currentMonday=getMonday(new Date()),selectedDate=new Date(),events=[];
+    const API = 'https://script.google.com/macros/s/AKfycbw-Nk4eHU6p5oaV-bSGXFBJOpfGJoj2wDaV7vMN1XPGi2s3WZ5aF6uAA3WQW7F5qJuI/exec'; // colle ton URL
 
-    function getMonday(d){d=new Date(d);const day=d.getDay(),diff=d.getDate()-day+(day===0?-6:1);return new Date(d.setDate(diff));}
-    function formatDate(d){return d.toISOString().split("T")[0];}
+    const daysEl = document.getElementById("days");
+    const listEl = document.getElementById("list");
+    const whenEl = document.getElementById("when");
+    const loadingEl = document.getElementById("loading");
+    const sheetBg = document.getElementById("sheetBg");
+    const fDate = document.getElementById("fDate");
+    const fStart = document.getElementById("fStart");
+    const fEnd = document.getElementById("fEnd");
+    const fLieu = document.getElementById("fLieu");
+
+    let currentMonday = getMonday(new Date());
+    let selectedDate = new Date();
+    let events = [];
+
+    function getMonday(d){ d=new Date(d); const day=d.getDay(),diff=d.getDate()-day+(day===0?-6:1); return new Date(d.setDate(diff)); }
+    function formatDate(d){ return d.toISOString().split("T")[0]; }
 
     function renderWeek(){
-      loading.style.display="none";
       daysEl.innerHTML="";
       const days=[];
       for(let i=0;i<7;i++){
-        const day=new Date(currentMonday);day.setDate(day.getDate()+i);
+        const day=new Date(currentMonday); day.setDate(day.getDate()+i);
         const pill=document.createElement("div");
         pill.className="daypill";
         pill.innerHTML=`${day.toLocaleDateString("fr-FR",{weekday:"short"})}<small>${day.getDate()} ${day.toLocaleDateString("fr-FR",{month:"short"})}</small>`;
-        pill.onclick=()=>{selectedDate=day;renderEvents();highlightSelected(day);fDate.value=formatDate(selectedDate);};
+        pill.onclick=()=>{ selectedDate=new Date(day); fDate.value=formatDate(selectedDate); highlightSelected(day); renderEvents(); };
         daysEl.appendChild(pill);
         days.push({el:pill,date:day});
       }
-      const end=new Date(currentMonday);end.setDate(end.getDate()+6);
+      const end=new Date(currentMonday); end.setDate(end.getDate()+6);
       whenEl.textContent=`${currentMonday.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})} – ${end.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}`;
       highlightSelected(selectedDate);
       const today=formatDate(new Date());
-      const activePill=days.find(d=>formatDate(d.date)===today);
-      if(activePill) setTimeout(()=>activePill.el.scrollIntoView({inline:"center",behavior:"smooth"}),50);
+      const active=days.find(d=>formatDate(d.date)===today);
+      if(active) setTimeout(()=>active.el.scrollIntoView({inline:"center",behavior:"smooth"}),50);
     }
 
     function highlightSelected(day){
       document.querySelectorAll(".daypill").forEach(p=>p.classList.remove("active"));
       const target=Array.from(document.querySelectorAll(".daypill")).find(p=>p.innerText.includes(String(day.getDate())));
       if(target) target.classList.add("active");
-      renderEvents();
     }
 
     function renderEvents(){
-      listEl.innerHTML="";
       const dateStr=formatDate(selectedDate);
-      const todaysEvents=events.filter(e=>e.date===dateStr).sort((a,b)=>a.start.localeCompare(b.start));
-      if(todaysEvents.length===0){listEl.innerHTML=`<div class="empty">Aucun entraînement</div>`;return;}
-      todaysEvents.forEach(e=>{
+      const todays=events.filter(e=>e.date===dateStr).sort((a,b)=>a.start.localeCompare(b.start));
+      listEl.innerHTML="";
+      if(todays.length===0){ listEl.innerHTML=`<div class="empty">Aucun entraînement</div>`; return; }
+      todays.forEach(e=>{
         const card=document.createElement("div");
         card.className="ev";
-        card.innerHTML=`<div class="bar"></div><div class="info"><div class="title">${e.lieu}</div><div class="meta"><strong>${e.start}</strong> – ${e.end}</div></div><button class="del">×</button>`;
-        card.querySelector(".del").onclick=()=>{events=events.filter(x=>x.id!==e.id);renderEvents();};
+        card.innerHTML=`
+          <div class="bar"></div>
+          <div class="info">
+            <div class="title">${e.lieu}</div>
+            <div class="meta"><strong>${e.start}</strong> – ${e.end}</div>
+          </div>
+          <button class="del">×</button>
+        `;
+        card.querySelector(".del").onclick=async()=>{ const ok=await apiDelete(e.id); if(ok){ events=events.filter(x=>x.id!==e.id); renderEvents(); } };
         listEl.appendChild(card);
       });
     }
 
-    document.getElementById("prev").onclick=()=>{currentMonday.setDate(currentMonday.getDate()-7);renderWeek();};
-    document.getElementById("next").onclick=()=>{currentMonday.setDate(currentMonday.getDate()+7);renderWeek();};
-    document.getElementById("today").onclick=()=>{currentMonday=getMonday(new Date());selectedDate=new Date();renderWeek();fDate.value=formatDate(selectedDate);};
+    async function apiFetchAll(){
+      if(!API||API.includes('https://script.google.com/macros/s/AKfycbw-Nk4eHU6p5oaV-bSGXFBJOpfGJoj2wDaV7vMN1XPGi2s3WZ5aF6uAA3WQW7F5qJuI/exec')) return;
+      try{
+        loadingEl.style.display='flex';
+        const r=await fetch(API+'?resource=planning');
+        const j=await r.json();
+        events=(j.items||[]).map(x=>({id:x.id||Date.now(),date:x.date,start:x.start,end:x.end,lieu:x.lieu}));
+        renderEvents();
+      }catch(e){console.error(e);}
+      finally{loadingEl.style.display='none';}
+    }
 
-    document.getElementById("fab").onclick=()=>{fDate.value=formatDate(selectedDate);sheetBg.style.display="flex";}
-    document.getElementById("cancel").onclick=()=>{sheetBg.style.display="none";};
-    sheetBg.addEventListener("click",(e)=>{if(e.target===sheetBg)sheetBg.style.display="none";});
+    async function apiCreate(item){
+      if(!API||API.includes('https://script.google.com/macros/s/AKfycbw-Nk4eHU6p5oaV-bSGXFBJOpfGJoj2wDaV7vMN1XPGi2s3WZ5aF6uAA3WQW7F5qJuI/exec')) return {ok:true,item};
+      const form=new URLSearchParams(); form.append('resource','planning'); form.append('action','create'); form.append('item',JSON.stringify(item));
+      const r=await fetch(API,{method:'POST',body:form}); return r.json();
+    }
 
-    document.getElementById("save").onclick=()=>{
-      if(!fDate.value||!fStart.value||!fEnd.value||!fLieu.value){
-        document.getElementById("msg").textContent="Merci de remplir tous les champs.";return;
-      }
-      const id=String(Date.now());
-      events.push({id,date:fDate.value,start:fStart.value,end:fEnd.value,lieu:fLieu.value});
-      sheetBg.style.display="none";
-      fStart.value="18:00";fEnd.value="20:00";fLieu.value="";
-      renderEvents();
+    async function apiDelete(id){
+      if(!API||API.includes('https://script.google.com/macros/s/AKfycbw-Nk4eHU6p5oaV-bSGXFBJOpfGJoj2wDaV7vMN1XPGi2s3WZ5aF6uAA3WQW7F5qJuI/exec')) return true;
+      const form=new URLSearchParams(); form.append('resource','planning'); form.append('action','delete'); form.append('id',id);
+      const r=await fetch(API,{method:'POST',body:form}); const j=await r.json(); return !!(j&&j.ok);
+    }
+
+    document.getElementById("prev").onclick=()=>{currentMonday.setDate(currentMonday.getDate()-7);renderWeek();renderEvents();};
+    document.getElementById("next").onclick=()=>{currentMonday.setDate(currentMonday.getDate()+7);renderWeek();renderEvents();};
+    document.getElementById("today").onclick=()=>{currentMonday=getMonday(new Date());selectedDate=new Date();renderWeek();fDate.value=formatDate(selectedDate);renderEvents();};
+
+    document.getElementById("fab").onclick=()=>{fDate.value=formatDate(selectedDate);document.getElementById("msg").textContent='';sheetBg.style.display="flex";};
+    document.getElementById("cancel").onclick=()=>{sheetBg.style.display="none";document.getElementById("msg").textContent='';};
+    sheetBg.addEventListener("click",(e)=>{if(e.target===sheetBg){sheetBg.style.display="none";document.getElementById("msg").textContent='';}});
+
+    document.getElementById("save").onclick=async()=>{
+      const date=fDate.value.trim(),start=fStart.value.trim(),end=fEnd.value.trim(),lieu=fLieu.value.trim();
+      if(!date||!start||!end||!lieu){document.getElementById("msg").textContent="Merci de remplir tous les champs.";return;}
+      const item={id:String(Date.now()),date,start,end,lieu};
+      document.getElementById("msg").textContent="Envoi…";
+      const res=await apiCreate(item);
+      if(res&&res.ok){events.push(res.item||item);document.getElementById("msg").textContent="";sheetBg.style.display="none";fStart.value="18:00";fEnd.value="20:00";fLieu.value="";if(formatDate(selectedDate)===date)renderEvents();}
+      else document.getElementById("msg").textContent="Erreur.";
     };
 
-    (function init(){
-      loading.style.display="flex";
-      setTimeout(()=>renderWeek(),400);
-      fDate.value=formatDate(selectedDate);
-    })();
+    (function init(){renderWeek();fDate.value=formatDate(selectedDate);apiFetchAll();})();
   </script>
 </body>
 </html>
