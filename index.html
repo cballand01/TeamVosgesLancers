@@ -7,7 +7,6 @@
   <style>
     :root{
       --bg:#0f172a;
-      --surface:#0b1326;
       --card:#111827;
       --text:#e5e7eb;
       --muted:#94a3b8;
@@ -19,7 +18,6 @@
       --space-2:12px;
       --space-3:16px;
       --space-4:24px;
-      --space-5:32px;
 
       --icon:24px;
       --shadow:0 10px 30px rgba(0,0,0,.35);
@@ -27,30 +25,22 @@
 
     *{box-sizing:border-box}
     html,body{height:100%}
-    /* 1) Fond uniforme: couleur sur html/body + calque fixe pour les dégradés */
-    html, body{
+    body{
       margin:0;
-      background: var(--bg); /* couleur de base uniforme */
+      background-color: var(--bg); /* Couleur de base solide pour éviter toute démarcation */
+      background-image:
+        radial-gradient(800px 500px at 80% -100px, rgba(34,197,94,.12), transparent 60%),
+        radial-gradient(700px 400px at -100px 40%, rgba(34,197,94,.08), transparent 60%);
+      background-repeat: no-repeat;
+      background-attachment: scroll;  /* évite les artefacts de “fixed” sur mobile */
+      background-size: cover, cover;  /* couvre toute la zone d’affichage */
       color:var(--text);
       font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial;
-    }
-    /* Le calque fixe évite toute cassure lors du scroll mobile */
-    body::before{
-      content:"";
-      position:fixed;
-      inset:0;
-      z-index:-1;
-      pointer-events:none;
-      background:
-        radial-gradient(800px 500px at 80% -100px, rgba(34,197,94,.12), transparent 60%),
-        radial-gradient(700px 400px at -100px 40%, rgba(34,197,94,.08), transparent 60%),
-        var(--bg);
-      /* pas de background-attachment:fixed (peu fiable iOS) */
     }
 
     .wrap{max-width:1000px;margin:0 auto;padding:24px 24px 96px}
 
-    /* Header / hero */
+    /* HERO */
     .hero{display:flex;align-items:center;gap:16px;margin:12px 0 var(--space-4)}
     .logo{
       width:84px;height:84px;border-radius:20px;overflow:hidden;border:1px solid #334155;
@@ -71,7 +61,7 @@
     }
     .subtitle{opacity:.85;color:var(--muted)}
 
-    /* Bandeau principal (CTA) */
+    /* CARTE PRINCIPALE (CTA) */
     .mega{
       background:linear-gradient(180deg, rgba(34,197,94,.10), rgba(34,197,94,.06)) , var(--card);
       border:1px solid var(--line);
@@ -93,25 +83,26 @@
     .mega .desc{opacity:.9;color:#cbd5e1}
     .mega .chev{margin-left:auto;font-size:22px;opacity:.9}
 
-    /* Section grid */
+    /* SECTION */
     .section-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 var(--space-2)}
     .section-title{font-size:18px;font-weight:700}
     .section-line{height:1px;background:#243043;border:none;margin:0 0 var(--space-3);opacity:.6}
 
+    /* GRID des cartes */
     .grid{
       display:grid;gap:12px;
       grid-template-columns:repeat(2,minmax(0,1fr));
     }
     @media (min-width:760px){ .grid{grid-template-columns:repeat(3,1fr)} }
 
-    /* Cards */
+    /* Cartes de navigation */
     a.card{
       position:relative;
       display:block;
       background:var(--card);
       border:1px solid var(--line);
       border-radius:var(--radius);
-      padding:14px 14px 14px 18px;
+      padding:16px 18px 16px 20px; /* espace à droite augmenté */
       text-decoration:none;color:var(--text);
       transition: transform .15s ease, box-shadow .15s ease, border-color .2s ease, background .2s ease;
       overflow:hidden;
@@ -123,33 +114,78 @@
     a.card:hover{ transform: translateY(-2px); box-shadow: var(--shadow); border-color:#25402f; }
     a.card:focus-visible{ outline:2px solid var(--accent); outline-offset:2px }
 
-    .card-inner{display:flex;gap:12px;align-items:flex-start}
-    .icon{
-      width:var(--icon);height:var(--icon);flex:0 0 var(--icon);
-      display:grid;place-items:center;border-radius:10px;background:#0a121f;border:1px solid #263143;
+    /* >>> Fix layout des cartes : grille icône + texte, safe-zone droite, clamps */
+    .card-inner{
+      display: grid;
+      grid-template-columns: 48px 1fr; /* icône fixe + texte fluide */
+      align-items: center;
+      gap: 12px;
     }
-    .icon img{width:70%;height:70%;object-fit:contain;filter:brightness(1.15) contrast(.95)}
-    .text{min-width:0}
-    .title{
-      font-weight:800;margin:0;display:flex;align-items:center;gap:8px;
+    .card .icon{
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background:#0a121f;
+      border:1px solid #263143;
+    }
+    .card .icon img{
+      width: 70%;
+      height: 70%;
+      object-fit: contain;
+      filter: brightness(1.1) contrast(.95);
+    }
+    .card .text{
+      min-width: 0;          /* indispensable pour l’ellipsis/clamp */
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-right: 8px;    /* safe-zone à droite */
+    }
+    .card .title{
+      margin:0;
+      font-weight: 800;
       letter-spacing:.2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .desc{opacity:.85;color:#cbd5e1;font-size:14px;margin-top:6px}
-
-    .title .chev{margin-left:auto;opacity:.7;transition:transform .15s ease, opacity .15s ease;font-size:18px}
+    .card .title .chev{
+      margin-left: auto;
+      opacity:.8;
+      flex-shrink: 0;
+      transition: transform .15s ease, opacity .15s ease;
+    }
     a.card:hover .chev{ transform:translateX(2px); opacity:1 }
+    .card .desc{
+      margin:0;
+      font-size: 14px;
+      line-height: 1.35;
+      color:#cbd5e1;
+      opacity:.9;
 
-    /* Footer — même teinte que le fond pour éviter toute “coupure” */
+      display: -webkit-box;
+      -webkit-line-clamp: 2;        /* coupe à 2 lignes */
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: break-word;
+      hyphens: auto;
+    }
+    @media (max-width: 380px){
+      .card-inner{ grid-template-columns: 40px 1fr; gap:10px }
+      .card .icon{ width:38px; height:38px }
+    }
+
+    /* Footer */
     footer.site-footer{
       position:fixed;left:0;right:0;bottom:0;
-      background: rgba(15,23,42,.92); /* var(--bg) légèrement opaque */
-      border-top:1px solid #202a38;
-      color:#cbd5e1;
-      text-align:center;padding:10px 12px;font-size:12px;z-index:10;
-      backdrop-filter: saturate(140%) blur(2px); /* doux, optionnel */
+      background:#0b0f16;border-top:1px solid #202a38;color:#cbd5e1;
+      text-align:center;padding:10px 12px;font-size:12px;z-index:10
     }
-
-    .mb-6{margin-bottom:var(--space-4)}
   </style>
 </head>
 <body>
@@ -158,7 +194,7 @@
     <!-- HERO -->
     <header class="hero" aria-label="En-tête">
       <div class="logo" aria-hidden="true">
-        <img src="IMG_20250401_225839_471.webp" alt="">
+        <img src="IMG_20250401_225839_471.webp" alt="Logo Team Vosges Lancers">
       </div>
       <div class="title-wrap">
         <h1>Accueil — Team Vosges Lancers</h1>
@@ -173,7 +209,7 @@
           <img src="dumbbell-svgrepo-com.svg" alt="">
         </div>
         <div class="text">
-          <div class="title">Plans d'entrainement</div>
+          <div class="title">Plans d’entraînement</div>
           <div class="desc">Voir, ajouter et partager les entraînements du groupe</div>
         </div>
         <div class="chev" aria-hidden="true">›</div>
