@@ -38,7 +38,7 @@
     .ath-chevron{margin-left:auto;color:#cbd5e1;font-size:20px;opacity:.85}
 
     /* ====== Exercices (mobile: liste) ====== */
-    .section-title{margin:30px 0 8px;font-weight:700}
+    .section-title{margin:40px 0 8px;font-weight:700} /* + espace vertical avant la section */
     .section-line{height:1px;background:#243043;border:none;margin:0 0 14px;opacity:.6}
     .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
     .search{flex:1;min-width:180px;background:#0b1326;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:10px 12px}
@@ -47,15 +47,25 @@
 
     .ex-list{display:grid;gap:10px}
     .ex-row{
-      display:flex;gap:10px;align-items:center;
-      background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;
+      display:flex;gap:14px;align-items:center;
+      background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
     }
-    .ex-thumb{width:110px;height:62px;flex:0 0 110px;border-radius:10px;overflow:hidden;background:#000}
+    .ex-thumb{width:120px;height:68px;flex:0 0 120px;border-radius:10px;overflow:hidden;background:#000}
     .ex-thumb img{width:100%;height:100%;object-fit:cover}
     .ex-txt{min-width:0}
-    .ex-title{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .ex-info{font-size:12px;color:var(--muted)}
-    .info-btn{margin-left:auto;border:1px solid var(--line);background:transparent;color:var(--text);border-radius:8px;padding:6px 10px;cursor:pointer}
+    .ex-title{
+      font-weight:700;font-size:14px;
+      /* mobile: multi-ligne */
+      white-space:normal;
+    }
+    .ex-info{font-size:12px;color:var(--muted);margin-top:2px}
+    .info-btn{
+      margin-left:auto;border:1px solid var(--line);background:transparent;color:var(--text);
+      border-radius:10px;padding:8px 14px;cursor:pointer;flex-shrink:0;
+      transition: border-color .2s, transform .08s;
+    }
+    .info-btn:hover{border-color:var(--accent)}
+    .info-btn:active{transform:scale(.98)}
 
     /* ====== Desktop adaptations ====== */
     @media (min-width:760px){
@@ -66,11 +76,12 @@
       .ath-avatar{width:64px;height:64px;flex:0 0 64px}
 
       /* Exos → cartes en grille */
-      .ex-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+      .ex-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
       .ex-row{display:block;padding:0;overflow:hidden}
       .ex-thumb{width:100%;height:auto;aspect-ratio:16/9;border-radius:12px 12px 0 0}
       .ex-thumb img{border-bottom:1px solid var(--line)}
       .ex-txt{padding:10px 12px}
+      .ex-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis} /* ellipsis desktop */
       .info-btn{margin:8px 12px 12px auto;display:block}
     }
 
@@ -106,7 +117,9 @@
       <button class="pill active" data-fam="all">Tous</button>
       <button class="pill" data-fam="muscu">Musculation</button>
       <button class="pill" data-fam="halter">Haltérophilie</button>
-      <button class="pill" data-fam="spec">Spécifiques</button>
+      <button class="pill" data-fam="corps">Poids du corps</button>
+      <button class="pill" data-fam="ppg">PPG</button>
+      <button class="pill" data-fam="spec">Spécifique</button>
     </div>
 
     <!-- Liste / grille d’exos -->
@@ -125,46 +138,102 @@
   </div>
 
   <script>
-    const API = 'https://script.google.com/macros/s/YOUR-APPS-SCRIPT/exec'; // à remplacer
+    // Remplace par ton Apps Script si besoin
+    const API = 'https://script.google.com/macros/s/YOUR-APPS-SCRIPT/exec';
 
     // Données mock (remplace par fetch API plus tard)
     const ATHLETES = [
-      { id:'charles', name:'Charles Balland', photo:'./images/Charles.png', club:'PCA • Sénior' },
+      { id:'charles', name:'Charles Balland', photo:'./images/Charles.png', club:'PCA • Senior' },
       { id:'daniel',  name:'Daniel Balland',  photo:'./images/Daniel.png',  club:'AVEC • Légende' },
       { id:'elano',   name:'Elano Thiébaut',  photo:'./images/Elano.png',   club:'AVEC • Jeune' },
       { id:'fabio',   name:'Fabio Thiébaut',  photo:'./images/fabio.png',   club:'AVEC • Jeune' },
-      { id:'fanny',   name:'Fanny T.-Lacôte', photo:'./images/fanny.png',   club:'AVEC • Sénior' },
+      { id:'fanny',   name:'Fanny T.-Lacôte', photo:'./images/fanny.png',   club:'AVEC • Senior' },
       { id:'franck',  name:'Franck Mathieu',  photo:'./images/franck.jpg',  club:'AVEC • Master' },
-      { id:'laura',   name:'Laura Didier',    photo:'./images/Laura.png',   club:'AVEC • Sénior' },
-      { id:'maxime',  name:'Maxime Balland',  photo:'./images/maxime.jpg',  club:'MBA • Sénior' },
+      { id:'laura',   name:'Laura Didier',    photo:'./images/Laura.png',   club:'AVEC • Senior' },
+      { id:'maxime',  name:'Maxime Balland',  photo:'./images/maxime.jpg',  club:'MBA • Senior' },
       { id:'rosie',   name:'Rosie Prêtre',    photo:'./images/Rosie.png',   club:'AVEC • Master' },
-      { id:'yanis',   name:'Yanis Boulayoune',photo:'./images/Yanis.png',   club:'AVEC • Sénior' },
+      { id:'yanis',   name:'Yanis Boulayoune',photo:'./images/Yanis.png',   club:'AVEC • Senior' },
     ];
 
+    // Helpers pour miniatures (placeholders)
+    const P_MUSC = 'https://i.imgur.com/5b0q7hS.jpeg';
+    const P_POST = 'https://i.imgur.com/y1F7pF2.jpeg';
+    const P_SPEC = 'https://i.imgur.com/8YBf1bT.jpeg';
+    const P_DISC = 'https://i.imgur.com/3YJXb7a.jpeg';
+    const P_SN   = 'https://i.imgur.com/0dXw0k2.jpeg';
+    const P_CJ   = 'https://i.imgur.com/8v9M3Kj.jpeg';
+
+    // Grosse base d’exercices (à compléter/remplacer)
     const EXOS = [
-      { id:'squatcom', fam:'muscu', name:'Squat arrière complet', thumb:'https://i.imgur.com/3r5kqjG.jpeg', note:'Quadriceps • Force' },
-      { id:'squatdemi', fam:'muscu', name:'Demi squat arrière', thumb:'https://i.imgur.com/3r5kqjG.jpeg', note:'Quadriceps • Force' },
-      { id:'squatavant', fam:'muscu', name:'Squat avant', thumb:'https://i.imgur.com/3r5kqjG.jpeg', note:'Quadriceps • Force' },
-      { id:'bench', fam:'muscu', name:'Développé couché', thumb:'https://i.imgur.com/5b0q7hS.jpeg', note:'Pectoraux • Force' },
-      { id:'benchinc', fam:'muscu', name:'Développé couché incliné', thumb:'https://i.imgur.com/5b0q7hS.jpeg', note:'Pectoraux • Force' },
-      { id:'dl',    fam:'muscu', name:'Soulevé de terre', thumb:'https://i.imgur.com/y1F7pF2.jpeg', note:'Chaîne postérieure' },
-      { id:'ht',    fam:'muscu', name:'Hip Thrust', thumb:'https://i.imgur.com/y1F7pF2.jpeg', note:'Chaîne postérieure' },
-      
-      { id:'sn',    fam:'halter',name:'Arraché', thumb:'https://i.imgur.com/0dXw0k2.jpeg', note:'Explosivité • Technique' },
-      { id:'cj',    fam:'halter',name:'Épaulé-jeté', thumb:'https://i.imgur.com/8v9M3Kj.jpeg', note:'Puissance' },
-      { id:'ép',    fam:'halter',name:'Épaulé', thumb:'https://i.imgur.com/8v9M3Kj.jpeg', note:'Puissance' },
+      // Musculation — Squats
+      { id:'squat_arriere_complet', fam:'muscu', name:'Squat arrière (complet)', thumb:P_MUSC, note:'Quadriceps • Force' },
+      { id:'squat_arriere_demi', fam:'muscu', name:'Demi-squat arrière', thumb:P_MUSC, note:'Quadriceps • Force' },
+      { id:'squat_avant', fam:'muscu', name:'Squat avant (front squat)', thumb:P_MUSC, note:'Quadriceps • Gainage' },
+      { id:'squat_box', fam:'muscu', name:'Box squat', thumb:P_MUSC, note:'Puissance • Contrôle' },
+      { id:'overhead_squat', fam:'muscu', name:'Overhead squat', thumb:P_MUSC, note:'Mobilité • Stability' },
 
-      { id:'pompe',    fam:'corps',name:'Pompes', thumb:'https://i.imgur.com/8v9M3Kj.jpeg', note:'Puissance' },
-      { id:'dips',    fam:'corps',name:'Dips', thumb:'https://i.imgur.com/8v9M3Kj.jpeg', note:'Puissance' },
-      { id:'trac',    fam:'corps',name:'Tractions', thumb:'https://i.imgur.com/8v9M3Kj.jpeg', note:'Puissance' },
-      { id:'abdo',    fam:'corps',name:'Abdominaux', thumb:'https://i.imgur.com/8v9M3Kj.jpeg', note:'Puissance' },
-      { id:'gain',    fam:'corps',name:'Gainage', thumb:'https://i.imgur.com/8v9M3Kj.jpeg', note:'Puissance' },
-      { id:'burp',    fam:'corps',name:'Burpees', thumb:'https://i.imgur.com/8v9M3Kj.jpeg', note:'Puissance' },
+      // Musculation — Poussé
+      { id:'dev_couche', fam:'muscu', name:'Développé couché', thumb:P_MUSC, note:'Pectoraux • Triceps' },
+      { id:'dev_couche_incline', fam:'muscu', name:'Développé couché incliné', thumb:P_MUSC, note:'Haut de pectoraux' },
+      { id:'dev_militaire', fam:'muscu', name:'Développé militaire (strict press)', thumb:P_MUSC, note:'Épaules • Tronc' },
+      { id:'dev_epaule_halteres', fam:'muscu', name:'Développé épaules haltères', thumb:P_MUSC, note:'Stabilité • Unilatéral' },
+      { id:'push_press', fam:'muscu', name:'Push press', thumb:P_MUSC, note:'Transfert de force' },
 
-      { id:'haie',  fam:'ppg',  name:'Saut de haie', thumb:'https://i.imgur.com/8YBf1bT.jpeg', note:'Spécifique disque' },
-      
-      { id:'wall',  fam:'spec',  name:'Frappes au mur', thumb:'https://i.imgur.com/8YBf1bT.jpeg', note:'Spécifique disque' },
-      { id:'step',  fam:'spec',  name:'Déplacements disques', thumb:'https://i.imgur.com/3YJXb7a.jpeg', note:'Pieds • rythme' },
+      // Musculation — Tirage / Chaîne post
+      { id:'souleve_terre', fam:'muscu', name:'Soulevé de terre', thumb:P_POST, note:'Chaîne postérieure' },
+      { id:'souleve_terre_jt', fam:'muscu', name:'Soulevé de terre jambes tendues', thumb:P_POST, note:'Ischios • Fessiers' },
+      { id:'row_barre', fam:'muscu', name:'Rowing barre', thumb:P_POST, note:'Dos • Scapulas' },
+      { id:'row_un_lateral', fam:'muscu', name:'Rowing unilatéral haltère', thumb:P_POST, note:'Dos • Antidéséquilibre' },
+      { id:'hip_thrust', fam:'muscu', name:'Hip Thrust', thumb:P_POST, note:'Fessiers • Puissance' },
+      { id:'good_morning', fam:'muscu', name:'Good Morning', thumb:P_POST, note:'Ischios • Lombaires' },
+
+      // Haltérophilie
+      { id:'snatch', fam:'halter', name:'Arraché (Snatch)', thumb:P_SN, note:'Explosivité • Technique' },
+      { id:'power_snatch', fam:'halter', name:'Power Snatch', thumb:P_SN, note:'Vitesse • Coordination' },
+      { id:'clean_jerk', fam:'halter', name:'Épaulé-jeté (Clean & Jerk)', thumb:P_CJ, note:'Puissance' },
+      { id:'clean', fam:'halter', name:'Épaulé (Clean)', thumb:P_CJ, note:'Triple extension' },
+      { id:'power_clean', fam:'halter', name:'Power Clean', thumb:P_CJ, note:'Vitesse • Puissance' },
+      { id:'hang_clean', fam:'halter', name:'Hang Clean', thumb:P_CJ, note:'Travail du 2e tirage' },
+      { id:'jerk', fam:'halter', name:'Jeté (Jerk)', thumb:P_CJ, note:'Puissance épaule/hanches' },
+      { id:'push_jerk', fam:'halter', name:'Push Jerk', thumb:P_CJ, note:'Vitesse bras/jambes' },
+      { id:'high_pull', fam:'halter', name:'High Pull (tirage haut)', thumb:P_CJ, note:'Puissance • Trajectoire' },
+      { id:'shrug_jump', fam:'halter', name:'Shrug jump', thumb:P_CJ, note:'Synchronisation' },
+
+      // Poids du corps
+      { id:'pompes', fam:'corps', name:'Pompes', thumb:P_CJ, note:'Pectoraux • Triceps' },
+      { id:'pompes_diamant', fam:'corps', name:'Pompes diamant', thumb:P_CJ, note:'Triceps • Serratus' },
+      { id:'dips', fam:'corps', name:'Dips', thumb:P_CJ, note:'Triceps • Pectoraux' },
+      { id:'tractions_pronation', fam:'corps', name:'Tractions pronation', thumb:P_CJ, note:'Dos • Biceps' },
+      { id:'tractions_suppination', fam:'corps', name:'Tractions supination', thumb:P_CJ, note:'Biceps • Dos' },
+      { id:'abdos_crunch', fam:'corps', name:'Abdominaux — Crunch', thumb:P_CJ, note:'Grand droit' },
+      { id:'gainage_planche', fam:'corps', name:'Gainage — Planche', thumb:P_CJ, note:'Core • Anti-extension' },
+      { id:'gainage_cote', fam:'corps', name:'Gainage — Côté', thumb:P_CJ, note:'Obliques • Anti-inclinaison' },
+      { id:'burpees', fam:'corps', name:'Burpees', thumb:P_CJ, note:'Cardio • Explosivité' },
+      { id:'fentes_saut', fam:'corps', name:'Fentes sautées', thumb:P_CJ, note:'Plyo • Jambes' },
+
+      // PPG (Prépa Physique Générale)
+      { id:'ppg_haies', fam:'ppg', name:'PPG — Sauts de haies', thumb:P_SPEC, note:'Coordination • Plyo' },
+      { id:'ppg_montes_genoux', fam:'ppg', name:'PPG — Montées de genoux', thumb:P_SPEC, note:'Fréquence • Posture' },
+      { id:'ppg_talons_fesses', fam:'ppg', name:'PPG — Talons-fesses', thumb:P_SPEC, note:'Mobilité genou' },
+      { id:'ppg_multibonds', fam:'ppg', name:'PPG — Multibonds', thumb:P_SPEC, note:'Plyométrie' },
+      { id:'ppg_sauts_corde', fam:'ppg', name:'PPG — Corde à sauter', thumb:P_SPEC, note:'Rythme • Chevilles' },
+      { id:'ppg_cote_cote', fam:'ppg', name:'PPG — Appuis latéraux', thumb:P_SPEC, note:'Réactivité • Appuis' },
+
+      // Spécifiques lancers (ex. disque)
+      { id:'disq_frappes_mur', fam:'spec', name:'Disque — Frappes au mur', thumb:P_SPEC, note:'Chemin du disque' },
+      { id:'disq_deplacements', fam:'spec', name:'Disque — Déplacements (rotations)', thumb:P_DISC, note:'Pieds • Rythme' },
+      { id:'disq_stand_throw', fam:'spec', name:'Disque — Stand throw', thumb:P_DISC, note:'Blocage • Bras' },
+      { id:'disq_south_african', fam:'spec', name:'Disque — South African', thumb:P_DISC, note:'Transition • Vitesse' },
+      { id:'disq_full_throw', fam:'spec', name:'Disque — Lancer complet', thumb:P_DISC, note:'Synchronisation' },
+
+      // Spécifiques poids
+      { id:'poids_puts_statiques', fam:'spec', name:'Poids — Poussées statiques', thumb:P_MUSC, note:'Bras • Transfert' },
+      { id:'poids_glide', fam:'spec', name:'Poids — Glide (translation)', thumb:P_MUSC, note:'Placement • Ligne' },
+      { id:'poids_rot', fam:'spec', name:'Poids — Rotation', thumb:P_MUSC, note:'Rythme • Posture' },
+
+      // Spécifiques javelot / marteau (si utile plus tard)
+      { id:'jav_pas_croises', fam:'spec', name:'Javelot — Pas croisés', thumb:P_SPEC, note:'Coordination' },
+      { id:'marteau_tournants', fam:'spec', name:'Marteau — Tournants', thumb:P_SPEC, note:'Équilibre • Axe' }
     ];
 
     // ===== Athlètes (mobile: une carte = un lien cliquable) =====
@@ -201,7 +270,14 @@
     });
     qInput.addEventListener('input', ()=>{ q = qInput.value.toLowerCase(); renderExos(); });
 
-    function labelFam(f){ return f==='muscu'?'Musculation':f==='corps'?'Poids du corps':f==='halter'?'Haltérophilie':f==='ppg'?'PPG':f==='spec'?'Spécifique'; }
+    function labelFam(f){
+      return f==='muscu' ? 'Musculation'
+           : f==='halter'? 'Haltérophilie'
+           : f==='corps' ? 'Poids du corps'
+           : f==='ppg'   ? 'PPG'
+           : f==='spec'  ? 'Spécifique'
+           : 'Autre';
+    }
 
     function renderExos(){
       exList.innerHTML = '';
@@ -217,7 +293,7 @@
               <div class="ex-title">${x.name}</div>
               <div class="ex-info">${labelFam(x.fam)}${x.note ? ' • ' + x.note : ''}</div>
             </div>
-            <button class="info-btn" data-id="${x.id}">i</button>
+            <button class="info-btn" data-id="${x.id}" title="Voir l’illustration">i</button>
           `;
           row.querySelector('.info-btn').addEventListener('click', ()=>{
             openLB(x);
@@ -232,12 +308,14 @@
     const lbTitle = document.getElementById('lbTitle');
     document.getElementById('lbClose').onclick = ()=> lb.classList.remove('open');
     lb.addEventListener('click', e=>{ if(e.target===lb) lb.classList.remove('open'); });
+
     function openLB(ex){
       lbImg.src = ex.thumb;
       lbTitle.textContent = `${ex.name} • ${labelFam(ex.fam)}${ex.note?' — '+ex.note:''}`;
       lb.classList.add('open');
     }
 
+    // Init
     renderExos();
   </script>
 </body>
