@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Plans d’entraînement — Athlètes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0f172a; --card:#111827; --surface:#0b1326;
+      --text:#e5e7eb; --muted:#94a3b8; --line:#1f2937; --accent:#22c55e;
+      --radius:16px; --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
+    .wrap{max-width:1000px;margin:0 auto;padding:24px 24px 96px}
+
+    /* Header commun (DA) */
+    .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px;margin-bottom:12px}
+    .back svg{width:20px;height:20px;stroke:#fff}
+    h1{margin:0 0 6px;font-size:28px;line-height:1.15;font-weight:800;letter-spacing:.2px;position:relative;padding-bottom:8px}
+    h1::after{content:"";position:absolute;left:0;bottom:0;width:88px;height:3px;background:var(--accent);border-radius:999px;
+      box-shadow:0 0 0 1px rgba(34,197,94,.15), 0 8px 18px rgba(34,197,94,.18)}
+    .subtitle{opacity:.85;color:var(--muted);margin-bottom:16px}
+
+    /* Section Athlètes */
+    .grid{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+    @media (min-width:760px){ .grid{grid-template-columns:repeat(3,1fr)} }
+    .card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;gap:12px;padding:12px}
+    .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--accent);opacity:.9}
+    .avatar{width:64px;height:64px;border-radius:12px;overflow:hidden;border:1px solid #334155;flex:0 0 64px;background:#000}
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    .t{min-width:0;display:flex;flex-direction:column;gap:4px}
+    .name{font-weight:800}
+    .meta{font-size:12px;color:var(--muted)}
+    .go{margin-left:auto;align-self:center;background:transparent;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:6px 10px;cursor:pointer}
+    .go:hover{border-color:var(--accent)}
+
+    .section-title{margin:18px 0 8px;font-weight:700}
+    .section-line{height:1px;background:#243043;border:none;margin:0 0 14px;opacity:.6}
+
+    /* Explorateur d’exos */
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .search{flex:1;min-width:200px;background:#0b1326;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:10px 12px}
+    .pill{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#0b1326;color:var(--text);cursor:pointer;font-size:13px}
+    .pill.active{background:var(--accent);color:#0b1326;border-color:var(--accent)}
+    .ex-grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+    .ex{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    .thumb{width:100%;aspect-ratio:16/9;object-fit:cover;background:#000}
+    .ex-meta{padding:10px}
+    .ex-title{font-weight:700;font-size:14px;margin-bottom:4px}
+    .ex-info{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:6px}
+    .info-btn{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:8px;padding:3px 6px;cursor:pointer}
+
+    /* Lightbox illustration */
+    .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
+    .lightbox.open{display:flex}
+    .viewer{position:relative;width:min(100%,900px);max-height:90vh;background:#000;border-radius:12px;overflow:hidden}
+    .viewer img{display:block;width:100%;height:auto}
+    .viewer-head{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:center}
+    .viewer-title{color:#fff;font-size:14px;background:rgba(0,0,0,.5);padding:6px 10px;border-radius:8px}
+    .close{background:rgba(255,255,255,.15);border:none;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="index.html" class="back">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      Retour
+    </a>
+
+    <h1>Plans d’entraînement</h1>
+    <div class="subtitle">Choisis un athlète pour ouvrir son plan • Explore les exercices illustrés</div>
+
+    <!-- Grille athlètes -->
+    <div id="athGrid" class="grid"></div>
+
+    <div class="section-title">Exercices illustrés</div>
+    <hr class="section-line" />
+
+    <!-- Barre outils -->
+    <div class="toolbar">
+      <input id="q" class="search" placeholder="Recherche : squat, épaulé, frappes…">
+      <button class="pill active" data-fam="all">Tous</button>
+      <button class="pill" data-fam="muscu">Musculation</button>
+      <button class="pill" data-fam="halter">Haltérophilie</button>
+      <button class="pill" data-fam="spec">Spécifiques</button>
+    </div>
+
+    <!-- Grille exos -->
+    <div id="exGrid" class="ex-grid"></div>
+  </div>
+
+  <!-- Lightbox -->
+  <div id="lb" class="lightbox">
+    <div class="viewer">
+      <div class="viewer-head">
+        <div id="lbTitle" class="viewer-title"></div>
+        <button id="lbClose" class="close">✕</button>
+      </div>
+      <img id="lbImg" alt="">
+    </div>
+  </div>
+
+  <script>
+    const API = 'https://script.google.com/macros/s/YOUR-APPS-SCRIPT/exec'; // à remplacer
+
+    // ——— Mock de départ (remplace par fetch API quand prêt)
+    const ATHLETES = [
+      { id:'charles', name:'Charles Balland', photo:'https://storage.cloud.google.com/vosgeslancers/Images/Photo_id/Charles.png', club:'AAV • Seniors' },
+      { id:'fanny',   name:'Fanny T.-Lacôte', photo:'https://storage.cloud.google.com/vosgeslancers/Images/Photo_id/fanny.png', club:'AAV • Elites' },
+      { id:'franck',  name:'Franck Mathieu',  photo:'https://storage.cloud.google.com/vosgeslancers/Images/Photo_id/franck.jpg', club:'AAV • Masters' },
+      { id:'maxime',  name:'Maxime Balland',  photo:'https://storage.cloud.google.com/vosgeslancers/Images/Photo_id/maxime.jpg', club:'AAV • Seniors' },
+      { id:'laura',   name:'Laura Didier',    photo:'https://storage.cloud.google.com/vosgeslancers/Images/Photo_id/Laura.png',  club:'AAV • Seniors' },
+      { id:'rosie',   name:'Rosie Prêtre',    photo:'https://storage.cloud.google.com/vosgeslancers/Images/Photo_id/Rosie.png',  club:'AAV • Jeunes' },
+      { id:'yanis',   name:'Yanis Boulayoune',photo:'https://storage.cloud.google.com/vosgeslancers/Images/Photo_id/Yanis.png',  club:'AAV • Jeunes' },
+      { id:'daniel',  name:'Daniel Balland',  photo:'https://storage.cloud.google.com/vosgeslancers/Images/Photo_id/Daniel.png', club:'AAV • Légende' },
+    ];
+
+    const EXOS = [
+      { id:'squat', fam:'muscu', name:'Squat arrière', thumb:'https://i.imgur.com/3r5kqjG.jpeg', note:'Quadriceps • Force' },
+      { id:'bench', fam:'muscu', name:'Développé couché', thumb:'https://i.imgur.com/5b0q7hS.jpeg', note:'Pectoraux • Force' },
+      { id:'dl',    fam:'muscu', name:'Soulevé de terre', thumb:'https://i.imgur.com/y1F7pF2.jpeg', note:'Chaîne postérieure' },
+      { id:'sn',    fam:'halter',name:'Arraché', thumb:'https://i.imgur.com/0dXw0k2.jpeg', note:'Explosivité • Technique' },
+      { id:'cj',    fam:'halter',name:'Épaulé-jeté', thumb:'https://i.imgur.com/8v9M3Kj.jpeg', note:'Puissance' },
+      { id:'wall',  fam:'spec',  name:'Frappes au mur', thumb:'https://i.imgur.com/8YBf1bT.jpeg', note:'Spécifique disque' },
+      { id:'step',  fam:'spec',  name:'Déplacements disques', thumb:'https://i.imgur.com/3YJXb7a.jpeg', note:'Pieds • rythme' },
+    ];
+
+    // — Athlètes
+    const athGrid = document.getElementById('athGrid');
+    ATHLETES.forEach(a=>{
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="avatar"><img src="${a.photo}" alt="${a.name}"></div>
+        <div class="t">
+          <div class="name">${a.name}</div>
+          <div class="meta">${a.club||''}</div>
+        </div>
+        <button class="go" onclick="location.href='athlete.html?id=${encodeURIComponent(a.id)}'">Ouvrir</button>
+      `;
+      athGrid.appendChild(card);
+    });
+
+    // — Explorateur
+    let fam = 'all';
+    let q = '';
+    const pills = document.querySelectorAll('.pill');
+    const exGrid = document.getElementById('exGrid');
+    const qInput = document.getElementById('q');
+
+    pills.forEach(p=>{
+      p.addEventListener('click', ()=>{
+        pills.forEach(x=>x.classList.remove('active'));
+        p.classList.add('active');
+        fam = p.dataset.fam;
+        renderExos();
+      });
+    });
+    qInput.addEventListener('input', ()=>{ q = qInput.value.toLowerCase(); renderExos(); });
+
+    function renderExos(){
+      exGrid.innerHTML = '';
+      EXOS
+        .filter(x=> fam==='all' ? true : x.fam===fam)
+        .filter(x=> !q || x.name.toLowerCase().includes(q))
+        .forEach(x=>{
+          const card = document.createElement('div');
+          card.className = 'ex';
+          card.innerHTML = `
+            <img class="thumb" src="${x.thumb}" alt="">
+            <div class="ex-meta">
+              <div class="ex-title">${x.name}</div>
+              <div class="ex-info">
+                <span>${labelFam(x.fam)}</span>
+                <button class="info-btn" data-id="${x.id}">i</button>
+              </div>
+            </div>`;
+          exGrid.appendChild(card);
+        });
+
+      document.querySelectorAll('.info-btn').forEach(b=>{
+        b.addEventListener('click', ()=>{
+          const ex = EXOS.find(e=>e.id===b.dataset.id);
+          openLB(ex);
+        });
+      });
+    }
+    function labelFam(f){ return f==='muscu'?'Muscu':f==='halter'?'Haltéro':'Spécifique'; }
+
+    // Lightbox
+    const lb = document.getElementById('lb');
+    const lbImg = document.getElementById('lbImg');
+    const lbTitle = document.getElementById('lbTitle');
+    document.getElementById('lbClose').onclick = ()=> lb.classList.remove('open');
+    lb.addEventListener('click', e=>{ if(e.target===lb) lb.classList.remove('open'); });
+    function openLB(ex){
+      lbImg.src = ex.thumb; lbTitle.textContent = `${ex.name} • ${labelFam(ex.fam)}${ex.note?' — '+ex.note:''}`;
+      lb.classList.add('open');
+    }
+
+    renderExos();
+  </script>
+</body>
+</html>
