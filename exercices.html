@@ -142,11 +142,27 @@
     ];
 
     const EXOS = [
-      { id:'squat', fam:'muscu', name:'Squat arrière', thumb:'https://i.imgur.com/3r5kqjG.jpeg', note:'Quadriceps • Force' },
+      { id:'squatcom', fam:'muscu', name:'Squat arrière complet', thumb:'https://i.imgur.com/3r5kqjG.jpeg', note:'Quadriceps • Force' },
+      { id:'squatdemi', fam:'muscu', name:'Demi squat arrière', thumb:'https://i.imgur.com/3r5kqjG.jpeg', note:'Quadriceps • Force' },
+      { id:'squatavant', fam:'muscu', name:'Squat avant', thumb:'https://i.imgur.com/3r5kqjG.jpeg', note:'Quadriceps • Force' },
       { id:'bench', fam:'muscu', name:'Développé couché', thumb:'https://i.imgur.com/5b0q7hS.jpeg', note:'Pectoraux • Force' },
+      { id:'benchinc', fam:'muscu', name:'Développé couché incliné', thumb:'https://i.imgur.com/5b0q7hS.jpeg', note:'Pectoraux • Force' },
       { id:'dl',    fam:'muscu', name:'Soulevé de terre', thumb:'https://i.imgur.com/y1F7pF2.jpeg', note:'Chaîne postérieure' },
+      { id:'ht',    fam:'muscu', name:'Hip Thrust', thumb:'https://i.imgur.com/y1F7pF2.jpeg', note:'Chaîne postérieure' },
+      
       { id:'sn',    fam:'halter',name:'Arraché', thumb:'https://i.imgur.com/0dXw0k2.jpeg', note:'Explosivité • Technique' },
       { id:'cj',    fam:'halter',name:'Épaulé-jeté', thumb:'https://i.imgur.com/8v9M3Kj.jpeg', note:'Puissance' },
+      { id:'ép',    fam:'halter',name:'Épaulé', thumb:'https://i.imgur.com/8v9M3Kj.jpeg', note:'Puissance' },
+
+      { id:'pompe',    fam:'corps',name:'Pompes', thumb:'https://i.imgur.com/8v9M3Kj.jpeg', note:'Puissance' },
+      { id:'dips',    fam:'corps',name:'Dips', thumb:'https://i.imgur.com/8v9M3Kj.jpeg', note:'Puissance' },
+      { id:'trac',    fam:'corps',name:'Tractions', thumb:'https://i.imgur.com/8v9M3Kj.jpeg', note:'Puissance' },
+      { id:'abdo',    fam:'corps',name:'Abdominaux', thumb:'https://i.imgur.com/8v9M3Kj.jpeg', note:'Puissance' },
+      { id:'gain',    fam:'corps',name:'Gainage', thumb:'https://i.imgur.com/8v9M3Kj.jpeg', note:'Puissance' },
+      { id:'burp',    fam:'corps',name:'Burpees', thumb:'https://i.imgur.com/8v9M3Kj.jpeg', note:'Puissance' },
+
+      { id:'haie',  fam:'ppg',  name:'Saut de haie', thumb:'https://i.imgur.com/8YBf1bT.jpeg', note:'Spécifique disque' },
+      
       { id:'wall',  fam:'spec',  name:'Frappes au mur', thumb:'https://i.imgur.com/8YBf1bT.jpeg', note:'Spécifique disque' },
       { id:'step',  fam:'spec',  name:'Déplacements disques', thumb:'https://i.imgur.com/3YJXb7a.jpeg', note:'Pieds • rythme' },
     ];
@@ -185,7 +201,7 @@
     });
     qInput.addEventListener('input', ()=>{ q = qInput.value.toLowerCase(); renderExos(); });
 
-    function labelFam(f){ return f==='muscu'?'Musculation':f==='halter'?'Haltérophilie':'Spécifique'; }
+    function labelFam(f){ return f==='muscu'?'Musculation':f==='corps'?'Poids du corps':f==='halter'?'Haltérophilie':f==='ppg'?'PPG':f==='spec'?'Spécifique'; }
 
     function renderExos(){
       exList.innerHTML = '';
