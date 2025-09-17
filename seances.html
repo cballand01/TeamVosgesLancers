@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Athlète — Plan & Records</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0f172a; --card:#111827; --text:#e5e7eb; --muted:#94a3b8; --line:#1f2937; --accent:#22c55e;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
+    .wrap{max-width:960px;margin:0 auto;padding:16px 16px 96px}
+
+    /* Back */
+    .topbar{display:flex;align-items:center;margin-bottom:12px}
+    .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px}
+    .back svg{width:20px;height:20px;stroke:#fff}
+
+    /* Header commun (même DA) */
+    .page-header h1{
+      font-size:28px;font-weight:700;margin:0 0 4px;position:relative;padding-bottom:6px;text-align:left;
+    }
+    .page-header h1::after{
+      content:"";position:absolute;left:0;bottom:0;width:72px;height:3px;background:var(--accent);border-radius:999px;
+    }
+    .page-header .subtitle{ text-align:left;opacity:.8;font-size:16px;margin:0 0 24px }
+
+    /* Tabs */
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+    .tab{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#0b1326;color:var(--text);cursor:pointer;font-size:14px}
+    .tab.active{background:var(--accent);color:#0b1326;border-color:var(--accent);font-weight:700}
+
+    /* Spinner compact */
+    .loading{display:none;align-items:center;gap:8px;margin:12px 0 16px}
+    .loading .dot{
+      width:14px;height:14px;border-radius:50%;
+      border:2px solid rgba(34,197,94,.25);border-top-color:var(--accent);animation:spin .7s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading .txt{font-size:13px;color:var(--muted)}
+
+    /* Week bar & day pills (onglet Semaine) */
+    .weekbar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px}
+    .navbtn{
+      width:36px;height:36px;border-radius:50%;border:1px solid var(--line);
+      background:var(--card);color:var(--text);display:grid;place-items:center;
+      font-size:18px;cursor:pointer;transition:border-color .2s, transform .1s
+    }
+    .navbtn:hover{ border-color:var(--accent); transform:translateY(-1px) }
+    .when{font-weight:600;font-size:15px;min-width:190px;text-align:center}
+
+    .days{display:flex;gap:8px;overflow-x:auto;padding:6px 0 10px;margin-bottom:16px;scroll-behavior:smooth}
+    .daypill{
+      flex:0 0 auto; min-width:78px; text-align:center; padding:10px 12px; border-radius:999px;
+      border:1px solid var(--line); background:#0b1326; color:#fff; cursor:pointer; font-weight:500
+    }
+    .daypill small{display:block;opacity:.7}
+    .daypill.active{background:var(--accent); color:#0b1326; border-color:var(--accent); font-weight:700}
+
+    /* Liste de lignes d’exos (séance du jour) */
+    .list{display:grid;gap:12px}
+    .empty{font-size:14px;color:var(--muted);opacity:.9;padding:8px}
+    .line{
+      display:grid;grid-template-columns:6px 1fr auto;gap:10px;
+      align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;position:relative;overflow:hidden;
+    }
+    .line .bar{width:6px;border-radius:8px;background:var(--accent);height:100%}
+    .line .main{min-width:0}
+    .line .title{font-weight:800;margin:0 0 4px}
+    .line .meta{font-size:13px;color:var(--muted)}
+    .line .meta strong{color:#e5e7eb}
+    .line .note{font-size:12px;color:#cbd5e1;margin-top:6px}
+    .line .del{border:none;background:transparent;color:#94a3b8;cursor:pointer;font-size:18px}
+    .line .del:hover{color:#fff}
+
+    /* FAB */
+    .fab{
+      position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;
+      display:grid;place-items:center;background:var(--accent);color:#0b1326;
+      border:1px solid #1a2b1f;box-shadow:0 10px 30px rgba(0,0,0,.4);cursor:pointer;z-index:50;
+      font-size:28px;font-weight:900
+    }
+
+    /* Bottom sheet (ajout de ligne/exo) */
+    .sheet-backdrop{
+      position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);
+      display:none;align-items:flex-end;z-index:60
+    }
+    .sheet{
+      width:100%;max-width:960px;margin:0 auto;background:var(--card);
+      border-top-left-radius:16px;border-top-right-radius:16px;border:1px solid var(--line);
+      border-bottom:none;padding:12px 16px 16px;animation:slideup .18s ease-out;max-height:85vh;overflow:auto
+    }
+    @keyframes slideup{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .row{display:flex;gap:8px;margin:8px 0;align-items:center}
+    .row label{flex:0 0 120px;opacity:.9}
+    .row input,.row select,.row textarea{flex:1;background:#0b1326;border:1px solid var(--line);border-radius:8px;color:#e5e7eb;padding:10px}
+    .row textarea{resize:vertical}
+    .row .hint{font-size:12px;color:var(--muted)}
+    .row .two{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1}
+    .actions{display:flex;gap:8px;justify-content:flex-start;margin-top:8px}
+    .btn{border:1px solid var(--line);border-radius:10px;background:#0b1326;color:#e5e7eb;padding:8px 12px;cursor:pointer}
+    .btn.ghost{background:transparent}
+    .subtitle.small{font-size:12px;color:var(--muted)}
+
+    /* Onglet Records */
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+    .cardX{
+      position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 12px 12px 16px;
+    }
+    .cardX::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--accent);border-radius:12px 0 0 12px}
+    .cardX .title{font-weight:800;margin:0 0 4px}
+    .cardX .meta{font-size:13px;color:var(--muted)}
+
+    /* Onglet Exos illustrés */
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+    .exo{
+      background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden
+    }
+    .exo img{width:100%;height:120px;object-fit:cover;display:block;background:#000}
+    .exo .meta{padding:10px}
+    .exo .name{font-weight:700;font-size:14px;margin:0 0 4px}
+    .exo .fam{font-size:12px;color:var(--muted)}
+
+    /* Petits helpers */
+    .hide{display:none}
+    @media (max-width:480px){
+      .row label{flex:0 0 90px}
+      .row .two{grid-template-columns:1fr 1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a href="index.html" class="back">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        Retour
+      </a>
+    </div>
+
+    <header class="page-header">
+      <h1 id="athName">Fiche athlète</h1>
+      <div class="subtitle" id="athSub">Plan hebdo, records & bibliothèque d’exercices</div>
+    </header>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="week">Semaine</button>
+      <button class="tab" data-tab="records">Records</button>
+      <button class="tab" data-tab="library">Exos illustrés</button>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="loading"><div class="dot" aria-hidden="true"></div><div class="txt">Chargement…</div></div>
+
+    <!-- === Onglet Semaine === -->
+    <section id="tab-week">
+      <div class="weekbar">
+        <button class="navbtn" id="prev">‹</button>
+        <div class="when" id="when"></div>
+        <button class="navbtn" id="today">⌂</button>
+        <button class="navbtn" id="next">›</button>
+      </div>
+
+      <div class="days" id="days"></div>
+      <div class="list" id="lines"></div>
+
+      <button class="fab" id="fab" title="Ajouter un exercice">＋</button>
+    </section>
+
+    <!-- === Onglet Records === -->
+    <section id="tab-records" class="hide">
+      <div class="cards" id="records"></div>
+      <div id="recordsEmpty" class="empty hide">Aucun record pour l’instant.</div>
+    </section>
+
+    <!-- === Onglet Exos illustrés === -->
+    <section id="tab-library" class="hide">
+      <div class="row" style="margin:0 0 12px">
+        <label>Filtre</label>
+        <div class="two">
+          <select id="fFamFilter">
+            <option value="">Toutes familles</option>
+            <option>Musculation</option>
+            <option>Haltérophilie</option>
+            <option>Spécifique</option>
+          </select>
+          <input id="fSearchExo" placeholder="Rechercher un exercice…">
+        </div>
+      </div>
+      <div class="grid" id="exoGrid"></div>
+      <div id="libraryEmpty" class="empty hide">Aucun exercice ne correspond.</div>
+    </section>
+
+    <!-- Bottom sheet: ajout ligne -->
+    <div class="sheet-backdrop" id="sheetBg">
+      <div class="sheet">
+        <h3 style="margin:4px 0 8px">Ajouter un exercice</h3>
+
+        <div class="row">
+          <label>Date</label>
+          <input id="fDate" type="date">
+        </div>
+
+        <div class="row">
+          <label>Famille</label>
+          <select id="fFam">
+            <option value="">Choisir…</option>
+            <option>Musculation</option>
+            <option>Haltérophilie</option>
+            <option>Spécifique</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label>Exercice</label>
+          <input id="fExo" list="dExo" placeholder="Tape pour chercher…">
+          <datalist id="dExo"></datalist>
+        </div>
+
+        <div class="row">
+          <label>Volume</label>
+          <div class="two">
+            <input id="fSeries" type="number" min="1" placeholder="Séries">
+            <input id="fReps"   type="number" min="1" placeholder="Répétitions">
+          </div>
+        </div>
+
+        <div class="row">
+          <label>Charge</label>
+          <div class="two">
+            <input id="fKg" type="number" step="0.5" placeholder="Kg">
+            <input id="fRpe" type="number" min="1" max="10" step="0.5" placeholder="RPE (opt)">
+          </div>
+        </div>
+
+        <div class="row">
+          <label>Commentaire</label>
+          <textarea id="fNote" rows="3" placeholder="Consignes, sensations…"></textarea>
+        </div>
+
+        <div class="actions">
+          <button class="btn ghost" id="cancel">Annuler</button>
+          <button class="btn" id="save">Ajouter</button>
+        </div>
+        <div id="msg" class="subtitle small" style="margin-top:6px"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ================== CONFIG ================== */
+    const API = 'https://script.google.com/macros/s/AKfycbx-gKwaUkf6Ewo17HMYPadDaRpGlYNbXrok5Ng42zL7mrNuUldoVCYRw3sjDx7V8GZG/exec';
+    const urlParams = new URLSearchParams(location.search);
+    const ATHLETE_ID = urlParams.get('id') || 'ATHLETE_ID_EXEMPLE';
+
+    /* ================== STATE ================== */
+    const $ = (q,root=document)=>root.querySelector(q);
+    const $$ = (q,root=document)=>Array.from(root.querySelectorAll(q));
+
+    let athlete = null;
+    let exercises = [];      // {id, famille, sous_famille?, nom, alias?, image_url?}
+    let records = [];        // {exercise_id, valeur, unité, date, lieu, note}
+    let sessions = [];       // {id, date, status, note}
+    let lines = [];          // {session_id, line_id, exercise_id, series, reps, kg, rpe, commentaire, created_at}
+
+    // Semaine & sélection jour
+    let currentMonday = getMonday(new Date());
+    let selectedDate  = new Date();
+    const linesEl = $('#lines');
+    const whenEl  = $('#when');
+    const daysEl  = $('#days');
+    const loadingEl = $('#loading');
+
+    /* ================== UTILS ================== */
+    function getMonday(d){
+      d = new Date(d);
+      const day = d.getDay(), diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      return new Date(d.setDate(diff));
+    }
+    function iso(d){ const d2=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())); return d2.toISOString().split('T')[0]; }
+    function todayISO(){ return iso(new Date()); }
+    function cap(s){ return s? s.charAt(0).toUpperCase()+s.slice(1):s; }
+
+    function groupBy(arr, key){ return arr.reduce((acc,x)=>((acc[x[key]] ||= []).push(x),acc),{}); }
+    function findExerciseByName(name){
+      if(!name) return null;
+      const n = name.trim().toLowerCase();
+      return exercises.find(e=> (e.nom||'').toLowerCase()===n || (e.alias||'').toLowerCase()===n );
+    }
+
+    /* ================== TABS ================== */
+    $$('.tab').forEach(t=>{
+      t.addEventListener('click', ()=>{
+        $$('.tab').forEach(x=>x.classList.remove('active'));
+        t.classList.add('active');
+        const key = t.dataset.tab;
+        $('#tab-week').classList.toggle('hide', key!=='week');
+        $('#tab-records').classList.toggle('hide', key!=='records');
+        $('#tab-library').classList.toggle('hide', key!=='library');
+      });
+    });
+
+    /* ================== RENDER SEMAINE ================== */
+    function renderWeekBar(){
+      daysEl.innerHTML = '';
+      const pills = [];
+      for(let i=0;i<7;i++){
+        const day = new Date(currentMonday);
+        day.setDate(day.getDate()+i);
+        const pill = document.createElement('div');
+        pill.className = 'daypill';
+        pill.dataset.date = iso(day);
+        pill.innerHTML = `${day.toLocaleDateString('fr-FR',{weekday:'short'})}<small>${day.getDate()} ${day.toLocaleDateString('fr-FR',{month:'short'})}</small>`;
+        pill.onclick = ()=>{
+          selectedDate = new Date(day);
+          $('#fDate').value = iso(selectedDate);
+          highlightSelected(pill.dataset.date);
+          renderLines();
+          pill.scrollIntoView({inline:'center',behavior:'smooth',block:'nearest'});
+        };
+        daysEl.appendChild(pill);
+        pills.push(pill);
+      }
+      const end = new Date(currentMonday); end.setDate(end.getDate()+6);
+      whenEl.textContent = `${currentMonday.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})} – ${end.toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})}`;
+
+      highlightSelected(iso(selectedDate));
+      const today = todayISO();
+      const todayPill = pills.find(p=>p.dataset.date===today);
+      if(todayPill) setTimeout(()=>todayPill.scrollIntoView({inline:'center',behavior:'smooth'}),50);
+    }
+    function highlightSelected(dateStr){
+      $$('.daypill').forEach(p=>p.classList.remove('active'));
+      const target = $$('.daypill').find(p=>p.dataset.date===dateStr);
+      if(target) target.classList.add('active');
+    }
+
+    function renderLines(){
+      const dateStr = iso(selectedDate);
+      const session = sessions.find(s=>s.date===dateStr);
+      const sessionId = session ? session.id : null;
+      const rows = lines.filter(l=>l.session_id===sessionId);
+      linesEl.innerHTML = '';
+      if(rows.length===0){
+        linesEl.innerHTML = `<div class="empty">Aucun exercice ce jour.</div>`;
+        return;
+      }
+      rows.forEach(l=>{
+        const exo = exercises.find(e=>e.id===l.exercise_id) || {};
+        const card = document.createElement('div');
+        card.className = 'line';
+        card.innerHTML = `
+          <div class="bar"></div>
+          <div class="main">
+            <div class="title">${exo.nom || 'Exercice'} ${l.kg?`— <strong>${Number(l.kg)} kg</strong>`:''}</div>
+            <div class="meta">
+              <strong>${l.series||'?'}×${l.reps||'?'}</strong>${l.rpe?` • RPE ${l.rpe}`:''}
+              ${exo.famille?` • ${exo.famille}`:''}
+            </div>
+            ${l.commentaire?`<div class="note">${l.commentaire}</div>`:''}
+          </div>
+          <button class="del" title="(Append-only) Masquer côté UI" data-line="${l.line_id}">×</button>
+        `;
+        // Option: côté UI, on peut juste masquer (on ne supprime pas côté API pour garder l'historique).
+        card.querySelector('.del').onclick = ()=>{
+          if(confirm("Masquer cette ligne (l'historique complet reste en base) ?")){
+            card.remove();
+          }
+        };
+        linesEl.appendChild(card);
+      });
+    }
+
+    /* ================== RENDER RECORDS ================== */
+    function renderRecords(){
+      const box = $('#records');
+      const empty = $('#recordsEmpty');
+      box.innerHTML = '';
+      if(!records || records.length===0){ empty.classList.remove('hide'); return; }
+      empty.classList.add('hide');
+      records.forEach(r=>{
+        const exo = exercises.find(e=>e.id===r.exercise_id) || {};
+        const card = document.createElement('div');
+        card.className = 'cardX';
+        const when = r.date ? new Date(r.date).toLocaleDateString('fr-FR') : '';
+        card.innerHTML = `
+          <div class="title">${exo.nom || 'Exercice'} — <strong>${r.valeur} ${r.unité||''}</strong></div>
+          <div class="meta">${when}${r.lieu?` • ${r.lieu}`:''}${r.note?` • ${r.note}`:''}</div>
+        `;
+        box.appendChild(card);
+      });
+    }
+
+    /* ================== RENDER LIBRARY ================== */
+    function renderLibrary(){
+      const fam = $('#fFamFilter').value.trim();
+      const q   = $('#fSearchExo').value.trim().toLowerCase();
+      const grid= $('#exoGrid');
+      const empty = $('#libraryEmpty');
+      grid.innerHTML = '';
+      let list = exercises.slice();
+      if(fam) list = list.filter(e=> (e.famille||'').toLowerCase()===fam.toLowerCase());
+      if(q) list = list.filter(e=>{
+        const hay = `${e.nom||''} ${e.alias||''} ${e.sous_famille||''}`.toLowerCase();
+        return hay.includes(q);
+      });
+      if(list.length===0){ empty.classList.remove('hide'); return; }
+      empty.classList.add('hide');
+      list.forEach(e=>{
+        const card = document.createElement('div');
+        card.className = 'exo';
+        const img = e.image_url ? `<img src="${e.image_url}" alt="">` : `<img src="" alt="" style="background:#0b1326">`;
+        card.innerHTML = `
+          ${img}
+          <div class="meta">
+            <div class="name">${e.nom}</div>
+            <div class="fam">${e.famille || ''}${e.sous_famille?` • ${e.sous_famille}`:''}</div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+    $('#fFamFilter').addEventListener('change', renderLibrary);
+    $('#fSearchExo').addEventListener('input', renderLibrary);
+
+    /* ================== BOTTOM SHEET (ADD LINE) ================== */
+    const sheetBg=$('#sheetBg');
+    $('#fab').onclick=()=>{ $('#msg').textContent=''; $('#fDate').value=iso(selectedDate); sheetBg.style.display='flex'; };
+    $('#cancel').onclick=()=>{ sheetBg.style.display='none'; $('#msg').textContent=''; };
+    sheetBg.addEventListener('click',e=>{ if(e.target===sheetBg){ sheetBg.style.display='none'; $('#msg').textContent=''; } });
+
+    // Filtrage autocomplétion exercices
+    $('#fFam').addEventListener('change', ()=>{
+      const fam = $('#fFam').value.trim().toLowerCase();
+      const dl = $('#dExo'); dl.innerHTML='';
+      exercises.filter(e=> !fam || (e.famille||'').toLowerCase()===fam).forEach(e=>{
+        const opt = document.createElement('option'); opt.value = e.nom; dl.appendChild(opt);
+      });
+    });
+
+    $('#save').onclick = async ()=>{
+      const date = $('#fDate').value.trim();
+      const fam  = $('#fFam').value.trim();
+      const exoName = $('#fExo').value.trim();
+      const series  = $('#fSeries').value ? Number($('#fSeries').value) : null;
+      const reps    = $('#fReps').value   ? Number($('#fReps').value)   : null;
+      const kg      = $('#fKg').value     ? Number($('#fKg').value)     : null;
+      const rpe     = $('#fRpe').value    ? Number($('#fRpe').value)    : null;
+      const commentaire = $('#fNote').value.trim();
+
+      if(!date || !exoName || !series || !reps){
+        $('#msg').textContent = "Date, exercice, séries et répétitions sont requis.";
+        return;
+      }
+      let exo = findExerciseByName(exoName);
+      if(!exo){
+        // Si l’exo n’existe pas dans le catalogue, on peut créer côté API (optionnel). Ici, simple message.
+        $('#msg').textContent = "Exercice inconnu. Choisis dans la liste (ou ajoute-le côté catalogue).";
+        return;
+      }
+
+      $('#msg').textContent = "Ajout…";
+      try{
+        // 1) Assurer une session pour ce jour
+        let sess = sessions.find(s=>s.date===date);
+        if(!sess){
+          const created = await apiCreateSession({ athlete_id: ATHLETE_ID, date, status:'fait' });
+          if(!created || !created.ok){ throw new Error(created && created.error ? created.error : 'Création séance'); }
+          sess = created.item;
+          sessions.push(sess);
+        }
+        // 2) Append line
+        const payloadLine = {
+          session_id: sess.id,
+          exercise_id: exo.id,
+          series, reps, kg, rpe, commentaire
+        };
+        const appended = await apiAppendLine(payloadLine);
+        if(!appended || !appended.ok){ throw new Error(appended && appended.error ? appended.error : 'Ajout ligne'); }
+        const newLine = appended.item;
+        lines.push(newLine);
+
+        // UI reset
+        $('#msg').textContent='';
+        sheetBg.style.display='none';
+        $('#fSeries').value=''; $('#fReps').value=''; $('#fKg').value=''; $('#fRpe').value=''; $('#fNote').value='';
+        if(iso(selectedDate)===date) renderLines();
+      }catch(err){
+        $('#msg').textContent = "Erreur: " + String(err.message || err);
+      }
+    };
+
+    /* ================== API CALLS (Apps Script) ================== */
+    async function apiGetAthlete(id){
+      const r = await fetch(`${API}?resource=athlete&action=page&id=${encodeURIComponent(id)}`);
+      return r.json();
+    }
+    async function apiGetExercises(){
+      const r = await fetch(`${API}?resource=exercises`);
+      return r.json();
+    }
+    async function apiGetWeek(id, fromISO, toISO){
+      const r = await fetch(`${API}?resource=sessions&athlete_id=${encodeURIComponent(id)}&from=${fromISO}&to=${toISO}`);
+      return r.json();
+    }
+    async function apiCreateSession(item){
+      const form = new URLSearchParams();
+      form.append('resource','session');
+      form.append('action','create');
+      form.append('item', JSON.stringify(item));
+      const r = await fetch(API, { method:'POST', body: form });
+      return r.json();
+    }
+    async function apiAppendLine(item){
+      const form = new URLSearchParams();
+      form.append('resource','session_line');
+      form.append('action','append'); // append-only
+      form.append('item', JSON.stringify(item));
+      const r = await fetch(API, { method:'POST', body: form });
+      return r.json();
+    }
+
+    /* ================== NAVIGATION SEMAINE ================== */
+    $('#prev').onclick = ()=>{ currentMonday.setDate(currentMonday.getDate()-7); refreshWeek(); };
+    $('#next').onclick = ()=>{ currentMonday.setDate(currentMonday.getDate()+7); refreshWeek(); };
+    $('#today').onclick= ()=>{ currentMonday = getMonday(new Date()); selectedDate = new Date(); refreshWeek(); $('#fDate').value=iso(selectedDate); };
+
+    async function refreshWeek(){
+      renderWeekBar();
+      await loadWeekData();
+      renderLines();
+    }
+
+    async function loadWeekData(){
+      loadingEl.style.display='flex';
+      try{
+        const from = iso(currentMonday);
+        const end  = new Date(currentMonday); end.setDate(end.getDate()+6);
+        const to   = iso(end);
+        const j = await apiGetWeek(ATHLETE_ID, from, to);
+        sessions = (j.sessions||[]);
+        lines    = (j.lines||[]);
+      }catch(e){
+        console.error(e);
+        sessions = []; lines = [];
+      }finally{
+        loadingEl.style.display='none';
+      }
+    }
+
+    /* ================== INIT ================== */
+    (async function init(){
+      // Récup athlète + catalogue + records
+      loadingEl.style.display='flex';
+      try{
+        // Athlete + records
+        const page = await apiGetAthlete(ATHLETE_ID);
+        if(page && page.athlete){ athlete = page.athlete; $('#athName').textContent = athlete.nom || 'Fiche athlète'; }
+        if(page && page.records){ records = page.records || []; }
+        renderRecords();
+
+        // Catalogue
+        const cat = await apiGetExercises();
+        exercises = (cat.items||cat.exercises||[]);
+
+        // Préparer datalist selon famille initiale
+        $('#fFam').dispatchEvent(new Event('change'));
+
+        // Semaine courante
+        renderWeekBar();
+        $('#fDate').value = iso(selectedDate);
+        await loadWeekData();
+        renderLines();
+
+        // Library
+        renderLibrary();
+      }catch(e){
+        console.error(e);
+      }finally{
+        loadingEl.style.display='none';
+      }
+    })();
+  </script>
+</body>
+</html>
