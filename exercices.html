@@ -12,7 +12,7 @@
     }
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
-    .wrap{max-width:1000px;margin:0 auto;padding:24px 16px 96px}
+    .wrap{max-width:1000px;margin:0 auto;padding:24px 16px 120px}
 
     /* Header */
     .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px;margin-bottom:12px}
@@ -20,7 +20,16 @@
     h1{margin:0 0 6px;font-size:28px;line-height:1.15;font-weight:800;letter-spacing:.2px;position:relative;padding-bottom:8px}
     h1::after{content:"";position:absolute;left:0;bottom:0;width:88px;height:3px;background:var(--accent);border-radius:999px;
       box-shadow:0 0 0 1px rgba(34,197,94,.15), 0 8px 18px rgba(34,197,94,.18)}
-    .subtitle{opacity:.85;color:var(--muted);margin-bottom:16px}
+    .subtitle{opacity:.85;color:var(--muted);margin:6px 0 12px}
+
+    /* Header actions (Admin + Ajouter) */
+    .head-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 16px}
+    .pill{
+      padding:8px 12px;border-radius:999px;border:1px solid var(--line);
+      background:#0b1326;color:var(--text);cursor:pointer;font-size:13px
+    }
+    .pill.primary{background:var(--accent);color:#0b1326;border-color:var(--accent);font-weight:700}
+    [data-admin]{display:none} /* masqué par défaut, visible si admin */
 
     /* ====== ATHLÈTES (mobile: liste verticale) ====== */
     .ath-list{display:grid;gap:10px}
@@ -38,12 +47,12 @@
     .ath-chevron{margin-left:auto;color:#cbd5e1;font-size:20px;opacity:.85}
 
     /* ====== Exercices (mobile: liste) ====== */
-    .section-title{margin:40px 0 8px;font-weight:700} /* + espace vertical avant la section */
+    .section-title{margin:40px 0 8px;font-weight:700}
     .section-line{height:1px;background:#243043;border:none;margin:0 0 14px;opacity:.6}
     .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
     .search{flex:1;min-width:180px;background:#0b1326;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:10px 12px}
-    .pill{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#0b1326;color:var(--text);cursor:pointer;font-size:13px}
-    .pill.active{background:var(--accent);color:#0b1326;border-color:var(--accent)}
+    .filter{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#0b1326;color:var(--text);cursor:pointer;font-size:13px}
+    .filter.active{background:var(--accent);color:#0b1326;border-color:var(--accent)}
 
     .ex-list{display:grid;gap:10px}
     .ex-row{
@@ -53,11 +62,7 @@
     .ex-thumb{width:120px;height:68px;flex:0 0 120px;border-radius:10px;overflow:hidden;background:#000}
     .ex-thumb img{width:100%;height:100%;object-fit:cover}
     .ex-txt{min-width:0}
-    .ex-title{
-      font-weight:700;font-size:14px;
-      /* mobile: multi-ligne */
-      white-space:normal;
-    }
+    .ex-title{font-weight:700;font-size:14px;white-space:normal}
     .ex-info{font-size:12px;color:var(--muted);margin-top:2px}
     .info-btn{
       margin-left:auto;border:1px solid var(--line);background:transparent;color:var(--text);
@@ -69,19 +74,16 @@
 
     /* ====== Desktop adaptations ====== */
     @media (min-width:760px){
-      .wrap{padding:24px 24px 96px}
-      /* Athlètes → grille */
+      .wrap{padding:24px 24px 120px}
       .ath-list{grid-template-columns:repeat(3,1fr)}
-      a.ath-card{flex-direction:row}
       .ath-avatar{width:64px;height:64px;flex:0 0 64px}
 
-      /* Exos → cartes en grille */
       .ex-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
       .ex-row{display:block;padding:0;overflow:hidden}
       .ex-thumb{width:100%;height:auto;aspect-ratio:16/9;border-radius:12px 12px 0 0}
       .ex-thumb img{border-bottom:1px solid var(--line)}
       .ex-txt{padding:10px 12px}
-      .ex-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis} /* ellipsis desktop */
+      .ex-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .info-btn{margin:8px 12px 12px auto;display:block}
     }
 
@@ -93,6 +95,20 @@
     .viewer-head{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:center}
     .viewer-title{color:#fff;font-size:14px;background:rgba(0,0,0,.5);padding:6px 10px;border-radius:8px}
     .close{background:rgba(255,255,255,.15);border:none;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer}
+
+    /* Sheets (login + add exercise) */
+    .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);display:none;align-items:flex-end;z-index:1100}
+    .sheet{width:100%;max-width:1000px;margin:0 auto;background:var(--card);
+      border-top-left-radius:16px;border-top-right-radius:16px;border:1px solid var(--line);
+      border-bottom:none;padding:14px 16px 16px;animation:slideup .18s ease-out;max-height:85vh;overflow:auto}
+    @keyframes slideup{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .row{display:flex;gap:8px;margin:8px 0;align-items:center}
+    .row label{flex:0 0 130px;opacity:.9}
+    .row input,.row select,.row textarea{flex:1;background:#0b1326;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:10px}
+    .actions{display:flex;gap:8px;justify-content:flex-start;margin-top:8px}
+    .btn{border:1px solid var(--line);border-radius:10px;background:#0b1326;color:#e5e7eb;padding:8px 12px;cursor:pointer}
+    .btn.ghost{background:transparent}
+    .small{font-size:12px;color:var(--muted)}
   </style>
 </head>
 <body>
@@ -103,9 +119,15 @@
     </a>
 
     <h1>Plans d’entraînement</h1>
-    <div class="subtitle">Choisis un athlète pour ouvrir son plan • Explore les exercices illustrés</div>
+    <p class="subtitle">Choisis un athlète pour ouvrir son plan • Explore les exercices illustrés</p>
 
-    <!-- Liste athlètes (mobile: 1 par ligne) -->
+    <!-- Header actions -->
+    <div class="head-actions">
+      <button id="btnAdmin" class="pill">Se connecter</button>
+      <button id="btnAddExo" class="pill primary" data-admin>＋ Ajouter un exercice</button>
+    </div>
+
+    <!-- Liste athlètes -->
     <div id="athList" class="ath-list"></div>
 
     <div class="section-title">Exercices illustrés</div>
@@ -114,19 +136,19 @@
     <!-- Barre outils -->
     <div class="toolbar">
       <input id="q" class="search" placeholder="Recherche : squat, épaulé, frappes…">
-      <button class="pill active" data-fam="all">Tous</button>
-      <button class="pill" data-fam="muscu">Musculation</button>
-      <button class="pill" data-fam="halter">Haltérophilie</button>
-      <button class="pill" data-fam="corps">Poids du corps</button>
-      <button class="pill" data-fam="ppg">PPG</button>
-      <button class="pill" data-fam="spec">Spécifique</button>
+      <button class="filter active" data-fam="all">Tous</button>
+      <button class="filter" data-fam="muscu">Musculation</button>
+      <button class="filter" data-fam="halter">Haltérophilie</button>
+      <button class="filter" data-fam="corps">Poids du corps</button>
+      <button class="filter" data-fam="ppg">PPG</button>
+      <button class="filter" data-fam="spec">Spécifique</button>
     </div>
 
     <!-- Liste / grille d’exos -->
     <div id="exList" class="ex-list"></div>
   </div>
 
-  <!-- Lightbox -->
+  <!-- Lightbox (illustrations) -->
   <div id="lb" class="lightbox">
     <div class="viewer">
       <div class="viewer-head">
@@ -137,11 +159,182 @@
     </div>
   </div>
 
-  <script>
-    // Remplace par ton Apps Script si besoin
-    const API = 'https://script.google.com/macros/s/YOUR-APPS-SCRIPT/exec';
+  <!-- Sheet: Connexion admin -->
+  <div id="loginSheet" class="sheet-backdrop">
+    <div class="sheet">
+      <h3 style="margin:4px 0 8px">Connexion admin</h3>
+      <div class="row"><label>Mot de passe</label><input id="adminPwd" type="password" placeholder="••••••" autocomplete="current-password"></div>
+      <div class="actions">
+        <button class="btn ghost" id="loginCancel">Annuler</button>
+        <button class="btn" id="loginSubmit">Se connecter</button>
+      </div>
+      <div id="loginMsg" class="small" style="margin-top:6px"></div>
+    </div>
+  </div>
 
-    // Données mock (remplace par fetch API plus tard)
+  <!-- Sheet: Ajouter un exercice (admin only) -->
+  <div id="addExoSheet" class="sheet-backdrop">
+    <div class="sheet">
+      <h3 style="margin:4px 0 8px">Ajouter un exercice</h3>
+      <div class="row"><label>Nom</label><input id="exName" placeholder="ex: Développé couché"></div>
+      <div class="row">
+        <label>Famille</label>
+        <select id="exFam">
+          <option value="muscu">Musculation</option>
+          <option value="halter">Haltérophilie</option>
+          <option value="corps">Poids du corps</option>
+          <option value="ppg">PPG</option>
+          <option value="spec">Spécifique</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Type de mesure</label>
+        <select id="exMeasure">
+          <option value="sets_reps_kg">Séries + Rép + Kg</option>
+          <option value="sets_reps">Séries + Rép</option>
+          <option value="reps">Répétitions</option>
+          <option value="weight_only">Poids (Kg)</option>
+          <option value="time">Temps</option>
+          <option value="distance">Distance</option>
+          <option value="technique">Technique / Quali.</option>
+        </select>
+      </div>
+      <div class="row"><label>Miniature</label><input id="exThumb" placeholder="URL image miniature"></div>
+      <div class="row"><label>Illustration</label><input id="exFull" placeholder="URL image/vidéo (optionnel)"></div>
+      <div class="row"><label>Tags</label><input id="exTags" placeholder="ex: pousser, poitrine"></div>
+      <div class="row"><label>Note</label><input id="exNote" placeholder="ex: Pectoraux • Triceps"></div>
+
+      <div class="actions">
+        <button class="btn ghost" id="addExoCancel">Annuler</button>
+        <button class="btn" id="addExoSave">Enregistrer</button>
+      </div>
+      <div id="addExoMsg" class="small" style="margin-top:6px"></div>
+    </div>
+  </div>
+
+  <script>
+    /* ====== API base ====== */
+    const API = 'https://script.google.com/macros/s/YOUR-APPS-SCRIPT/exec'; // ← remplace
+
+    /* ====== Auth front (token en localStorage) ====== */
+    const btnAdmin = document.getElementById('btnAdmin');
+    const adminSheet = document.getElementById('loginSheet');
+    const adminPwd = document.getElementById('adminPwd');
+    const loginMsg = document.getElementById('loginMsg');
+
+    function authToken(){ return localStorage.getItem('authToken') || ''; }
+    function isAdmin(){ return !!authToken(); }
+    function authHeader(){
+      const t = authToken();
+      return t ? { 'Authorization':'Bearer '+t } : {};
+    }
+    function openLogin(){ adminSheet.style.display='flex'; loginMsg.textContent=''; adminPwd.value=''; adminPwd.focus(); }
+    function closeLogin(){ adminSheet.style.display='none'; loginMsg.textContent=''; adminPwd.value=''; }
+    async function doLogin(){
+      loginMsg.textContent = 'Vérification…';
+      try{
+        const r = await fetch(API+'?resource=auth&action=login', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ password: adminPwd.value })
+        });
+        const j = await r.json();
+        if(j && j.ok && j.token){
+          localStorage.setItem('authToken', j.token);
+          loginMsg.textContent = 'Connecté !';
+          setTimeout(()=>{ closeLogin(); refreshAdminUI(); }, 300);
+        }else{
+          loginMsg.textContent = 'Mot de passe invalide.';
+        }
+      }catch(e){
+        loginMsg.textContent = 'Erreur réseau.';
+      }
+    }
+    function logout(){
+      localStorage.removeItem('authToken');
+      refreshAdminUI();
+    }
+    function refreshAdminUI(){
+      const adminBits = document.querySelectorAll('[data-admin]');
+      if(isAdmin()){
+        btnAdmin.textContent = 'Admin ✅ (Déconnexion)';
+        btnAdmin.onclick = logout;
+        adminBits.forEach(x=>x.style.display='');
+      }else{
+        btnAdmin.textContent = 'Se connecter';
+        btnAdmin.onclick = openLogin;
+        adminBits.forEach(x=>x.style.display='none');
+      }
+    }
+    document.getElementById('loginCancel').onclick = closeLogin;
+    document.getElementById('loginSubmit').onclick = doLogin;
+    adminSheet.addEventListener('click', e=>{ if(e.target===adminSheet) closeLogin(); });
+
+    /* ====== Add Exercise sheet (admin) ====== */
+    const addExoBtn = document.getElementById('btnAddExo');
+    const addExoSheet = document.getElementById('addExoSheet');
+    const addExoMsg = document.getElementById('addExoMsg');
+    const exName = document.getElementById('exName');
+    const exFam = document.getElementById('exFam');
+    const exMeasure = document.getElementById('exMeasure');
+    const exThumb = document.getElementById('exThumb');
+    const exFull = document.getElementById('exFull');
+    const exTags = document.getElementById('exTags');
+    const exNote = document.getElementById('exNote');
+
+    function openAddExo(){
+      if(!isAdmin()){ openLogin(); return; }
+      addExoMsg.textContent=''; exName.value=''; exThumb.value=''; exFull.value='';
+      exTags.value=''; exNote.value='';
+      exFam.value='muscu'; exMeasure.value='sets_reps_kg';
+      addExoSheet.style.display='flex';
+    }
+    function closeAddExo(){ addExoSheet.style.display='none'; addExoMsg.textContent=''; }
+    document.getElementById('addExoCancel').onclick = closeAddExo;
+    addExoSheet.addEventListener('click', e=>{ if(e.target===addExoSheet) closeAddExo(); });
+    addExoBtn.onclick = openAddExo;
+
+    async function createExercise(payload){
+      const r = await fetch(API+'?resource=exercises&action=create', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', ...authHeader() },
+        body: JSON.stringify(payload)
+      });
+      return r.json();
+    }
+
+    document.getElementById('addExoSave').onclick = async ()=>{
+      const name = exName.value.trim();
+      const fam  = exFam.value;
+      const measure_mode = exMeasure.value;
+      const thumb = exThumb.value.trim();
+      const full  = exFull.value.trim();
+      const tags  = exTags.value.split(',').map(s=>s.trim()).filter(Boolean);
+      const note  = exNote.value.trim();
+
+      if(!name){ addExoMsg.textContent='Le nom est obligatoire.'; return; }
+      addExoMsg.textContent='Enregistrement…';
+      try{
+        const payload = { name, family:fam, measure_mode, media_thumb:thumb, media_full:full, tags, note };
+        const res = await createExercise(payload);
+        if(res && res.ok){
+          addExoMsg.textContent = 'Ajouté !';
+          // Option UX : injecter localement pour voir l’exo tout de suite
+          EXOS.unshift({
+            id: res.item?.id || (name.toLowerCase().replace(/\s+/g,'_')+'_'+Date.now()),
+            fam, name, thumb: thumb || P_MUSC, note
+          });
+          renderExos();
+          setTimeout(closeAddExo, 350);
+        }else{
+          addExoMsg.textContent = 'Erreur: ' + (res && res.error ? res.error : 'API');
+        }
+      }catch(e){
+        addExoMsg.textContent = 'Erreur réseau.';
+      }
+    };
+
+    /* ====== Données mock (athlètes + exos de départ) ====== */
     const ATHLETES = [
       { id:'charles', name:'Charles Balland', photo:'./images/Charles.png', club:'PCA • Senior' },
       { id:'daniel',  name:'Daniel Balland',  photo:'./images/Daniel.png',  club:'AVEC • Légende' },
@@ -155,7 +348,6 @@
       { id:'yanis',   name:'Yanis Boulayoune',photo:'./images/Yanis.png',   club:'AVEC • Senior' },
     ];
 
-    // Helpers pour miniatures (placeholders)
     const P_MUSC = 'https://i.imgur.com/5b0q7hS.jpeg';
     const P_POST = 'https://i.imgur.com/y1F7pF2.jpeg';
     const P_SPEC = 'https://i.imgur.com/8YBf1bT.jpeg';
@@ -222,21 +414,28 @@
       { id:'ppg_cote_cote', fam:'ppg', name:'PPG — Appuis latéraux', thumb:P_SPEC, note:'Réactivité • Appuis' },
 
       // Spécifiques lancers (ex. disque)
-      { id:'disq_frappes_mur', fam:'spec', name:'Disque — Frappes au mur', thumb:P_SPEC, note:'Chemin du disque' },
-      { id:'disq_deplacements', fam:'spec', name:'Disque — Déplacements (rotations)', thumb:P_DISC, note:'Pieds • Rythme' },
-      { id:'disq_stand_throw', fam:'spec', name:'Disque — Stand throw', thumb:P_DISC, note:'Blocage • Bras' },
-      { id:'disq_south_african', fam:'spec', name:'Disque — South African', thumb:P_DISC, note:'Transition • Vitesse' },
-      { id:'disq_full_throw', fam:'spec', name:'Disque — Lancer complet', thumb:P_DISC, note:'Synchronisation' },
+      { id:'disq_frappes_mur', fam:'spec', name:'Disque — Frappes au mur', thumb:P_SPEC, note:'Rythme • Posture' },
+      { id:'disq_deplacements', fam:'spec', name:'Disque — Déplacements (rotations)', thumb:P_DISC, note:'Rythme • Posture' },
+      { id:'disq_stand_throw', fam:'spec', name:'Disque — Stand throw', thumb:P_DISC, note:'Rythme • Posture' },
+      { id:'disq_south_african', fam:'spec', name:'Disque — South African', thumb:P_DISC, note:'Rythme • Posture' },
+      { id:'disq_full_throw', fam:'spec', name:'Disque — Lancer complet', thumb:P_DISC, note:'Rythme • Posture' },
 
       // Spécifiques poids
-      { id:'poids_sansélan', fam:'spec', name:'Poids — Sans élan', thumb:P_MUSC, note:'Bras • Transfert' },
-      { id:'poids_glide', fam:'spec', name:'Poids — Jet complet', thumb:P_MUSC, note:'Placement • Ligne' },
-      { id:'poids_robertson', fam:'spec', name:'Poids — Robertson', thumb:P_MUSC, note:'Placement • Ligne' },
-      { id:'poids_mimes', fam:'spec', name:'Poids — Mimes', thumb:P_MUSC, note:'Rythme • Posture' },
-      { id:'poids_piedgauche', fam:'spec', name:'Poids — ', thumb:P_MUSC, note:'Rythme • Posture' },
+      { id:'poids_sansélan', fam:'spec', name:'Poids — Sans élan', thumb:'./images/Exercices/poids/Sans-élan.png', note:'Rythme • Posture' },
+      { id:'poids_glide', fam:'spec', name:'Poids — Jet complet', thumb:'./images/Exercices/poids/complet.png', note:'Rythme • Posture' },
+      { id:'poids_robertson', fam:'spec', name:'Poids — Robertson', thumb:'./images/Exercices/poids/Robertson.png', note:'Rythme • Posture' },
+      { id:'poids_mimes', fam:'spec', name:'Poids — Mimes simples', thumb:'./images/Exercices/poids/mimes.png', note:'Rythme • Posture' },
+      { id:'poids_piedgauche', fam:'spec', name:'Poids — Mimes percussion butoire', thumb:'./images/Exercices/poids/frappe.png', note:'Rythme • Posture' },
+      { id:'poids_elastique', fam:'spec', name:'Poids — Ramener élastique', thumb:'./images/Exercices/poids/ramene_elastique.png', note:'Rythme • Posture' },
+      { id:'poids_ramenerlancer', fam:'spec', name:'Poids — Ramener-Lancer', thumb:'./images/Exercices/poids/ramenéLance.png', note:'Rythme • Posture' },
+      { id:'poids_mimeslouds', fam:'spec', name:'Poids — Mimes lestés', thumb:'./images/Exercices/poids/mimes_10kg.png', note:'Rythme • Posture' },
+      { id:'poids_fentes', fam:'spec', name:'Poids — Fentes Dynamiques', thumb:'./images/Exercices/poids/fentes_rapide.png', note:'Rythme • Posture' },
+      { id:'poids_mimes_enchaine', fam:'spec', name:'Poids — Mimes enchainés', thumb:'./images/Exercices/poids/déplacement_enchainé.png', note:'Rythme • Posture' },
+      { id:'poids_mimes_finale', fam:'spec', name:'Poids — Mimes finale avec barre', thumb:'./images/Exercices/poids/déplacement_enchainé.png', note:'Rythme • Posture' },
+      { id:'poids_frappes', fam:'spec', name:'Poids — Frappes au mur (medecinBall)', thumb:'./images/Exercices/poids/frappe mur.png', note:'Rythme • Posture' },
     ];
 
-    // ===== Athlètes (mobile: une carte = un lien cliquable) =====
+    /* ====== Athlètes (cartes cliquables) ====== */
     const athList = document.getElementById('athList');
     ATHLETES.forEach(a=>{
       const card = document.createElement('a');
@@ -253,16 +452,16 @@
       athList.appendChild(card);
     });
 
-    // ===== Explorateur d’exos =====
+    /* ====== Explorateur d’exos ====== */
     let fam = 'all';
     let q = '';
-    const pills = document.querySelectorAll('.pill');
+    const filters = document.querySelectorAll('.filter');
     const exList = document.getElementById('exList');
     const qInput = document.getElementById('q');
 
-    pills.forEach(p=>{
+    filters.forEach(p=>{
       p.addEventListener('click', ()=>{
-        pills.forEach(x=>x.classList.remove('active'));
+        filters.forEach(x=>x.classList.remove('active'));
         p.classList.add('active');
         fam = p.dataset.fam;
         renderExos();
@@ -295,28 +494,26 @@
             </div>
             <button class="info-btn" data-id="${x.id}" title="Voir l’illustration">i</button>
           `;
-          row.querySelector('.info-btn').addEventListener('click', ()=>{
-            openLB(x);
-          });
+          row.querySelector('.info-btn').addEventListener('click', ()=> openLB(x));
           exList.appendChild(row);
         });
     }
 
-    // Lightbox
+    /* Lightbox */
     const lb = document.getElementById('lb');
     const lbImg = document.getElementById('lbImg');
     const lbTitle = document.getElementById('lbTitle');
     document.getElementById('lbClose').onclick = ()=> lb.classList.remove('open');
     lb.addEventListener('click', e=>{ if(e.target===lb) lb.classList.remove('open'); });
-
     function openLB(ex){
       lbImg.src = ex.thumb;
       lbTitle.textContent = `${ex.name} • ${labelFam(ex.fam)}${ex.note?' — '+ex.note:''}`;
       lb.classList.add('open');
     }
 
-    // Init
+    /* Boot */
     renderExos();
+    refreshAdminUI();
   </script>
 </body>
 </html>
