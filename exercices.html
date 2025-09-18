@@ -222,6 +222,8 @@
     const adminPwd = document.getElementById('adminPwd');
     const loginMsg = document.getElementById('loginMsg');
 
+    const FRONT_PASSWORD = "CH48ba84&*"; // à changer évidemment
+
     function authToken(){ return localStorage.getItem('authToken') || ''; }
     function isAdmin(){ return !!authToken(); }
     function authHeader(){
@@ -231,23 +233,13 @@
     function openLogin(){ adminSheet.style.display='flex'; loginMsg.textContent=''; adminPwd.value=''; adminPwd.focus(); }
     function closeLogin(){ adminSheet.style.display='none'; loginMsg.textContent=''; adminPwd.value=''; }
     async function doLogin(){
-      loginMsg.textContent = 'Vérification…';
-      try{
-        const r = await fetch(API+'?resource=auth&action=login', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ password: adminPwd.value })
-        });
-        const j = await r.json();
-        if(j && j.ok && j.token){
-          localStorage.setItem('authToken', j.token);
-          loginMsg.textContent = 'Connecté !';
-          setTimeout(()=>{ closeLogin(); refreshAdminUI(); }, 300);
-        }else{
-          loginMsg.textContent = 'Mot de passe invalide.';
-        }
-      }catch(e){
-        loginMsg.textContent = 'Erreur réseau.';
+      if (adminPwd.value === FRONT_PASSWORD) {
+        // Simule un token
+        localStorage.setItem('authToken', 'local-dev-token');
+        loginMsg.textContent = 'Connecté !';
+        setTimeout(()=>{ closeLogin(); refreshAdminUI(); }, 300);
+      } else {
+        loginMsg.textContent = 'Mot de passe invalide.';
       }
     }
     function logout(){
@@ -261,7 +253,7 @@
         btnAdmin.onclick = logout;
         adminBits.forEach(x=>x.style.display='');
       }else{
-        btnAdmin.textContent = 'Se connecter';
+        btnAdmin.textContent = 'Administrateur';
         btnAdmin.onclick = openLogin;
         adminBits.forEach(x=>x.style.display='none');
       }
@@ -358,45 +350,45 @@
     // Grosse base d’exercices (à compléter/remplacer)
     const EXOS = [
       // Musculation — Squats
-      { id:'squat_arriere_complet', fam:'muscu', name:'Squat arrière complet', thumb:'./images/squatComplet.jpeg', note:'Quadriceps • Force' },
+      { id:'squat_arriere_complet', fam:'muscu', name:'Squat arrière complet', thumb:'./images/Exercices/squatComplet.jpeg', note:'Quadriceps • Force' },
       { id:'squat_arriere_demi', fam:'muscu', name:'Demi-squat arrière', thumb:P_MUSC, note:'Quadriceps • Force' },
-      { id:'squat_avant', fam:'muscu', name:'Squat avant (front squat)', thumb:'./images/front-squat.jpg', note:'Quadriceps • Gainage' },
-      { id:'overhead_squat', fam:'muscu', name:'Overhead squat', thumb:'./images/overhead-squat.jpg', note:'Mobilité • Stability' },
-      { id:'squat_bulgare', fam:'muscu', name:'Squat Bulgare', thumb:'./images/SquatBulgare.png', note:'Mobilité • Stability' },
+      { id:'squat_avant', fam:'muscu', name:'Squat avant (front squat)', thumb:'./images/Exercices/front-squat.jpg', note:'Quadriceps • Gainage' },
+      { id:'overhead_squat', fam:'muscu', name:'Overhead squat', thumb:'./images/Exercices/overhead-squat.jpg', note:'Mobilité • Stability' },
+      { id:'squat_bulgare', fam:'muscu', name:'Squat Bulgare', thumb:'./images/Exercices/SquatBulgare.png', note:'Mobilité • Stability' },
 
       // Musculation — Poussé
-      { id:'dev_couche', fam:'muscu', name:'Développé couché', thumb:'./images/Bench1.png', note:'Pectoraux • Triceps' },
-      { id:'dev_couche_incline', fam:'muscu', name:'Développé couché incliné', thumb:'./images/BenchInc1.png', note:'Haut de pectoraux' },
-      { id:'dev_militaire', fam:'muscu', name:'Développé militaire (strict press)', thumb:'./images/devMili.jpg', note:'Épaules • Tronc' },
+      { id:'dev_couche', fam:'muscu', name:'Développé couché', thumb:'./images/Exercices/Bench1.png', note:'Pectoraux • Triceps' },
+      { id:'dev_couche_incline', fam:'muscu', name:'Développé couché incliné', thumb:'./images/Exercices/BenchInc1.png', note:'Haut de pectoraux' },
+      { id:'dev_militaire', fam:'muscu', name:'Développé militaire (strict press)', thumb:'./images/Exercices/devMili.jpg', note:'Épaules • Tronc' },
       { id:'dev_epaule_halteres', fam:'muscu', name:'Développé épaules haltères', thumb:P_MUSC, note:'Stabilité • Unilatéral' },
       { id:'push_press', fam:'muscu', name:'Push press', thumb:P_MUSC, note:'Transfert de force' },
 
       // Musculation — Tirage / Chaîne post
-      { id:'souleve_terre', fam:'muscu', name:'Soulevé de terre', thumb:'./images/sdt.jpg', note:'Chaîne postérieure' },
-      { id:'souleve_terre_jt', fam:'muscu', name:'Soulevé de terre jambes tendues', thumb:'./images/sdtjambetendu.webp', note:'Ischios • Fessiers' },
-      { id:'row_barre', fam:'muscu', name:'Rowing barre', thumb:'./images/rowing-barre-buste-penche-exercice.jpg', note:'Dos • Scapulas' },
+      { id:'souleve_terre', fam:'muscu', name:'Soulevé de terre', thumb:'./images/Exercices/sdt.jpg', note:'Chaîne postérieure' },
+      { id:'souleve_terre_jt', fam:'muscu', name:'Soulevé de terre jambes tendues', thumb:'./images/Exercices/sdtjambetendu.webp', note:'Ischios • Fessiers' },
+      { id:'row_barre', fam:'muscu', name:'Rowing barre', thumb:'./images/Exercices/rowing-barre-buste-penche-exercice.jpg', note:'Dos • Scapulas' },
       { id:'row_un_lateral', fam:'muscu', name:'Rowing unilatéral haltère', thumb:P_POST, note:'Dos • Antidéséquilibre' },
       { id:'tirage', fam:'muscu', name:'Tirage couché', thumb:P_MUSC, note:'Dos • ...' },
-      { id:'hip_thrust', fam:'muscu', name:'Hip Thrust', thumb:'./images/HipThrust.png', note:'Fessiers • Puissance' },
-      { id:'curl', fam:'muscu', name:'Biceps', thumb:'./images/CurlBarre.png', note:'Ischios • Lombaires' },
+      { id:'hip_thrust', fam:'muscu', name:'Hip Thrust', thumb:'./images/Exercices/HipThrust.png', note:'Fessiers • Puissance' },
+      { id:'curl', fam:'muscu', name:'Biceps', thumb:'./images/Exercices/CurlBarre.png', note:'Ischios • Lombaires' },
       { id:'good_morning', fam:'muscu', name:'Good Morning', thumb:P_MUSC, note:'Ischios • Lombaires' },
-      { id:'elev_lat', fam:'muscu', name:'Elévation latérale', thumb:'./images/ElevLat.png', note:'Ischios • Lombaires' },
-      { id:'triceps', fam:'muscu', name:'Triceps', thumb:'./images/Triceps.png', note:'Ischios • Lombaires' },
-      { id:'tirage_poit', fam:'muscu', name:'Tirage poitrine', thumb:'./images/tiragePoit.png', note:'Ischios • Lombaires' },
+      { id:'elev_lat', fam:'muscu', name:'Elévation latérale', thumb:'./images/Exercices/ElevLat.png', note:'Ischios • Lombaires' },
+      { id:'triceps', fam:'muscu', name:'Triceps', thumb:'./images/Exercices/Triceps.png', note:'Ischios • Lombaires' },
+      { id:'tirage_poit', fam:'muscu', name:'Tirage poitrine', thumb:'./images/Exercices/tiragePoit.png', note:'Ischios • Lombaires' },
 
       // Haltérophilie
-      { id:'snatch', fam:'halter', name:'Arraché (Snatch)', thumb:'./images/snatch.jpg', note:'Explosivité • Technique' },
+      { id:'snatch', fam:'halter', name:'Arraché (Snatch)', thumb:'./images/Exercices/snatch.jpg', note:'Explosivité • Technique' },
       { id:'power_snatch', fam:'halter', name:'Arraché des hanches', thumb:P_SN, note:'Vitesse • Coordination' },
-      { id:'clean_jerk', fam:'halter', name:'Épaulé-jeté (Clean & Jerk)', thumb:'./images/CleanJerk.jpg', note:'Puissance' },
-      { id:'clean', fam:'halter', name:'Épaulé (Clean)', thumb:'./images/Clean.jpg', note:'Triple extension' },
+      { id:'clean_jerk', fam:'halter', name:'Épaulé-jeté (Clean & Jerk)', thumb:'./images/Exercices/CleanJerk.jpg', note:'Puissance' },
+      { id:'clean', fam:'halter', name:'Épaulé (Clean)', thumb:'./images/Exercices/Clean.jpg', note:'Triple extension' },
       { id:'hang_clean', fam:'halter', name:'Épaulé des genoux', thumb:P_CJ, note:'Travail du 2e tirage' },
       { id:'jerk', fam:'halter', name:'Jeté (Jerk)', thumb:P_CJ, note:'Puissance épaule/hanches' },
       { id:'high_pull', fam:'halter', name:'High Pull (tirage haut)', thumb:P_CJ, note:'Puissance • Trajectoire' },
       { id:'shrug_jump', fam:'halter', name:'Shrug jump', thumb:P_CJ, note:'Synchronisation' },
 
       // Poids du corps
-      { id:'pompes', fam:'corps', name:'Pompes', thumb:'./images/pompes.png', note:'Pectoraux • Triceps' },
-      { id:'dips', fam:'corps', name:'Dips', thumb:'./images/dips.png', note:'Triceps • Pectoraux' },
+      { id:'pompes', fam:'corps', name:'Pompes', thumb:'./images/Exercices/pompes.png', note:'Pectoraux • Triceps' },
+      { id:'dips', fam:'corps', name:'Dips', thumb:'./images/Exercices/dips.png', note:'Triceps • Pectoraux' },
       { id:'tractions_pronation', fam:'corps', name:'Tractions pronation', thumb:P_CJ, note:'Dos • Biceps' },
       { id:'tractions_suppination', fam:'corps', name:'Tractions supination', thumb:P_CJ, note:'Biceps • Dos' },
       { id:'abdos_crunch', fam:'corps', name:'Abdominaux — Crunch', thumb:P_CJ, note:'Grand droit' },
@@ -421,18 +413,18 @@
       { id:'disq_full_throw', fam:'spec', name:'Disque — Lancer complet', thumb:P_DISC, note:'Rythme • Posture' },
 
       // Spécifiques poids
-      { id:'poids_sansélan', fam:'spec', name:'Poids — Sans élan', thumb:'./images/Exercices/poids/Sans-élan.png', note:'Rythme • Posture' },
-      { id:'poids_glide', fam:'spec', name:'Poids — Jet complet', thumb:'./images/Exercices/poids/complet.png', note:'Rythme • Posture' },
-      { id:'poids_robertson', fam:'spec', name:'Poids — Robertson', thumb:'./images/Exercices/poids/Robertson.png', note:'Rythme • Posture' },
-      { id:'poids_mimes', fam:'spec', name:'Poids — Mimes simples', thumb:'./images/Exercices/poids/mimes.png', note:'Rythme • Posture' },
-      { id:'poids_piedgauche', fam:'spec', name:'Poids — Mimes percussion butoire', thumb:'./images/Exercices/poids/frappe.png', note:'Rythme • Posture' },
-      { id:'poids_elastique', fam:'spec', name:'Poids — Ramener élastique', thumb:'./images/Exercices/poids/ramene_elastique.png', note:'Rythme • Posture' },
-      { id:'poids_ramenerlancer', fam:'spec', name:'Poids — Ramener-Lancer', thumb:'./images/Exercices/poids/ramenéLance.png', note:'Rythme • Posture' },
-      { id:'poids_mimeslouds', fam:'spec', name:'Poids — Mimes lestés', thumb:'./images/Exercices/poids/mimes_10kg.png', note:'Rythme • Posture' },
-      { id:'poids_fentes', fam:'spec', name:'Poids — Fentes Dynamiques', thumb:'./images/Exercices/poids/fentes_rapide.png', note:'Rythme • Posture' },
-      { id:'poids_mimes_enchaine', fam:'spec', name:'Poids — Mimes enchainés', thumb:'./images/Exercices/poids/déplacement_enchainé.png', note:'Rythme • Posture' },
-      { id:'poids_mimes_finale', fam:'spec', name:'Poids — Mimes finale avec barre', thumb:'./images/Exercices/poids/déplacement_enchainé.png', note:'Rythme • Posture' },
-      { id:'poids_frappes', fam:'spec', name:'Poids — Frappes au mur (medecinBall)', thumb:'./images/Exercices/poids/frappe mur.png', note:'Rythme • Posture' },
+      { id:'poids_sansélan', fam:'spec', name:'Poids — Sans élan', thumb:'./images/Exercices/Poids/Sans-élan.png', note:'Rythme • Posture' },
+      { id:'poids_glide', fam:'spec', name:'Poids — Jet complet', thumb:'./images/Exercices/Poids/complet.png', note:'Rythme • Posture' },
+      { id:'poids_robertson', fam:'spec', name:'Poids — Robertson', thumb:'./images/Exercices/Poids/Robertson.png', note:'Rythme • Posture' },
+      { id:'poids_mimes', fam:'spec', name:'Poids — Mimes simples', thumb:'./images/Exercices/Poids/mimes.png', note:'Rythme • Posture' },
+      { id:'poids_piedgauche', fam:'spec', name:'Poids — Mimes percussion butoire', thumb:'./images/Exercices/Poids/frappe.png', note:'Rythme • Posture' },
+      { id:'poids_elastique', fam:'spec', name:'Poids — Ramener élastique', thumb:'./images/Exercices/Poids/ramene_elastique.png', note:'Rythme • Posture' },
+      { id:'poids_ramenerlancer', fam:'spec', name:'Poids — Ramener-Lancer', thumb:'./images/Exercices/Poids/ramenéLance.png', note:'Rythme • Posture' },
+      { id:'poids_mimeslouds', fam:'spec', name:'Poids — Mimes lestés', thumb:'./images/Exercices/Poids/mimes_10kg.png', note:'Rythme • Posture' },
+      { id:'poids_fentes', fam:'spec', name:'Poids — Fentes Dynamiques', thumb:'./images/Exercices/Poids/fentes_rapide.png', note:'Rythme • Posture' },
+      { id:'poids_mimes_enchaine', fam:'spec', name:'Poids — Mimes enchainés', thumb:'./images/Exercices/Poids/déplacement_enchainé.png', note:'Rythme • Posture' },
+      { id:'poids_mimes_finale', fam:'spec', name:'Poids — Mimes finale avec barre', thumb:'./images/Exercices/Poids/déplacement_enchainé.png', note:'Rythme • Posture' },
+      { id:'poids_frappes', fam:'spec', name:'Poids — Frappes au mur (medecinBall)', thumb:'./images/Exercices/Poids/frappe mur.png', note:'Rythme • Posture' },
     ];
 
     /* ====== Athlètes (cartes cliquables) ====== */
