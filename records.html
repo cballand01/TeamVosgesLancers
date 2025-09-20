@@ -179,6 +179,39 @@
     @media (prefers-reduced-motion: reduce){
       .out-left,.in-right,.out-right,.in-left{animation:none}
     }
+
+    /* ====== PODIUM — TEXTE TRÈS PETIT ====== */
+    .podium-content h2{
+      font-size: clamp(12px, 2.8vw, 16px);
+      margin-bottom: 8px;
+    }
+    
+    .podium { gap: clamp(2px, 1.2vw, 6px); }
+    
+    .bar{
+      font-size: 12px;        /* chiffre 1/2/3 dans la barre */
+    }
+    
+    .ath-stacked{
+      gap: 1px;
+      line-height: 1.1;
+    }
+    
+    .ath-stacked .ath-name{
+      font-size: clamp(10px, 2.8vw, 13px);  /* <<< beaucoup plus petit */
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;                /* 2 lignes max (mets 3 si besoin) */
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .ath-stacked .ath-perf{
+      font-size: clamp(9px, 2.4vw, 12px);   /* <<< plus petit aussi */
+      opacity: .95;
+      font-weight: 700;
+    }
+
   </style>
 </head>
 <body>
