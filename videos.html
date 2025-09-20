@@ -3,35 +3,57 @@
 <head>
   <meta charset="utf-8" />
   <title>Photos & Vidéos — Groupe Athlé</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <style>
     :root{
       --bg:#0f172a; --card:#111827; --text:#e5e7eb; --muted:#94a3b8; --line:#1f2937; --accent:#22c55e;
+      --fs-sm: clamp(12px, 1.7vw, 14px);
+      --fs-md: clamp(14px, 2.1vw, 16px);
+      --fs-lg: clamp(18px, 3vw, 22px);
+      --fs-xl: clamp(22px, 4.2vw, 28px);
     }
-    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
-    .wrap{max-width:960px;margin:0 auto;padding:16px 16px 96px}
+    html{-webkit-text-size-adjust:100%}
+    body{
+      margin:0;background:var(--bg);color:var(--text);
+      font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial,Helvetica,sans-serif;
+      line-height:1.45;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    img{max-width:100%;height:auto;display:block}
+    svg{display:block}
+
+    .wrap{
+      max-width:960px;margin:0 auto;padding:16px 16px calc(96px + env(safe-area-inset-bottom, 0));
+    }
+    @supports(padding:max(0px)){
+      .wrap{
+        padding-left:max(16px, env(safe-area-inset-left));
+        padding-right:max(16px, env(safe-area-inset-right));
+      }
+    }
 
     /* Retour */
     .topbar{display:flex;align-items:center;margin-bottom:12px}
-    .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px}
+    .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:var(--fs-md);padding:10px 12px;border-radius:10px}
+    .back:hover{background:#0b1326}
     .back svg{width:20px;height:20px;stroke:#fff}
 
-    /* ===== Header commun (même DA que Records/Planning/Saison) ===== */
+    /* ===== Header commun ===== */
     .page-header h1{
-      font-size:28px;font-weight:700;margin:0 0 4px;position:relative;padding-bottom:6px;text-align:left;
+      font-size:var(--fs-xl);font-weight:700;margin:0 0 4px;position:relative;padding-bottom:8px;text-align:left;
     }
     .page-header h1::after{
       content:"";position:absolute;left:0;bottom:0;width:72px;height:3px;background:var(--accent);border-radius:999px;
     }
     .page-header .subtitle{
-      text-align:left;opacity:.8;font-size:16px;margin:0 0 24px;
+      text-align:left;opacity:.85;font-size:var(--fs-md);margin:0 0 24px;
     }
 
     /* Onglets */
     .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
     .tab{
       padding:8px 12px;border-radius:999px;border:1px solid var(--line);
-      background:#0b1326;color:var(--text);cursor:pointer;font-size:14px;line-height:1;
+      background:#0b1326;color:var(--text);cursor:pointer;font-size:var(--fs-sm);line-height:1;
       transition:border-color .15s, background .15s, transform .06s;
     }
     .tab:hover{border-color:rgba(34,197,94,.45)}
@@ -40,15 +62,26 @@
     .tab[type="button"]{appearance:none}
 
     /* Grille & cartes */
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
     .card{
       position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;
       transition:border-color .15s, transform .06s;
     }
     .card:hover{border-color:rgba(34,197,94,.45);transform:translateY(-1px)}
-    .thumb{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#000}
+
+    /* === Vignettes : jamais rognées === */
+    .thumb-wrap{
+      width:100%;aspect-ratio:16/9;               /* cadre stable */
+      background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden;
+    }
+    .thumb{
+      width:100%;height:100%;
+      object-fit:contain;                          /* clé : zéro rognage */
+      background:#000;display:block;
+    }
+
     .meta{padding:10px}
-    .title{font-weight:700;font-size:14px;margin:0 0 4px}
+    .title{font-weight:700;font-size:var(--fs-sm);margin:0 0 4px}
     .info{font-size:12px;opacity:.8}
     .badge{
       position:absolute;top:8px;left:8px;font-size:12px;background:rgba(0,0,0,.5);
@@ -60,19 +93,45 @@
     /* Lightbox */
     .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
     .lightbox.open{display:flex}
-    .viewer{position:relative;width:min(100%,1000px);max-height:90vh;background:#000;border-radius:12px;overflow:hidden}
-    .viewer-inner{position:relative;background:#000}
-    .viewer img{display:block;width:100%;height:auto;max-height:90vh}
+    .viewer{
+      position:relative;width:min(100%,1000px);max-height:90vh;background:#000;border-radius:12px;overflow:hidden;
+      display:flex;align-items:center;justify-content:center; /* centre le contenu */
+    }
+    .viewer-inner{
+      position:relative;max-width:100%;max-height:90vh;display:flex;align-items:center;justify-content:center;background:#000;
+    }
+
+    /* === Contenu lightbox : toujours entier === */
+    .viewer img,
+    .viewer video,
+    .viewer iframe{
+      max-width:100%;
+      max-height:90vh;
+      width:auto;height:auto;          /* conserve le ratio natif */
+      object-fit:contain;              /* images/vidéos “contain” */
+      background:#000;display:block;
+    }
 
     .viewer-header{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
-    .viewer-title{color:#fff;font-size:14px;background:rgba(0,0,0,.5);padding:6px 10px;border-radius:8px;pointer-events:auto}
+    .viewer-title{color:#fff;font-size:var(--fs-sm);background:rgba(0,0,0,.5);padding:6px 10px;border-radius:8px;pointer-events:auto}
     .close{pointer-events:auto;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer}
     .nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border:none;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;cursor:pointer}
     .nav.left{left:8px}.nav.right{right:8px}
 
-    /* Responsive 16:9 pour YouTube / vidéos / preview Drive */
+    /* Responsive 16:9 pour YouTube / vidéos / preview Drive (thumbnail aussi en contain) */
     .video-wrapper{position:relative;width:100%;padding-bottom:56.25%;background:#000;max-height:90vh}
     .video-wrapper iframe,.video-wrapper video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000;display:block;object-fit:contain}
+
+    /* Petite ergonomie mobile */
+    @media (max-width:420px){
+      .viewer-title{font-size:12px}
+      .nav{width:40px;height:40px}
+      .play svg{width:36px;height:36px}
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .card{transition:none}
+    }
   </style>
 </head>
 <body>
@@ -80,7 +139,7 @@
 
     <div class="topbar">
       <a href="index.html" class="back">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
         Retour
       </a>
     </div>
@@ -99,34 +158,37 @@
     </div>
 
     <!-- Grille -->
-    <div id="grid" class="grid"></div>
+    <div id="grid" class="grid" aria-live="polite"></div>
   </div>
 
   <!-- Lightbox -->
   <div id="lightbox" class="lightbox" aria-modal="true" role="dialog">
     <div class="viewer">
-      <button class="nav left" id="prev" title="Précédent">⟨</button>
+      <button class="nav left" id="prev" title="Précédent" aria-label="Précédent">⟨</button>
       <div class="viewer-inner" id="viewer"></div>
-      <button class="nav right" id="next" title="Suivant">⟩</button>
+      <button class="nav right" id="next" title="Suivant" aria-label="Suivant">⟩</button>
       <div class="viewer-header">
         <div class="viewer-title" id="viewerTitle"></div>
-        <button class="close" id="close" title="Fermer">✕</button>
+        <button class="close" id="close" title="Fermer" aria-label="Fermer">✕</button>
       </div>
     </div>
   </div>
 
   <script>
     // ===== TYPES pris en charge =====
-    // 'gdrive_photo' : src = ID ou lien Drive ; affichage <img> (uc?export=view)
-    // 'gdrive_video' : src = ID ou lien Drive ; affichage <iframe> (file/d/ID/preview)
-    // 'youtube'      : src = ID YouTube ou URL YouTube ; <iframe> responsive
-    // (Tu peux aussi mixer 'photo' et 'video' en direct)
+    // 'gdrive_photo' : src = ID ou lien Drive ; <img> via uc?export=view
+    // 'gdrive_video' : src = ID ou lien Drive ; <iframe> via /file/d/ID/preview
+    // 'youtube'      : src = ID ou URL YouTube ; <iframe> responsive
+    // 'photo'        : src direct
+    // 'video'        : src direct (mp4, etc.)
 
     const ITEMS = [
-      // Remplace par tes éléments (Drive/YouTube)
+      // EXEMPLES — remplace par tes éléments
       // { type:'gdrive_photo', src:'1abcDEFghiJKLmnOPqrSTUVwXYZ', title:'Séance poids – hiver', info:'2025 • Épinal' },
       // { type:'gdrive_video', src:'https://drive.google.com/file/d/1ZzYYxxAA_BBccDD33EEffGGHHIIjjKK/preview', title:'Marteau – ralenti', info:'2024 • Metz', duration:'0:26' },
       { type:'youtube', src:'dQw4w9WgXcQ', title:'Finale Disque – Highlights', info:'2023 • France', duration:'4:12' },
+      // { type:'photo', src:'./images/exemple.jpg', title:'Stage', info:'2025 • Vosges' },
+      // { type:'video', src:'./videos/exemple.mp4', title:'Technique', info:'2025 • Vittel', duration:'0:42' },
     ];
 
     const $grid = document.getElementById('grid');
@@ -175,11 +237,16 @@
           card.className = 'card';
           card.dataset.index = idx;
 
+          const wrap = document.createElement('div');
+          wrap.className = 'thumb-wrap';
+
           const thumb = document.createElement('img');
           thumb.className = 'thumb';
           thumb.loading = 'lazy';
           thumb.src = getThumb(it);
           thumb.alt = it.title || '';
+
+          wrap.appendChild(thumb);
 
           const meta = document.createElement('div');
           meta.className = 'meta';
@@ -193,11 +260,11 @@
 
             const play = document.createElement('div');
             play.className = 'play';
-            play.innerHTML = `<svg viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M8 5v14l11-7z"/></svg>`;
+            play.innerHTML = `<svg viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>`;
             card.appendChild(play);
           }
 
-          card.appendChild(thumb);
+          card.appendChild(wrap);
           card.appendChild(meta);
           card.addEventListener('click', () => openViewer(idx));
           $grid.appendChild(card);
@@ -247,7 +314,8 @@
         wrapper.className = 'video-wrapper';
         const iframe = document.createElement('iframe');
         iframe.src = `https://www.youtube.com/embed/${extractYouTubeId(it.src)}?autoplay=1&rel=0`;
-        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        iframe.referrerPolicy = 'strict-origin-when-cross-origin';
         iframe.allowFullscreen = true;
         wrapper.appendChild(iframe);
         $viewer.appendChild(wrapper);
