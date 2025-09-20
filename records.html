@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <title>Records — Groupe Athlé</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <style>
     :root{
       --bg:#0f172a;
@@ -12,51 +12,97 @@
       --muted:#94a3b8;
       --line:#1f2937;
       --accent:#22c55e;
-    }
-    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
-    .wrap{max-width:960px;margin:0 auto;padding:24px;padding-bottom:80px}
 
-    .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px;margin-bottom:16px}
-    .back svg{width:20px;height:20px;stroke:#fff}
+      /* échelle de typo fluide */
+      --fs-sm: clamp(12px, 1.8vw, 14px);
+      --fs-md: clamp(14px, 2.2vw, 16px);
+      --fs-lg: clamp(18px, 3vw, 20px);
+      --fs-xl: clamp(22px, 4.2vw, 28px);
+    }
+    html{-webkit-text-size-adjust:100%}
+    body{
+      margin:0;background:var(--bg);color:var(--text);
+      font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial,Helvetica,sans-serif;
+      line-height:1.45;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    img{max-width:100%;height:auto;display:block}
+    svg{display:block}
+
+    .wrap{
+      max-width:960px;margin:0 auto;
+      padding:24px;
+      padding-bottom:calc(80px + env(safe-area-inset-bottom, 0));
+    }
+    @supports (padding: max(0px)) {
+      .wrap{
+        padding-left:max(24px, env(safe-area-inset-left));
+        padding-right:max(24px, env(safe-area-inset-right));
+      }
+    }
+
+    .back{
+      display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;
+      font-size:var(--fs-md);margin-bottom:16px;padding:10px 12px;border-radius:10px;
+      touch-action:manipulation;
+    }
+    .back:hover{background:#0b1225}
+    .back svg{width:20px;height:20px;stroke:#fff;flex:0 0 auto}
 
     /* Titre + touche de vert */
-    h1{font-size:28px;margin:0 0 4px;position:relative;padding-bottom:6px}
+    h1{font-size:var(--fs-xl);margin:0 0 4px;position:relative;padding-bottom:8px}
     h1::after{content:"";position:absolute;left:0;bottom:0;width:72px;height:3px;background:var(--accent);border-radius:999px}
-    .subtitle{font-size:16px;opacity:.8;margin-bottom:24px}
+    .subtitle{font-size:var(--fs-md);opacity:.85;margin-bottom:24px}
 
     /* === Bloc podium === */
     .podium-card{
       background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:24px;
       display:flex;align-items:center;justify-content:space-between;gap:12px;
     }
-    .podium-nav{background:none;border:none;font-size:28px;color:var(--text);cursor:pointer;transition:opacity .2s}
-    .podium-nav:hover{opacity:.7}
-
+    .podium-nav{
+      background:none;border:1px solid var(--line);border-radius:10px;
+      padding:6px 10px;font-size:24px;color:var(--text);cursor:pointer;transition:background .2s,border-color .2s,opacity .2s;
+    }
+    .podium-nav:hover{background:rgba(255,255,255,.06);border-color:var(--accent)}
     .podium-content{flex:1;display:flex;flex-direction:column;align-items:center}
-    .podium-viewport{width:100%;max-width:460px;overflow:hidden}
-    .podium-slide{will-change:transform,opacity}
-    .podium-content h2{margin:0 0 12px;font-size:20px;text-align:center}
+    .podium-content h2{margin:0 0 12px;font-size:var(--fs-lg);text-align:center}
 
+    /* Viewport stable pour tout contenu visuel éventuel (images podium) */
+    .podium-viewport{
+      width:100%;max-width:460px;overflow:hidden;margin:0 auto;
+    }
+    .podium-slide{will-change:transform,opacity}
+
+    /* Podium barres */
     .podium{
-      display:grid;grid-template-columns:repeat(3,1fr);align-items:end;gap:8px;width:100%;max-width:400px;margin:0 auto;
+      display:grid;grid-template-columns:repeat(3,1fr);align-items:end;gap:8px;width:100%;max-width:420px;margin:0 auto;
     }
     .place{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
     .bar{
       background:var(--accent);width:80%;border-radius:6px 6px 0 0;display:flex;justify-content:center;align-items:flex-end;
-      font-weight:bold;color:#0f172a;
+      font-weight:800;color:#0f172a;
     }
     .place.first  .bar{height:100px}
     .place.second .bar{height:70px}
     .place.third  .bar{height:50px}
 
-    /* Libellé podium — tjs empilé (desktop + mobile) */
+    /* Libellé podium — empilé, noms longs gérés */
     .athlete{max-width:100%;text-align:center;line-height:1.25}
-    .ath-combined{display:none}               /* ⬅️ masqué partout */
-    .ath-stacked{display:flex;flex-direction:column;gap:2px}  /* ⬅️ affiché partout */
+    .ath-combined{display:none}
+    .ath-stacked{display:flex;flex-direction:column;gap:2px}
     .ath-stacked .ath-name{
-      max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;
+      max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;
     }
-    .ath-stacked .ath-perf{font-size:12px;opacity:.9;font-weight:600}
+    .ath-stacked .ath-perf{font-size:var(--fs-sm);opacity:.95;font-weight:700}
+
+    /* Si tu ajoutes des photos dans le podium plus tard */
+    .podium-photo{
+      width:100%;aspect-ratio:4/3;background:#0b1326;border:1px solid var(--line);border-radius:10px;
+      display:flex;align-items:center;justify-content:center;overflow:hidden;
+    }
+    .podium-photo img,.podium-photo svg{
+      width:100%;height:100%;object-fit:contain; /* jamais rogné */
+    }
 
     /* Animations slide */
     @keyframes slideOutLeft{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-24px)}}
@@ -82,11 +128,20 @@
     .ffa-link:hover{background:rgba(34,197,94,.15);border-color:var(--accent)}
     .ffa-link svg{width:100%;height:100%}
 
-    .athlete-photo{width:96px;height:96px;border-radius:50%;object-fit:cover;margin-bottom:12px;border:2px solid #334155}
+    /* === Photos athlètes : toujours entières === */
+    .athlete-photo-wrap{
+      width:96px;aspect-ratio:1/1;border-radius:50%;
+      background:#0b1326;border:2px solid #334155;overflow:hidden;display:flex;align-items:center;justify-content:center;
+      margin-bottom:12px;
+    }
+    .athlete-photo{
+      width:100%;height:100%;object-fit:contain; /* jamais rogné */
+    }
+
     .athlete-name{font-weight:700;font-size:18px;margin-bottom:12px;text-align:center}
     .records{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;font-size:14px}
     .record-label{opacity:.8}
-    .record-value{text-align:right;font-weight:600}
+    .record-value{text-align:right;font-weight:700}
     .record-meta{grid-column:1/-1;font-size:12px;opacity:.7;text-align:right;margin-bottom:6px;color:var(--muted)}
 
     /* Ajustements smartphone */
@@ -96,7 +151,12 @@
       .place.second .bar{height:52px}
       .place.third .bar{height:40px}
       .podium{max-width:100%;gap:6px}
-      /* empilé déjà actif par défaut */
+      .athlete-name{font-size:16px}
+      .records{font-size:13px}
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .out-left,.in-right,.out-right,.in-left{animation:none}
     }
   </style>
 </head>
@@ -104,7 +164,7 @@
   <div class="wrap">
 
     <a href="index.html" class="back">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
       </svg>
       Retour
@@ -115,12 +175,18 @@
 
     <!-- === Podium avec slide === -->
     <div class="podium-card">
-      <button class="podium-nav left" onclick="prevPodium()">&#10094;</button>
+      <button class="podium-nav left" onclick="prevPodium()" aria-label="Podium précédent">&#10094;</button>
 
       <div class="podium-content">
         <div class="podium-viewport">
           <div class="podium-slide" id="podiumSlide">
             <h2 id="podiumTitle">Podium — Poids Hommes</h2>
+
+            <!-- (Optionnel) si tu veux une image de podium : 
+            <div class="podium-photo">
+              <img src="./images/podium-exemple.jpg" alt="Photo du podium">
+            </div> -->
+
             <div class="podium">
               <div class="place second">
                 <div class="bar">2</div>
@@ -148,7 +214,7 @@
         </div>
       </div>
 
-      <button class="podium-nav right" onclick="nextPodium()">&#10095;</button>
+      <button class="podium-nav right" onclick="nextPodium()" aria-label="Podium suivant">&#10095;</button>
     </div>
 
     <!-- === Grille d'athlètes === -->
@@ -156,12 +222,14 @@
 
       <!-- Athlète 1 -->
       <div class="athlete-card">
-        <a href="https://www.athle.fr/athletes/1289987/bilans" class="ffa-link" target="_blank" title="Voir sur FFA">
+        <a href="https://www.athle.fr/athletes/1289987/bilans" class="ffa-link" target="_blank" title="Voir sur FFA" rel="noopener">
           <svg viewBox="0 0 40 28" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
             <text x="50%" y="65%" text-anchor="middle" font-size="16" font-family="Arial, sans-serif" font-weight="bold" fill="white">FFA</text>
           </svg>
         </a>
-        <img src="./images/Charles.png" alt="Athlète 1" class="athlete-photo">
+        <div class="athlete-photo-wrap">
+          <img src="./images/Charles.png" alt="Portrait de Charles Balland" class="athlete-photo">
+        </div>
         <div class="athlete-name">Charles Balland</div>
         <div class="records">
           <div class="record-label">Poids</div>
@@ -176,7 +244,9 @@
 
       <!-- Athlète 7 -->
       <div class="athlete-card">
-        <img src="./images/Daniel.png" alt="Athlète 7" class="athlete-photo">
+        <div class="athlete-photo-wrap">
+          <img src="./images/Daniel.png" alt="Portrait de Daniel Balland" class="athlete-photo">
+        </div>
         <div class="athlete-name">Daniel Balland</div>
         <div class="records">
           <div class="record-label">Disque</div>
@@ -190,12 +260,14 @@
       </div>
 
       <div class="athlete-card">
-        <a href="https://www.athle.fr/athletes/2447418/bilans" class="ffa-link" target="_blank" title="Voir sur FFA">
+        <a href="https://www.athle.fr/athletes/2447418/bilans" class="ffa-link" target="_blank" title="Voir sur FFA" rel="noopener">
           <svg viewBox="0 0 40 28" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
             <text x="50%" y="65%" text-anchor="middle" font-size="16" font-family="Arial, sans-serif" font-weight="bold" fill="white">FFA</text>
           </svg>
         </a>
-        <img src="./images/Elano.png" alt="Athlète 1" class="athlete-photo">
+        <div class="athlete-photo-wrap">
+          <img src="./images/Elano.png" alt="Portrait d’Elano Thiébaut" class="athlete-photo">
+        </div>
         <div class="athlete-name">Elano Thiébaut</div>
         <div class="records">
           <div class="record-label">Marteau</div>
@@ -210,33 +282,36 @@
 
       <!-- Athlète 9 -->
       <div class="athlete-card">
-        <a href="https://www.athle.fr/athletes/2261270/bilans" class="ffa-link" target="_blank" title="Voir sur FFA">
+        <a href="https://www.athle.fr/athletes/2261270/bilans" class="ffa-link" target="_blank" title="Voir sur FFA" rel="noopener">
           <svg viewBox="0 0 40 28" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
             <text x="50%" y="65%" text-anchor="middle" font-size="16" font-family="Arial, sans-serif" font-weight="bold" fill="white">FFA</text>
           </svg>
         </a>
-        <img src="./images/fabio.png" alt="Athlète 9" class="athlete-photo">
+        <div class="athlete-photo-wrap">
+          <img src="./images/fabio.png" alt="Portrait de Fabio Thiébaut" class="athlete-photo">
+        </div>
         <div class="athlete-name">Fabio Thiébaut</div>
         <div class="records">
           <div class="record-label">Disque</div>
-          <div class="record-value">29.11 m (1.75kg) </div>
+          <div class="record-value">29.11 m (1.75kg)</div>
           <div class="record-meta" data-date="2025-07-18" data-lieu="Epinal"></div>
 
           <div class="record-label">Marteau</div>
           <div class="record-value">34.10 m (6kg)</div>
           <div class="record-meta" data-date="2025-05-29" data-lieu="Remiremont"></div>
-
         </div>
       </div>
 
       <!-- Athlète 4 -->
       <div class="athlete-card">
-        <a href="https://www.athle.fr/athletes/1411829/bilans" class="ffa-link" target="_blank" title="Voir sur FFA">
+        <a href="https://www.athle.fr/athletes/1411829/bilans" class="ffa-link" target="_blank" title="Voir sur FFA" rel="noopener">
           <svg viewBox="0 0 40 28" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
             <text x="50%" y="65%" text-anchor="middle" font-size="16" font-family="Arial, sans-serif" font-weight="bold" fill="white">FFA</text>
           </svg>
         </a>
-        <img src="./images/fanny.png" alt="Athlète 4" class="athlete-photo">
+        <div class="athlete-photo-wrap">
+          <img src="./images/fanny.png" alt="Portrait de Fanny Thévenon-Lacôte" class="athlete-photo">
+        </div>
         <div class="athlete-name">Fanny Thévenon-Lacôte</div>
         <div class="records">
           <div class="record-label">Disque</div>
@@ -259,12 +334,14 @@
 
       <!-- Athlète 2 -->
       <div class="athlete-card">
-        <a href="https://www.athle.fr/athletes/896515/bilans" class="ffa-link" target="_blank" title="Voir sur FFA">
+        <a href="https://www.athle.fr/athletes/896515/bilans" class="ffa-link" target="_blank" title="Voir sur FFA" rel="noopener">
           <svg viewBox="0 0 40 28" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
             <text x="50%" y="65%" text-anchor="middle" font-size="16" font-family="Arial, sans-serif" font-weight="bold" fill="white">FFA</text>
           </svg>
         </a>
-        <img src="./images/franck.jpg" alt="Athlète 2" class="athlete-photo">
+        <div class="athlete-photo-wrap">
+          <img src="./images/franck.jpg" alt="Portrait de Franck Mathieu" class="athlete-photo">
+        </div>
         <div class="athlete-name">Franck Mathieu</div>
         <div class="records">
           <div class="record-label">Disque</div>
@@ -279,12 +356,14 @@
 
       <!-- Athlète 5 -->
       <div class="athlete-card">
-        <a href="https://www.athle.fr/athletes/1278965/bilans" class="ffa-link" target="_blank" title="Voir sur FFA">
+        <a href="https://www.athle.fr/athletes/1278965/bilans" class="ffa-link" target="_blank" title="Voir sur FFA" rel="noopener">
           <svg viewBox="0 0 40 28" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
             <text x="50%" y="65%" text-anchor="middle" font-size="16" font-family="Arial, sans-serif" font-weight="bold" fill="white">FFA</text>
           </svg>
         </a>
-        <img src="./images/Laura.png" alt="Athlète 5" class="athlete-photo">
+        <div class="athlete-photo-wrap">
+          <img src="./images/Laura.png" alt="Portrait de Laura Didier" class="athlete-photo">
+        </div>
         <div class="athlete-name">Laura Didier</div>
         <div class="records">
           <div class="record-label">Disque</div>
@@ -306,12 +385,14 @@
       </div>
 
       <div class="athlete-card">
-        <a href="https://www.athle.fr/athletes/1693419/bilans" class="ffa-link" target="_blank" title="Voir sur FFA">
+        <a href="https://www.athle.fr/athletes/1693419/bilans" class="ffa-link" target="_blank" title="Voir sur FFA" rel="noopener">
           <svg viewBox="0 0 40 28" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
             <text x="50%" y="65%" text-anchor="middle" font-size="16" font-family="Arial, sans-serif" font-weight="bold" fill="white">FFA</text>
           </svg>
         </a>
-        <img src="./images/margot.png" alt="Athlète 1" class="athlete-photo">
+        <div class="athlete-photo-wrap">
+          <img src="./images/margot.png" alt="Portrait de Margot Adam" class="athlete-photo">
+        </div>
         <div class="athlete-name">Margot Adam</div>
         <div class="records">
           <div class="record-label">Disque</div>
@@ -320,15 +401,16 @@
         </div>
       </div>
 
-
       <!-- Athlète 3 -->
       <div class="athlete-card">
-        <a href="https://www.athle.fr/athletes/516706/bilans" class="ffa-link" target="_blank" title="Voir sur FFA">
+        <a href="https://www.athle.fr/athletes/516706/bilans" class="ffa-link" target="_blank" title="Voir sur FFA" rel="noopener">
           <svg viewBox="0 0 40 28" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
             <text x="50%" y="65%" text-anchor="middle" font-size="16" font-family="Arial, sans-serif" font-weight="bold" fill="white">FFA</text>
           </svg>
         </a>
-        <img src="./images/maxime.jpg" alt="Athlète 3" class="athlete-photo">
+        <div class="athlete-photo-wrap">
+          <img src="./images/maxime.jpg" alt="Portrait de Maxime Balland" class="athlete-photo">
+        </div>
         <div class="athlete-name">Maxime Balland</div>
         <div class="records">
           <div class="record-label">Disque</div>
@@ -343,12 +425,14 @@
 
       <!-- Athlète 6 -->
       <div class="athlete-card">
-        <a href="https://www.athle.fr/athletes/3164491/bilans" class="ffa-link" target="_blank" title="Voir sur FFA">
+        <a href="https://www.athle.fr/athletes/3164491/bilans" class="ffa-link" target="_blank" title="Voir sur FFA" rel="noopener">
           <svg viewBox="0 0 40 28" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
             <text x="50%" y="65%" text-anchor="middle" font-size="16" font-family="Arial, sans-serif" font-weight="bold" fill="white">FFA</text>
           </svg>
         </a>
-        <img src="./images/Rosie.png" alt="Athlète 6" class="athlete-photo">
+        <div class="athlete-photo-wrap">
+          <img src="./images/Rosie.png" alt="Portrait de Rosie Prêtre" class="athlete-photo">
+        </div>
         <div class="athlete-name">Rosie Prêtre</div>
         <div class="records">
           <div class="record-label">Disque</div>
@@ -359,12 +443,14 @@
 
       <!-- Athlète 8 -->
       <div class="athlete-card">
-        <a href="https://www.athle.fr/athletes/3435184/bilans" class="ffa-link" target="_blank" title="Voir sur FFA">
+        <a href="https://www.athle.fr/athletes/3435184/bilans" class="ffa-link" target="_blank" title="Voir sur FFA" rel="noopener">
           <svg viewBox="0 0 40 28" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
             <text x="50%" y="65%" text-anchor="middle" font-size="16" font-family="Arial, sans-serif" font-weight="bold" fill="white">FFA</text>
           </svg>
         </a>
-        <img src="./images/Yanis.png" alt="Athlète 8" class="athlete-photo">
+        <div class="athlete-photo-wrap">
+          <img src="./images/Yanis.png" alt="Portrait de Yanis Boulayoune" class="athlete-photo">
+        </div>
         <div class="athlete-name">Yanis Boulayoune</div>
         <div class="records">
           <div class="record-label">Poids</div>
