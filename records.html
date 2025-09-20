@@ -64,45 +64,62 @@
       padding:6px 10px;font-size:24px;color:var(--text);cursor:pointer;transition:background .2s,border-color .2s,opacity .2s;
     }
     .podium-nav:hover{background:rgba(255,255,255,.06);border-color:var(--accent)}
-    .podium-content{flex:1;display:flex;flex-direction:column;align-items:center}
+    .podium-content{
+      flex:1;display:flex;flex-direction:column;align-items:center;
+      container-type:inline-size; /* ⬅️ active les container queries (support iOS 16+) */
+    }
     .podium-content h2{margin:0 0 12px;font-size:var(--fs-lg);text-align:center}
 
-    /* Viewport stable pour tout contenu visuel éventuel (images podium) */
+    /* Viewport stable pour éventuelles photos podium */
     .podium-viewport{
       width:100%;max-width:460px;overflow:hidden;margin:0 auto;
     }
     .podium-slide{will-change:transform,opacity}
 
-    /* Podium barres */
+    /* Podium barres — valeurs FLUIDES avec clamp() */
     .podium{
-      display:grid;grid-template-columns:repeat(3,1fr);align-items:end;gap:8px;width:100%;max-width:420px;margin:0 auto;
+      display:grid;grid-template-columns:repeat(3,1fr);align-items:end;
+      gap:clamp(4px, 1.8vw, 8px);
+      width:100%;
+      max-width:min(420px, 92vw); /* se cale à la largeur écran */
+      margin:0 auto;
     }
     .place{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
     .bar{
       background:var(--accent);width:80%;border-radius:6px 6px 0 0;display:flex;justify-content:center;align-items:flex-end;
       font-weight:800;color:#0f172a;
+      /* hauteur FLUIDE : mini sur petits écrans, maxi sur grands */
     }
-    .place.first  .bar{height:100px}
-    .place.second .bar{height:70px}
-    .place.third  .bar{height:50px}
+    .place.first  .bar{height:clamp(56px, 18vw, 100px)}
+    .place.second .bar{height:clamp(40px, 12vw, 70px)}
+    .place.third  .bar{height:clamp(32px,  9vw, 50px)}
 
-    /* Libellé podium — empilé, noms longs gérés */
-    .athlete{max-width:100%;text-align:center;line-height:1.25}
+    /* Libellé podium — maintenant MULTILIGNE (max 2 lignes), plus d'effet "Ch..." */
+    .athlete{max-width:100%;text-align:center;line-height:1.2}
     .ath-combined{display:none}
-    .ath-stacked{display:flex;flex-direction:column;gap:2px}
-    .ath-stacked .ath-name{
-      max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;
-    }
-    .ath-stacked .ath-perf{font-size:var(--fs-sm);opacity:.95;font-weight:700}
+    .ath-stacked{display:flex;flex-direction:column;gap:2px;align-items:center}
 
-    /* Si tu ajoutes des photos dans le podium plus tard */
+    .ath-stacked .ath-name{
+      font-weight:700;
+      /* tailles FLUIDES */
+      font-size:clamp(12px, 3.8vw, 18px);
+      /* autoriser retour à la ligne + clamp à 2 lignes */
+      white-space:normal;
+      display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+      overflow:hidden;
+      max-width:100%;
+    }
+    .ath-stacked .ath-perf{
+      font-size:clamp(11px, 3.4vw, 14px);
+      opacity:.95;font-weight:700;
+    }
+
+    /* (Optionnel) photos podium, affichées en entier */
     .podium-photo{
       width:100%;aspect-ratio:4/3;background:#0b1326;border:1px solid var(--line);border-radius:10px;
-      display:flex;align-items:center;justify-content:center;overflow:hidden;
+      display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:8px;
     }
-    .podium-photo img,.podium-photo svg{
-      width:100%;height:100%;object-fit:contain; /* jamais rogné */
-    }
+    .podium-photo img,.podium-photo svg{width:100%;height:100%;object-fit:contain}
 
     /* Animations slide */
     @keyframes slideOutLeft{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-24px)}}
@@ -134,9 +151,7 @@
       background:#0b1326;border:2px solid #334155;overflow:hidden;display:flex;align-items:center;justify-content:center;
       margin-bottom:12px;
     }
-    .athlete-photo{
-      width:100%;height:100%;object-fit:contain; /* jamais rogné */
-    }
+    .athlete-photo{width:100%;height:100%;object-fit:contain}
 
     .athlete-name{font-weight:700;font-size:18px;margin-bottom:12px;text-align:center}
     .records{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;font-size:14px}
@@ -144,15 +159,21 @@
     .record-value{text-align:right;font-weight:700}
     .record-meta{grid-column:1/-1;font-size:12px;opacity:.7;text-align:right;margin-bottom:6px;color:var(--muted)}
 
-    /* Ajustements smartphone */
+    /* Ajustements smartphone généraux */
     @media (max-width:480px){
       .podium-content h2{font-size:18px}
-      .place.first .bar{height:72px}
-      .place.second .bar{height:52px}
-      .place.third .bar{height:40px}
-      .podium{max-width:100%;gap:6px}
       .athlete-name{font-size:16px}
       .records{font-size:13px}
+    }
+
+    /* Container query : si la zone podium < 360px, on réduit encore un peu */
+    @container (max-width: 360px){
+      .ath-stacked .ath-name{font-size:clamp(11px, 4.2vw, 16px)}
+      .ath-stacked .ath-perf{font-size:clamp(10px, 3.8vw, 13px)}
+      .podium{gap:clamp(3px, 1.2vw, 6px)}
+      .place.first  .bar{height:clamp(48px, 20vw, 72px)}
+      .place.second .bar{height:clamp(36px, 14vw, 56px)}
+      .place.third  .bar{height:clamp(28px, 11vw, 44px)}
     }
 
     @media (prefers-reduced-motion: reduce){
