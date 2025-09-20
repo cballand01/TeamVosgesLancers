@@ -19,6 +19,9 @@
       line-height:1.45;
       padding-bottom: env(safe-area-inset-bottom, 0);
     }
+    /* lock scroll quand lightbox ouverte (meilleur sur iOS) */
+    .no-scroll{ position:fixed; width:100%; overflow:hidden; }
+
     img{max-width:100%;height:auto;display:block}
     svg{display:block}
 
@@ -187,8 +190,6 @@
       // { type:'gdrive_photo', src:'1abcDEFghiJKLmnOPqrSTUVwXYZ', title:'Séance poids – hiver', info:'2025 • Épinal' },
       // { type:'gdrive_video', src:'https://drive.google.com/file/d/1ZzYYxxAA_BBccDD33EEffGGHHIIjjKK/preview', title:'Marteau – ralenti', info:'2024 • Metz', duration:'0:26' },
       { type:'youtube', src:'dQw4w9WgXcQ', title:'Finale Disque – Highlights', info:'2023 • France', duration:'4:12' },
-      // { type:'photo', src:'./images/exemple.jpg', title:'Stage', info:'2025 • Vosges' },
-      // { type:'video', src:'./videos/exemple.mp4', title:'Technique', info:'2025 • Vittel', duration:'0:42' },
     ];
 
     const $grid = document.getElementById('grid');
@@ -228,47 +229,60 @@
       return item.thumb || item.src;
     }
 
+    // IMPORTANT: utiliser l'index ORIGINAL des ITEMS
     function render(){
       $grid.innerHTML = '';
-      ITEMS
-        .filter(it => currentFilter==='all' ? true : normalizedType(it.type)===currentFilter)
-        .forEach((it, idx) => {
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.dataset.index = idx;
 
-          const wrap = document.createElement('div');
-          wrap.className = 'thumb-wrap';
+      const itemsForRender = ITEMS
+        .map((it, i) => ({ it, i })) // conserver l'index source
+        .filter(({it}) => currentFilter==='all' ? true : normalizedType(it.type)===currentFilter);
 
-          const thumb = document.createElement('img');
-          thumb.className = 'thumb';
-          thumb.loading = 'lazy';
-          thumb.src = getThumb(it);
-          thumb.alt = it.title || '';
+      for (const { it, i } of itemsForRender){
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.index = String(i); // index original
 
-          wrap.appendChild(thumb);
+        const wrap = document.createElement('div');
+        wrap.className = 'thumb-wrap';
 
-          const meta = document.createElement('div');
-          meta.className = 'meta';
-          meta.innerHTML = `<div class="title">${it.title||''}</div><div class="info">${it.info||''}</div>`;
+        const thumb = document.createElement('img');
+        thumb.className = 'thumb';
+        thumb.loading = 'lazy';
+        thumb.src = getThumb(it);
+        thumb.alt = it.title || '';
 
-          if(normalizedType(it.type)==='video'){
-            const badge = document.createElement('div');
-            badge.className = 'badge';
-            badge.textContent = it.duration || 'vidéo';
-            card.appendChild(badge);
+        wrap.appendChild(thumb);
 
-            const play = document.createElement('div');
-            play.className = 'play';
-            play.innerHTML = `<svg viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>`;
-            card.appendChild(play);
-          }
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.innerHTML = `<div class="title">${it.title||''}</div><div class="info">${it.info||''}</div>`;
 
-          card.appendChild(wrap);
-          card.appendChild(meta);
-          card.addEventListener('click', () => openViewer(idx));
-          $grid.appendChild(card);
-        });
+        if(normalizedType(it.type)==='video'){
+          const badge = document.createElement('div');
+          badge.className = 'badge';
+          badge.textContent = it.duration || 'vidéo';
+          card.appendChild(badge);
+
+          const play = document.createElement('div');
+          play.className = 'play';
+          play.innerHTML = `<svg viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>`;
+          card.appendChild(play);
+        }
+
+        card.appendChild(wrap);
+        card.appendChild(meta);
+
+        // Passer l'index ORIGINAL à la lightbox
+        card.addEventListener('click', () => openViewer(i));
+
+        $grid.appendChild(card);
+      }
+    }
+
+    function filteredItems(){
+      return ITEMS
+        .map((it, i) => ({it, i}))
+        .filter(({it}) => currentFilter==='all' ? true : normalizedType(it.type)===currentFilter);
     }
 
     $tabs.forEach(t=>{
@@ -290,8 +304,10 @@
     let currentIndex = -1;
 
     function openViewer(index){
-      currentIndex = index;
+      currentIndex = index;                  // index ORIGINAL
       const it = ITEMS[currentIndex];
+      if(!it) return;                        // garde-fou
+
       $viewer.innerHTML = '';
       $title.textContent = it.title || '';
 
@@ -332,22 +348,21 @@
         $viewer.appendChild(wrapper);
       }
 
+      document.body.classList.add('no-scroll'); // lock scroll fond
       $lightbox.classList.add('open');
     }
 
-    function closeViewer(){ $lightbox.classList.remove('open'); $viewer.innerHTML = ''; }
-
-    function filteredItems(){
-      return ITEMS
-        .map((it, i) => ({it, i}))
-        .filter(({it}) => currentFilter==='all' ? true : normalizedType(it.type)===currentFilter);
+    function closeViewer(){
+      $lightbox.classList.remove('open');
+      $viewer.innerHTML = '';
+      document.body.classList.remove('no-scroll'); // unlock scroll
     }
 
     function step(dir){
       if(currentIndex < 0) return;
       const list = filteredItems();
       const pos = list.findIndex(x => x.i === currentIndex);
-      const nextPos = (pos + dir + list.length) % list.length;
+      const nextPos = (pos === -1) ? 0 : (pos + dir + list.length) % list.length;
       openViewer(list[nextPos].i);
     }
 
