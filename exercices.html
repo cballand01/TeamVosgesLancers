@@ -2,90 +2,93 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>Plans d’entraînement — Athlètes</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Suivi d’entraînement — Semaine & Jour</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <style>
     :root{
       --bg:#0f172a; --card:#111827; --surface:#0b1326;
-      --text:#e5e7eb; --muted:#94a3b8; --line:#1f2937; --accent:#22c55e;
-      --radius:16px; --shadow:0 10px 30px rgba(0,0,0,.35);
+      --text:#e5e7eb; --muted:#94a3b8; --line:#1f2937;
+      --accent:#22c55e; --danger:#ef4444;
     }
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
-    .wrap{max-width:1000px;margin:0 auto;padding:24px 16px 120px}
+    a{color:inherit}
+    .wrap{max-width:740px;margin:0 auto;padding:14px 14px calc(90px + env(safe-area-inset-bottom,0))}
+    @supports(padding:max(0px)){ .wrap{ padding-left:max(14px,env(safe-area-inset-left)); padding-right:max(14px,env(safe-area-inset-right)); } }
 
-    /* Header */
-    .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px;margin-bottom:12px}
+    /* header */
+    .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px;margin-bottom:10px}
     .back svg{width:20px;height:20px;stroke:#fff}
-    h1{margin:0 0 6px;font-size:28px;line-height:1.15;font-weight:800;letter-spacing:.2px;position:relative;padding-bottom:8px}
-    h1::after{content:"";position:absolute;left:0;bottom:0;width:88px;height:3px;background:var(--accent);border-radius:999px;
-      box-shadow:0 0 0 1px rgba(34,197,94,.15), 0 8px 18px rgba(34,197,94,.18)}
-    .subtitle{opacity:.85;color:var(--muted);margin:6px 0 12px}
+    h1{margin:0 0 4px;font-size:22px;font-weight:800;position:relative;padding-bottom:8px;line-height:1.2}
+    h1::after{content:"";position:absolute;left:0;bottom:0;width:70px;height:3px;background:var(--accent);border-radius:999px}
+    .subtitle{opacity:.85;color:var(--muted);margin:6px 0 12px;font-size:14px}
 
-    /* ====== ATHLÈTES (mobile: liste verticale) ====== */
-    .ath-list{display:grid;gap:10px}
-    a.ath-card{
-      position:relative;display:flex;gap:12px;align-items:center;
-      padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:16px;
-      text-decoration:none;color:var(--text);
+    /* tabs */
+    .tabs{display:flex;gap:8px;align-items:center;margin:10px 0 12px}
+    .tab{border:1px solid var(--line);background:#0b1326;color:var(--text);padding:8px 12px;border-radius:999px;cursor:pointer;font-size:13px}
+    .tab.active{background:var(--accent);color:#0b1a10;border-color:var(--accent);font-weight:700}
+    .spacer{flex:1}
+    .btn{border:1px solid var(--line);background:#0b1326;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+    .btn.primary{background:var(--accent);color:#0b1326;border-color:var(--accent);font-weight:700}
+    .btn.danger{border-color:var(--danger);color:var(--danger)}
+    .btn.ghost{background:transparent}
+
+    /* week header */
+    .week-head{display:flex;align-items:center;gap:8px;margin:6px 0 10px}
+    .week-title{font-weight:800;font-size:15px}
+
+    /* day cards (week view) */
+    .days{display:grid;gap:10px}
+    .day-card{
+      position:relative;display:flex;gap:10px;align-items:flex-start;
+      background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;
     }
-    a.ath-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--accent);border-radius:16px 0 0 16px;opacity:.9}
-    .ath-avatar{width:72px;height:72px;border-radius:12px;overflow:hidden;border:1px solid #334155;background:#000;flex:0 0 72px}
-    .ath-avatar img{width:100%;height:100%;object-fit:cover}
-    .ath-txt{min-width:0;display:flex;flex-direction:column;gap:4px}
-    .ath-name{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .ath-meta{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .ath-chevron{margin-left:auto;color:#cbd5e1;font-size:20px;opacity:.85}
-
-    /* ====== Exercices (mobile: liste) ====== */
-    .section-title{margin:40px 0 8px;font-weight:700}
-    .section-line{height:1px;background:#243043;border:none;margin:0 0 14px;opacity:.6}
-    .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-    .search{flex:1;min-width:180px;background:#0b1326;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:10px 12px}
-    .filter{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#0b1326;color:var(--text);cursor:pointer;font-size:13px}
-    .filter.active{background:var(--accent);color:#0b1326;border-color:var(--accent)}
-
-    .ex-list{display:grid;gap:10px}
-    .ex-row{
-      display:flex;gap:14px;align-items:center;
-      background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+    .day-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--accent);border-radius:12px 0 0 12px}
+    .date-col{display:flex;flex-direction:column;gap:2px;min-width:64px}
+    .dow{font-size:12px;color:var(--muted);text-transform:capitalize}
+    .dnum{font-weight:800}
+    .list-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+    .chip{
+      display:flex;align-items:center;gap:6px;
+      background:#0b1326;border:1px solid #243043;border-radius:10px;padding:6px 8px;
+      font-size:12px;overflow:hidden
     }
-    .ex-thumb{width:120px;height:68px;flex:0 0 120px;border-radius:10px;overflow:hidden;background:#000}
-    .ex-thumb img{width:100%;height:100%;object-fit:cover}
-    .ex-txt{min-width:0}
-    .ex-title{font-weight:700;font-size:14px;white-space:normal}
-    .ex-info{font-size:12px;color:var(--muted);margin-top:2px}
-    .info-btn{
-      margin-left:auto;border:1px solid var(--line);background:transparent;color:var(--text);
-      border-radius:10px;padding:8px 14px;cursor:pointer;flex-shrink:0;
-      transition: border-color .2s, transform .08s;
+    .chip .txt{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .mini{font-size:11px;color:#cbd5e1;opacity:.85;margin-left:6px}
+    .add{margin-left:auto;border:1px solid var(--line);background:transparent;color:var(--text);
+      padding:6px 10px;border-radius:10px;cursor:pointer;flex-shrink:0}
+
+    /* day view */
+    .day-wrap{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px}
+    .day-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    .day-title{font-size:18px;font-weight:800;text-transform:capitalize}
+    .day-list{display:grid;gap:8px}
+    .row{background:#0b1326;border:1px solid #243043;border-radius:12px;padding:10px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+    .row .name{font-weight:700}
+    .row .meta{font-size:12px;color:var(--muted);margin-top:2px}
+    .row .act{display:flex;gap:6px}
+    .badge{border:1px solid #334155;border-radius:999px;padding:1px 8px;font-size:11px;color:#cbd5e1;margin-left:6px}
+    .empty{font-size:14px;color:var(--muted);padding:8px 2px}
+
+    /* bottom sheet (add) */
+    .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);display:none;align-items:flex-end;z-index:50}
+    .sheet{
+      width:100%;max-width:740px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+      border-bottom:none;border-top-left-radius:16px;border-top-right-radius:16px;
+      padding:12px 14px 14px;max-height:85vh;overflow:auto;animation:slideup .18s ease-out
     }
-    .info-btn:hover{border-color:var(--accent)}
-    .info-btn:active{transform:scale(.98)}
+    @keyframes slideup{from{transform:translateY(12px);opacity:.3}to{transform:translateY(0);opacity:1}}
+    .rowf{display:flex;gap:8px;align-items:center;margin:8px 0}
+    .rowf label{flex:0 0 120px;opacity:.9}
+    .rowf input,.rowf select,.rowf textarea{flex:1;background:#0b1326;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:10px}
+    .sheet .actions{display:flex;gap:8px;margin-top:2px}
+    .hint{font-size:12px;color:var(--muted)}
 
-    /* ====== Desktop adaptations ====== */
-    @media (min-width:760px){
-      .wrap{padding:24px 24px 120px}
-      .ath-list{grid-template-columns:repeat(3,1fr)}
-      .ath-avatar{width:64px;height:64px;flex:0 0 64px}
-
-      .ex-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-      .ex-row{display:block;padding:0;overflow:hidden}
-      .ex-thumb{width:100%;height:auto;aspect-ratio:16/9;border-radius:12px 12px 0 0}
-      .ex-thumb img{border-bottom:1px solid var(--line)}
-      .ex-txt{padding:10px 12px}
-      .ex-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      .info-btn{margin:8px 12px 12px auto;display:block}
+    @media (min-width:480px){
+      h1{font-size:24px}
+      .week-title{font-size:16px}
+      .day-title{font-size:20px}
     }
-
-    /* Lightbox */
-    .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
-    .lightbox.open{display:flex}
-    .viewer{position:relative;width:min(100%,900px);max-height:90vh;background:#000;border-radius:12px;overflow:hidden}
-    .viewer img{display:block;width:100%;height:auto}
-    .viewer-head{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:flex-end;align-items:center}
-    .viewer-title{display:none} /* cache tout texte dans la lightbox */
-    .close{background:rgba(255,255,255,.15);border:none;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer}
   </style>
 </head>
 <body>
@@ -95,221 +98,306 @@
       Retour
     </a>
 
-    <h1>Plans d’entraînement</h1>
-    <p class="subtitle">Choisis un athlète pour ouvrir son plan • Explore les exercices illustrés</p>
+    <h1>Suivi d’entraînement</h1>
+    <div class="subtitle">Vue semaine (par défaut) ou jour • Ajoute depuis chaque jour</div>
 
-    <!-- Liste athlètes -->
-    <div id="athList" class="ath-list"></div>
-
-    <div class="section-title">Exercices illustrés</div>
-    <hr class="section-line" />
-
-    <!-- Barre outils -->
-    <div class="toolbar">
-      <input id="q" class="search" placeholder="Recherche : squat, épaulé, frappes…">
-      <button class="filter active" data-fam="all">Tous</button>
-      <button class="filter" data-fam="muscu">Musculation</button>
-      <button class="filter" data-fam="halter">Haltérophilie</button>
-      <button class="filter" data-fam="corps">Poids du corps</button>
-      <button class="filter" data-fam="ppg">PPG</button>
-      <button class="filter" data-fam="spec">Spécifique</button>
+    <div class="tabs">
+      <button id="tabWeek" class="tab active">Semaine</button>
+      <button id="tabDay" class="tab">Jour</button>
+      <div class="spacer"></div>
+      <button id="btnToday" class="btn ghost">Aujourd’hui</button>
     </div>
 
-    <!-- Liste / grille d’exos -->
-    <div id="exList" class="ex-list"></div>
+    <!-- === Vue Semaine === -->
+    <div id="viewWeek">
+      <div class="week-head">
+        <button id="prevWeek" class="btn">◀</button>
+        <div id="weekTitle" class="week-title"></div>
+        <button id="nextWeek" class="btn">▶</button>
+        <div class="spacer"></div>
+      </div>
+
+      <div id="weekDays" class="days"></div>
+    </div>
+
+    <!-- === Vue Jour === -->
+    <div id="viewDay" style="display:none">
+      <div class="day-wrap">
+        <div class="day-head">
+          <button id="prevDay" class="btn">◀</button>
+          <div id="dayTitle" class="day-title"></div>
+          <button id="nextDay" class="btn">▶</button>
+          <div class="spacer"></div>
+          <button id="addDay" class="btn primary">＋ Ajouter</button>
+        </div>
+        <div id="dayList" class="day-list"></div>
+      </div>
+    </div>
   </div>
 
-  <!-- Lightbox (illustrations) -->
-  <div id="lb" class="lightbox">
-    <div class="viewer">
-      <div class="viewer-head">
-        <div id="lbTitle" class="viewer-title"></div>
-        <button id="lbClose" class="close">✕</button>
+  <!-- === Bottom sheet: Ajouter une entrée === -->
+  <div id="sheetBg" class="sheet-bg">
+    <div class="sheet">
+      <h3 style="margin:4px 0 10px">Ajouter une séance</h3>
+
+      <div class="rowf">
+        <label for="fDate">Date</label>
+        <input id="fDate" type="date">
       </div>
-      <img id="lbImg" alt="">
+
+      <div class="rowf">
+        <label for="fName">Exercice</label>
+        <input id="fName" placeholder="ex: Développé couché, Stand throw…" />
+      </div>
+
+      <div class="rowf">
+        <label for="fMode">Type de mesure</label>
+        <select id="fMode">
+          <option value="reps">Répétitions</option>
+          <option value="sets_reps">Séries × Répétitions</option>
+          <option value="duration">Durée</option>
+          <option value="weight">Poids (Kg) uniquement</option>
+        </select>
+      </div>
+
+      <div class="rowf" data-field="reps">
+        <label for="fReps">Répétitions</label>
+        <input id="fReps" type="number" inputmode="numeric" min="0" placeholder="ex: 12" />
+      </div>
+
+      <div class="rowf" data-field="sets_reps" style="display:none">
+        <label>Séries × Rép</label>
+        <input id="fSets" type="number" inputmode="numeric" min="0" placeholder="Séries (ex: 4)" style="max-width:140px">
+        <input id="fSRReps" type="number" inputmode="numeric" min="0" placeholder="Rép (ex: 6)" style="max-width:140px">
+      </div>
+
+      <div class="rowf" data-field="duration" style="display:none">
+        <label>Durée</label>
+        <input id="fMin" type="number" inputmode="numeric" min="0" placeholder="Minutes" style="max-width:140px">
+        <input id="fSec" type="number" inputmode="numeric" min="0" max="59" placeholder="Secondes" style="max-width:140px">
+      </div>
+
+      <div class="rowf">
+        <label for="fKg">Kg (optionnel)</label>
+        <input id="fKg" type="number" inputmode="decimal" step="0.5" placeholder="ex: 60" />
+      </div>
+
+      <div class="rowf">
+        <label for="fNotes">Commentaires</label>
+        <textarea id="fNotes" rows="3" placeholder="Sensations, technique, contexte…"></textarea>
+      </div>
+
+      <div class="actions">
+        <button id="btnCancel" class="btn ghost">Annuler</button>
+        <button id="btnSave" class="btn primary">Enregistrer</button>
+      </div>
+      <div id="msg" class="hint" style="margin-top:6px"></div>
     </div>
   </div>
 
   <script>
-    /* ====== Données mock (athlètes) ====== */
-    const ATHLETES = [
-      { id:'charles', name:'Charles Balland', photo:'./images/Charles.png', club:'PCA • Senior' },
-      { id:'daniel',  name:'Daniel Balland',  photo:'./images/Daniel.png',  club:'AVEC • Légende' },
-      { id:'elano',   name:'Elano Thiébaut',  photo:'./images/Elano.png',   club:'AVEC • Jeune' },
-      { id:'fabio',   name:'Fabio Thiébaut',  photo:'./images/fabio.png',   club:'AVEC • Jeune' },
-      { id:'fanny',   name:'Fanny T.-Lacôte', photo:'./images/fanny.png',   club:'AVEC • Senior' },
-      { id:'franck',  name:'Franck Mathieu',  photo:'./images/franck.jpg',  club:'AVEC • Master' },
-      { id:'laura',   name:'Laura Didier',    photo:'./images/Laura.png',   club:'AVEC • Senior' },
-      { id:'maxime',  name:'Maxime Balland',  photo:'./images/maxime.jpg',  club:'MBA • Senior' },
-      { id:'rosie',   name:'Rosie Prêtre',    photo:'./images/Rosie.png',   club:'AVEC • Master' },
-      { id:'yanis',   name:'Yanis Boulayoune',photo:'./images/Yanis.png',   club:'AVEC • Senior' },
-    ];
+    /* ===== Utils ===== */
+    const $=(q,root=document)=>root.querySelector(q);
+    const $$=(q,root=document)=>Array.from(root.querySelectorAll(q));
+    const pad=n=>String(n).padStart(2,'0');
+    const toISO=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const fromISO=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c);};
+    const monthsFR=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+    const dowsFR=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
 
-    const P_MUSC = 'https://i.imgur.com/5b0q7hS.jpeg';
-    const P_POST = 'https://i.imgur.com/y1F7pF2.jpeg';
-    const P_SPEC = 'https://i.imgur.com/8YBf1bT.jpeg';
-    const P_DISC = 'https://i.imgur.com/3YJXb7a.jpeg';
-    const P_SN   = 'https://i.imgur.com/0dXw0k2.jpeg';
-    const P_CJ   = 'https://i.imgur.com/8v9M3Kj.jpeg';
+    /* ===== Store ===== */
+    const STORAGE_KEY='trainingLog.v1';
+    function loadStore(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}catch{return[];} }
+    function saveStore(a){ localStorage.setItem(STORAGE_KEY,JSON.stringify(a)); }
+    let DATA=loadStore(); // {id,date,name,mode,reps,sets,srreps,min,sec,kg,notes,_ts}
 
-    /* ====== Exercices avec notes corrigées ====== */
-    const EXOS = [
-      /* Musculation — Squats */
-      { id:'squat_arriere_complet', fam:'muscu', name:'Squat arrière complet', thumb:'./images/Exercices/squatComplet.jpeg', note:'Quadriceps, fessiers, adducteurs, gainage' },
-      { id:'squat_avant', fam:'muscu', name:'Squat avant (front squat)', thumb:'./images/Exercices/front-squat.jpg', note:'Quadriceps, haut du dos, gainage ant.' },
-      { id:'overhead_squat', fam:'muscu', name:'Overhead squat', thumb:'./images/Exercices/overhead-squat.jpg', note:'Épaules, tronc, mobilité hanches/chevilles' },
-      { id:'squat_bulgare', fam:'muscu', name:'Squat Bulgare', thumb:'./images/Exercices/SquatBulgare.png', note:'Quadriceps, fessiers, stabilité hanche' },
+    /* ===== State ===== */
+    let refDate=new Date(); // sert de référence à la semaine affichée
+    let selDayISO=toISO(new Date());
 
-      /* Musculation — Poussée */
-      { id:'dev_couche', fam:'muscu', name:'Développé couché', thumb:'./images/Exercices/Bench1.png', note:'Pectoraux, triceps, deltoïdes ant.' },
-      { id:'dev_couche_incline', fam:'muscu', name:'Développé couché incliné', thumb:'./images/Exercices/BenchInc1.png', note:'Haut des pectoraux, deltoïdes ant., triceps' },
-      { id:'dev_militaire', fam:'muscu', name:'Développé militaire (strict press)', thumb:'./images/Exercices/devMili.jpg', note:'Deltoïdes, triceps, gainage' },
-      { id:'dev_epaule_halteres', fam:'muscu', name:'Développé épaules haltères', thumb:'./images/Exercices/DevhaltCouché.png', note:'Deltoïdes, coiffe des rotateurs, stabilité' },
-      { id:'ecartes_halteres', fam:'muscu', name:'Ecartés haltères', thumb:'./images/Exercices/EcartCouche.png', note:'Pectoraux' },
-      { id:'press', fam:'muscu', name:'Presse', thumb:'./images/Exercices/Press.png', note:'Quadriceps, ischio-jambiers, fessiers, mollets' },
-      { id:'leg_ext', fam:'muscu', name:'Extension de jambes', thumb:'./images/Exercices/legExt.png', note:'Quadriceps' },
-      { id:'leg_curl', fam:'muscu', name:'Leg Curl', thumb:'./images/Exercices/leg Curl.png', note:'Ischio-jambiers' },
-      { id:'mollets', fam:'muscu', name:'Extension mollets', thumb:'./images/Exercices/Mollets.png', note:'Mollets' },
+    /* ===== Tabs ===== */
+    const tabWeek=$('#tabWeek'), tabDay=$('#tabDay');
+    const viewWeek=$('#viewWeek'), viewDay=$('#viewDay');
+    function goWeek(){ tabWeek.classList.add('active'); tabDay.classList.remove('active'); viewWeek.style.display='block'; viewDay.style.display='none'; renderWeek(); }
+    function goDay(dateISO){ if(dateISO) selDayISO=dateISO; tabDay.classList.add('active'); tabWeek.classList.remove('active'); viewDay.style.display='block'; viewWeek.style.display='none'; renderDay(); }
+    tabWeek.onclick=goWeek;
+    tabDay.onclick=()=>goDay(selDayISO);
+    $('#btnToday').onclick=()=>{ const now=new Date(); refDate=now; selDayISO=toISO(now); goDay(selDayISO); };
 
+    /* ===== Week helpers ===== */
+    function startOfWeek(d){ // lundi
+      const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+      const day=(x.getDay()+6)%7; // 0=lundi…6=dim
+      x.setDate(x.getDate()-day);
+      return x;
+    }
+    function endOfWeek(d){const s=startOfWeek(d); const e=new Date(s); e.setDate(s.getDate()+6); return e;}
 
+    /* ===== Week view ===== */
+    $('#prevWeek').onclick=()=>{ refDate.setDate(refDate.getDate()-7); renderWeek(); };
+    $('#nextWeek').onclick=()=>{ refDate.setDate(refDate.getDate()+7); renderWeek(); };
 
-      /* Musculation — Tirage / Chaîne postérieure */
-      { id:'souleve_terre', fam:'muscu', name:'Soulevé de terre', thumb:'./images/Exercices/sdt.jpg', note:'Ischios, fessiers, lombaires, trapèzes' },
-      { id:'souleve_terre_jt', fam:'muscu', name:'Soulevé de terre jambes tendues', thumb:'./images/Exercices/sdtjambetendu.webp', note:'Ischios, fessiers, lombaires' },
-      { id:'row_barre', fam:'muscu', name:'Rowing barre', thumb:'./images/Exercices/rowing-barre-buste-penche-exercice.jpg', note:'Grand dorsal, rhomboïdes, biceps' },
-      { id:'row_un_lateral', fam:'muscu', name:'Rowing unilatéral haltère', thumb:'./images/Exercices/tirage_1_bras.png', note:'Dos, biceps, anti-rotation (obliques)' },
-      { id:'tirage', fam:'muscu', name:'Tirage couché', thumb:'./images/Exercices/tirage_coucher.png', note:'Dos moyen, arrière d’épaules, scapulas' },
-      { id:'hip_thrust', fam:'muscu', name:'Hip Thrust', thumb:'./images/Exercices/HipThrust.png', note:'Grand fessier, ischios' },
-      { id:'curl', fam:'muscu', name:'Curl biceps (barre/haltères)', thumb:'./images/Exercices/CurlBarre.png', note:'Biceps brachial, brachial antérieur' },
-      { id:'good_morning', fam:'muscu', name:'Good Morning', thumb:'./images/Exercices/good-morning.jpg', note:'Ischios, lombaires, fessiers' },
-      { id:'elev_lat', fam:'muscu', name:'Élévations latérales', thumb:'./images/Exercices/ElevLat.png', note:'Deltoïdes moyens' },
-      { id:'triceps', fam:'muscu', name:'Extensions triceps', thumb:'./images/Exercices/Triceps.png', note:'Triceps brachial' },
-      { id:'tirage_poit', fam:'muscu', name:'Tirage poitrine (lat pulldown)', thumb:'./images/Exercices/tiragePoit.png', note:'Grand dorsal, biceps, trapèzes inf.' },
+    function renderWeek(){
+      const s=startOfWeek(refDate), e=endOfWeek(refDate);
+      $('#weekTitle').textContent=`Semaine du ${s.getDate()} ${monthsFR[s.getMonth()]} au ${e.getDate()} ${monthsFR[e.getMonth()]} ${e.getFullYear()}`;
+      const root=$('#weekDays'); root.innerHTML='';
+      for(let i=0;i<7;i++){
+        const d=new Date(s); d.setDate(s.getDate()+i);
+        const iso=toISO(d);
+        const card=document.createElement('div'); card.className='day-card';
 
-      /* Haltérophilie */
-      { id:'snatch', fam:'halter', name:'Arraché (Snatch)', thumb:'./images/Exercices/snatch.jpg', note:'Chaîne post., trapèzes, vitesse, mobilité' },
-      { id:'power_snatch', fam:'halter', name:'Arraché des hanches', thumb:'./images/Exercices/hangsnatch.png', note:'Vitesse, coordination, chaîne post.' },
-      { id:'clean_jerk', fam:'halter', name:'Épaulé-jeté (Clean & Jerk)', thumb:'./images/Exercices/CleanJerk.jpg', note:'Quadriceps, fessiers, trapèzes, épaules' },
-      { id:'clean', fam:'halter', name:'Épaulé (Clean)', thumb:'./images/Exercices/Clean.jpg', note:'Quadriceps, fessiers, trapèzes' },
-      { id:'hang_clean', fam:'halter', name:'Épaulé des genoux', thumb:'./images/Exercices/hang-power_clean.webp', note:'2e tirage, puissance hanches' },
-      { id:'jerk', fam:'halter', name:'Jeté (Jerk)', thumb:'./images/Exercices/jerk.jpg', note:'Épaules, triceps, jambes (dip/drive)' },
-      { id:'high_pull', fam:'halter', name:'High pull (tirage haut)', thumb:'./images/Exercices/high-pull.webp', note:'Trapèzes, chaîne post., trajectoire' },
+        const dateCol=document.createElement('div'); dateCol.className='date-col';
+        const dow=document.createElement('div'); dow.className='dow'; dow.textContent=dowsFR[i];
+        const dnum=document.createElement('div'); dnum.className='dnum'; dnum.textContent=`${pad(d.getDate())}/${pad(d.getMonth()+1)}`;
+        dateCol.append(dow,dnum);
 
-      /* Poids du corps */
-      { id:'pompes', fam:'corps', name:'Pompes', thumb:'./images/Exercices/pompes.png', note:'Pectoraux, triceps, deltoïdes ant.' },
-      { id:'dips', fam:'corps', name:'Dips', thumb:'./images/Exercices/dips.png', note:'Triceps, pectoraux inférieurs' },
-      { id:'TRX', fam:'corps', name:'Tirage — TRX', thumb:'./images/Exercices/tirage_TRX.png', note:'Ceinture scapulaire, Arrières d’épaules, Biceps, Grands dorsaux' },
-      { id:'tractions_pronation', fam:'corps', name:'Tractions pronation', thumb:'./images/Exercices/pronation.png', note:'Grand dorsal, biceps, avant-bras' },
-      { id:'tractions_suppination', fam:'corps', name:'Tractions supination', thumb:'./images/Exercices/supination.png', note:'Biceps, grand dorsal' },
-      { id:'abdos_crunch', fam:'corps', name:'Abdominaux — Crunch', thumb:'./images/Exercices/abdo.png', note:'Grand droit' },
-      { id:'gainage_planche', fam:'corps', name:'Gainage — Planche', thumb:'./images/Exercices/gainage.png', note:'Transverse, anti-extension' },
-      { id:'gainage_cote', fam:'corps', name:'Gainage — Côté', thumb:'./images/Exercices/gainage_lat.png', note:'Obliques, moyen fessier' },
-      { id:'rotateur', fam:'corps', name:'Abdominaux — Rotateurs', thumb:'./images/Exercices/rotateurs.png', note:'Obliques, Grand droit, Transverses' },
-      { id:'burpees', fam:'corps', name:'Burpees', thumb:'./images/Exercices/Muscles-burpees.003.webp', note:'Cardio, chaîne complète' },
-      { id:'fentes_saut', fam:'corps', name:'Fentes sautées', thumb:'./images/Exercices/fentes.webp', note:'Quadriceps, fessiers, plyométrie' },
+        const listCol=document.createElement('div'); listCol.className='list-col';
+        const list=DATA.filter(x=>x.date===iso).sort((a,b)=>(a._ts||0)-(b._ts||0));
+        if(list.length===0){
+          const empty=document.createElement('div'); empty.className='mini'; empty.textContent='Aucune séance.';
+          listCol.appendChild(empty);
+        }else{
+          list.slice(0,4).forEach(e=>{
+            const chip=document.createElement('div'); chip.className='chip';
+            const txt=document.createElement('div'); txt.className='txt'; txt.textContent=formatLine(e);
+            chip.appendChild(txt);
+            listCol.appendChild(chip);
+          });
+          if(list.length>4){
+            const more=document.createElement('div'); more.className='mini'; more.textContent=`+${list.length-4} autre(s)…`;
+            listCol.appendChild(more);
+          }
+        }
 
-      /* PPG */
-      { id:'ppg_haies', fam:'ppg', name:'PPG — Sauts de haies', thumb:'./images/Exercices/haies.jpg', note:'Plyo, coordination, cheville' },
-      { id:'ppg_kettle', fam:'ppg', name:'PPG — KettleBell', thumb:'./images/Exercices/kettlebellSwing.png', note:'Fessiers, ischio-jambiers, cardio' },
-      { id:'ppg_multibonds', fam:'ppg', name:'PPG — Multibonds', thumb:'./images/Exercices/saut.webp', note:'Plyométrie, chaîne post.' },
-      { id:'ppg_sauts_corde', fam:'ppg', name:'PPG — Corde à sauter', thumb:'./images/Exercices/jumping-rope.jpg', note:'Mollets, cheville, cardio' },
-      { id:'ppg_sprint', fam:'ppg', name:'PPG — Sprint', thumb:'./images/Exercices/Male-athlete-sprinting.jpg', note:'Adducteurs/abducteurs, réactivité' },
+        const add=document.createElement('button'); add.className='add'; add.textContent='＋'; add.onclick=()=>openSheet(iso);
 
-      /* Spécifiques Disque */
-      { id:'disq_frappes_mur', fam:'spec', name:'Disque — Frappes au mur', thumb:P_SPEC, note:'Rotateurs tronc, fessiers, dorsaux' },
-      
-      /* Spécifiques Poids */
-      { id:'poids_sanselan', fam:'spec', name:'Poids — Sans élan', thumb:'./images/Exercices/Poids/Sans-élan.png', note:'Technique' },
-      { id:'poids_glide', fam:'spec', name:'Poids — Jet complet (glide)', thumb:'./images/Exercices/Poids/complet.png', note:'Technique' },
-      { id:'poids_robertson', fam:'spec', name:'Poids — Robertson', thumb:'./images/Exercices/Poids/Robertson.png', note:'Technique' },
-      { id:'poids_mimes', fam:'spec', name:'Poids — Mimes simples', thumb:'./images/Exercices/Poids/mimes.png', note:'Technique' },
-      { id:'poids_piedgauche', fam:'spec', name:'Poids — Mimes percussion butoir', thumb:'./images/Exercices/Poids/frappe.png', note:'Technique' },
-      { id:'poids_elastique', fam:'spec', name:'Poids — Ramener élastique', thumb:'./images/Exercices/Poids/ramene_elastique.png', note:'Technique' },
-      { id:'poids_ramenerlancer', fam:'spec', name:'Poids — Ramener-Lancer', thumb:'./images/Exercices/Poids/ramenéLance.png', note:'Technique' },
-      { id:'poids_mimeslourds', fam:'spec', name:'Poids — Mimes lestés', thumb:'./images/Exercices/Poids/mimes_10kg.png', note:'Technique' },
-      { id:'poids_fentes', fam:'spec', name:'Poids — Fentes dynamiques', thumb:'./images/Exercices/Poids/fentes_rapide.png', note:'Technique' },
-      { id:'poids_mimes_enchaine', fam:'spec', name:'Poids — Mimes enchaînés', thumb:'./images/Exercices/Poids/déplacement_enchainé.png', note:'Technique' },
-      { id:'poids_mimes_finale', fam:'spec', name:'Poids — Finale avec barre', thumb:'./images/Exercices/Poids/mime_finale.png', note:'Technique' },
-      { id:'poids_frappes', fam:'spec', name:'Poids — Frappes mur (med ball)', thumb:'./images/Exercices/Poids/frappe mur.png', note:'Technique' },
-    ];
+        card.append(dateCol,listCol,add);
+        // toucher la carte → bascule en vue jour
+        card.addEventListener('click',ev=>{ if(ev.target===add) return; goDay(iso); });
+        root.appendChild(card);
+      }
+    }
 
-    /* ====== Athlètes (cartes cliquables) ====== */
-    const athList = document.getElementById('athList');
-    ATHLETES.forEach(a=>{
-      const card = document.createElement('a');
-      card.className = 'ath-card';
-      card.href = `suivi.html?id=${encodeURIComponent(a.id)}`;
-      card.innerHTML = `
-        <div class="ath-avatar"><img src="${a.photo}" alt="${a.name}"></div>
-        <div class="ath-txt">
-          <div class="ath-name">${a.name}</div>
-          <div class="ath-meta">${a.club||''}</div>
-        </div>
-        <div class="ath-chevron" aria-hidden="true">›</div>
-      `;
-      athList.appendChild(card);
-    });
+    /* ===== Day view ===== */
+    $('#prevDay').onclick=()=>{ const d=fromISO(selDayISO); d.setDate(d.getDate()-1); selDayISO=toISO(d); renderDay(); };
+    $('#nextDay').onclick=()=>{ const d=fromISO(selDayISO); d.setDate(d.getDate()+1); selDayISO=toISO(d); renderDay(); };
+    $('#addDay').onclick=()=>openSheet(selDayISO);
 
-    /* ====== Explorateur d’exos ====== */
-    let fam = 'all';
-    let q = '';
-    const filters = document.querySelectorAll('.filter');
-    const exList = document.getElementById('exList');
-    const qInput = document.getElementById('q');
+    function renderDay(){
+      const d=fromISO(selDayISO);
+      $('#dayTitle').textContent=d.toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+      const root=$('#dayList'); root.innerHTML='';
+      const arr=DATA.filter(x=>x.date===selDayISO).sort((a,b)=>(a._ts||0)-(b._ts||0));
+      if(arr.length===0){ root.innerHTML='<div class="empty">Aucune séance ce jour.</div>'; return; }
 
-    filters.forEach(p=>{
-      p.addEventListener('click', ()=>{
-        filters.forEach(x=>x.classList.remove('active'));
-        p.classList.add('active');
-        fam = p.dataset.fam;
-        renderExos();
+      arr.forEach(e=>{
+        const row=document.createElement('div'); row.className='row';
+        const left=document.createElement('div');
+        const name=document.createElement('div'); name.className='name';
+        name.innerHTML=`${escapeHtml(e.name)} <span class="badge">${modeLabel(e)}</span>`;
+        const meta=document.createElement('div'); meta.className='meta'; meta.textContent=entryDetails(e);
+        if(e.notes){ const com=document.createElement('div'); com.className='meta'; com.textContent='💬 '+e.notes; left.append(name,meta,com); }
+        else { left.append(name,meta); }
+
+        const act=document.createElement('div'); act.className='act';
+        const del=document.createElement('button'); del.className='btn danger'; del.textContent='Supprimer';
+        del.onclick=()=>{ if(confirm('Supprimer cette entrée ?')){ DATA=DATA.filter(x=>x.id!==e.id); saveStore(DATA); renderDay(); renderWeek(); } };
+        act.appendChild(del);
+
+        row.append(left,act);
+        root.appendChild(row);
       });
-    });
-    qInput.addEventListener('input', ()=>{ q = qInput.value.toLowerCase(); renderExos(); });
-
-    function labelFam(f){
-      return f==='muscu' ? 'Musculation'
-           : f==='halter'? 'Haltérophilie'
-           : f==='corps' ? 'Poids du corps'
-           : f==='ppg'   ? 'PPG'
-           : f==='spec'  ? 'Spécifique'
-           : 'Autre';
     }
 
-    function renderExos(){
-      exList.innerHTML = '';
-      EXOS
-        .filter(x=> fam==='all' ? true : x.fam===fam)
-        .filter(x=> !q || x.name.toLowerCase().includes(q))
-        .forEach(x=>{
-          const row = document.createElement('div');
-          row.className = 'ex-row';
-          row.innerHTML = `
-            <div class="ex-thumb"><img src="${x.thumb}" alt=""></div>
-            <div class="ex-txt">
-              <div class="ex-title">${x.name}</div>
-              <div class="ex-info">${labelFam(x.fam)} • ${x.note}</div>
-            </div>
-            <button class="info-btn" data-id="${x.id}" title="Voir l’illustration">i</button>
-          `;
-          row.querySelector('.info-btn').addEventListener('click', ()=> openLB(x));
-          exList.appendChild(row);
-        });
+    function modeLabel(e){
+      switch(e.mode){
+        case 'reps': return 'Répétitions';
+        case 'sets_reps': return 'Séries×Rép';
+        case 'duration': return 'Durée';
+        case 'weight': return 'Poids';
+        default: return '—';
+      }
+    }
+    function entryDetails(e){
+      let parts=[];
+      if(e.mode==='reps' && e.reps!=null) parts.push(`${e.reps} rép`);
+      if(e.mode==='sets_reps' && (e.sets!=null || e.srreps!=null)) parts.push(`${e.sets||0}×${e.srreps||0}`);
+      if(e.mode==='duration' && (e.min!=null || e.sec!=null)) parts.push(`${e.min||0}′${pad(e.sec||0)}″`);
+      if(e.mode==='weight' && e.kg!=null) parts.push(`${e.kg} kg`);
+      if(e.mode!=='weight' && e.kg!=null) parts.push(`${e.kg} kg`);
+      return parts.join(' • ');
+    }
+    function formatLine(e){
+      const det=entryDetails(e);
+      return det? `${e.name} — ${det}` : e.name;
+    }
+    function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c]));}
+
+    /* ===== Sheet ===== */
+    const sheetBg=$('#sheetBg');
+    const fDate=$('#fDate'), fName=$('#fName'), fMode=$('#fMode');
+    const fReps=$('#fReps'), fSets=$('#fSets'), fSRReps=$('#fSRReps');
+    const fMin=$('#fMin'), fSec=$('#fSec'), fKg=$('#fKg'), fNotes=$('#fNotes');
+
+    function openSheet(dateISO){
+      $('#msg').textContent='';
+      fDate.value=dateISO||toISO(new Date());
+      fName.value=''; fMode.value='reps';
+      fReps.value=''; fSets.value=''; fSRReps.value='';
+      fMin.value=''; fSec.value=''; fKg.value=''; fNotes.value='';
+      updateModeFields();
+      sheetBg.style.display='flex';
+    }
+    function closeSheet(){ sheetBg.style.display='none'; }
+    $('#btnCancel').onclick=closeSheet;
+    sheetBg.addEventListener('click',e=>{ if(e.target===sheetBg) closeSheet(); });
+    $('#fMode').addEventListener('change',updateModeFields);
+
+    function updateModeFields(){
+      $$('[data-field]').forEach(el=>el.style.display='none');
+      const m=fMode.value;
+      if(m==='reps') $('[data-field="reps"]').style.display='';
+      if(m==='sets_reps') $('[data-field="sets_reps"]').style.display='';
+      if(m==='duration') $('[data-field="duration"]').style.display='';
     }
 
-    /* Lightbox */
-    const lb = document.getElementById('lb');
-    const lbImg = document.getElementById('lbImg');
-    document.getElementById('lbClose').onclick = ()=> lb.classList.remove('open');
-    lb.addEventListener('click', e=>{ if(e.target===lb) lb.classList.remove('open'); });
-    function openLB(ex){
-      lbImg.src = ex.thumb;
-      // pas de texte dans la lightbox
-      lb.classList.add('open');
-    }
+    function numOrNull(v, float=false){ if(v==null||v==='') return null; const n=float?parseFloat(v):parseInt(v,10); return isNaN(n)?null:n; }
 
-    /* Boot */
-    renderExos();
+    $('#btnSave').onclick=()=>{
+      const item={
+        id:'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+        _ts:Date.now(),
+        date:fDate.value,
+        name:fName.value.trim(),
+        mode:fMode.value,
+        reps:numOrNull(fReps.value),
+        sets:numOrNull(fSets?.value),
+        srreps:numOrNull(fSRReps?.value),
+        min:numOrNull(fMin?.value),
+        sec:numOrNull(fSec?.value),
+        kg:numOrNull(fKg?.value,true),
+        notes:fNotes.value.trim()
+      };
+      if(!item.date){ $('#msg').textContent='La date est obligatoire.'; return; }
+      if(!item.name){ $('#msg').textContent='Le nom de l’exercice est obligatoire.'; return; }
+      if(item.mode==='weight' && item.kg==null){ $('#msg').textContent='Indique un poids (kg).'; return; }
+
+      // nettoyage champs non utilisés
+      if(item.mode!=='reps') item.reps=null;
+      if(item.mode!=='sets_reps'){ item.sets=null; item.srreps=null; }
+      if(item.mode!=='duration'){ item.min=null; item.sec=null; }
+
+      DATA.push(item); saveStore(DATA); closeSheet();
+      // refresh la vue visible
+      if(viewDay.style.display!=='none'){ renderDay(); } else { renderWeek(); }
+    };
+
+    /* ===== Boot ===== */
+    (function init(){
+      const now=new Date();
+      refDate=now; selDayISO=toISO(now);
+      renderWeek();
+    })();
   </script>
 </body>
 </html>
