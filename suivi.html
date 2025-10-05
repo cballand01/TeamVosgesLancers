@@ -6,23 +6,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root{
-      --bg:#0f172a; --card:#111827; --text:#e5e7eb; --muted:#94a3b8; --line:#1f2937; --accent:#22c55e;
+      --bg:#0f172a; --card:#111827; --text:#e5e7eb; --muted:#94a3b8; --line:#1f2937;
+      --accent:#22c55e; --danger:#ef4444;
     }
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
     .wrap{max-width:960px;margin:0 auto;padding:16px 16px 96px}
 
-    /* Topbar */
     .topbar{display:flex;align-items:center;margin-bottom:12px}
     .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px}
     .back svg{width:20px;height:20px;stroke:#fff}
 
-    /* Header */
     .page-header h1{font-size:28px;font-weight:700;margin:0 0 4px;position:relative;padding-bottom:6px}
     .page-header h1::after{content:"";position:absolute;left:0;bottom:0;width:72px;height:3px;background:var(--accent);border-radius:999px}
     .page-header .subtitle{opacity:.8;font-size:16px;margin:0 0 16px}
 
-    /* Weekbar + pills */
     .weekbar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px}
     .navbtn{
       width:36px;height:36px;border-radius:50%;border:1px solid var(--line);
@@ -40,7 +38,6 @@
     .daypill small{display:block;opacity:.7}
     .daypill.active{background:var(--accent);color:#0b1326;border-color:var(--accent);font-weight:700}
 
-    /* Liste d'exos du jour */
     .list{display:grid;gap:10px}
     .empty{font-size:14px;color:var(--muted);opacity:.9;padding:6px}
 
@@ -57,7 +54,6 @@
     .del{position:absolute;top:6px;right:8px;border:none;background:transparent;color:#94a3b8;cursor:pointer;font-size:18px}
     .del:hover{color:#fff}
 
-    /* FAB */
     .fab{
       position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;
       display:grid;place-items:center;background:var(--accent);color:#0b1326;
@@ -65,7 +61,6 @@
       font-size:28px;font-weight:900
     }
 
-    /* Sheet */
     .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);display:none;align-items:flex-end;z-index:60}
     .sheet{
       width:100%;max-width:960px;margin:0 auto;background:var(--card);
@@ -81,38 +76,33 @@
     }
     .row textarea{resize:vertical}
 
-    /* Mini cases (sans placeholder) */
     .grid{display:grid;gap:6px}
     .mini-header{display:grid;grid-template-columns:64px 64px 64px 36px;gap:6px;align-items:center}
     .mini-row{display:grid;grid-template-columns:64px 64px 64px 36px;gap:6px;align-items:center}
-    .mini-sets,.mini-reps,.mini-kg{
+    .mini-sets,.mini-reps,.mini-kg,.mini-min,.mini-sec{
       width:100%;height:40px;text-align:center;
       background:#0b1326;border:1px solid var(--line);border-radius:8px;color:#e5e7eb;
-      font-size:14px;appearance:textfield; /* pas de flèches */
+      font-size:14px;appearance:textfield;
     }
-    .mini-sets::-webkit-outer-spin-button,.mini-sets::-webkit-inner-spin-button,
-    .mini-reps::-webkit-outer-spin-button,.mini-reps::-webkit-inner-spin-button,
-    .mini-kg::-webkit-outer-spin-button,.mini-kg::-webkit-inner-spin-button{
-      -webkit-appearance: none;margin:0;
-    }
-    .mini-actions{display:flex;gap:6px}
+    .mini-label{font-size:12px;color:#94a3b8;text-align:center}
+
+    /* Boutons + / - mis en couleurs */
     .iconbtn{
       width:36px;height:36px;border-radius:10px;border:1px solid var(--line);
-      background:#0b1326;color:#e5e7eb;display:grid;place-items:center;cursor:pointer
+      background:#0b1326;color:#e5e7eb;display:grid;place-items:center;cursor:pointer;
+      transition:all .15s ease;
     }
-    .iconbtn:active{transform:scale(.98)}
-    .mini-label{font-size:12px;color:#94a3b8;text-align:center}
+    .iconbtn.add{background:var(--accent);color:#0b1326;border-color:#16a34a;font-weight:900}
+    .iconbtn.remove{background:var(--danger);color:#fff;border-color:#b91c1c;font-weight:900}
+    .iconbtn:active{transform:scale(.94)}
 
     .actions{display:flex;gap:8px;justify-content:flex-start;margin-top:10px}
     .btn{border:1px solid var(--line);border-radius:10px;background:#0b1326;color:#e5e7eb;padding:10px 12px;cursor:pointer}
     .btn.ghost{background:transparent}
     .small{font-size:12px;color:#94a3b8}
-
-    /* Affichage conditionnel zones selon le mode */
     .mode-block{display:none}
     .mode-block.active{display:block}
 
-    /* Petits écrans: resserrer un peu */
     @media (max-width:380px){
       .mini-header,.mini-row{grid-template-columns:56px 56px 56px 36px}
     }
@@ -132,7 +122,6 @@
       <div class="subtitle">Vue semaine • Ajoute tes exos par jour</div>
     </header>
 
-    <!-- Navigation semaine -->
     <div class="weekbar">
       <button class="navbtn" id="prev">‹</button>
       <div class="when" id="when"></div>
@@ -140,30 +129,17 @@
       <button class="navbtn" id="next">›</button>
     </div>
 
-    <!-- Jours -->
     <div class="days" id="days"></div>
-
-    <!-- Liste exos du jour -->
     <div class="list" id="list"></div>
-
-    <!-- Ajouter -->
     <button class="fab" id="fab" title="Ajouter">＋</button>
 
-    <!-- Sheet ajout -->
+    <!-- Bottom sheet -->
     <div class="sheet-backdrop" id="sheetBg">
       <div class="sheet">
         <h3 style="margin:4px 0 8px">Ajouter un exercice</h3>
 
-        <div class="row">
-          <label>Date</label>
-          <input id="fDate" type="date">
-        </div>
-
-        <div class="row">
-          <label>Nom</label>
-          <input id="fName" type="text">
-        </div>
-
+        <div class="row"><label>Date</label><input id="fDate" type="date"></div>
+        <div class="row"><label>Nom</label><input id="fName" type="text" placeholder="ex: Développé couché"></div>
         <div class="row">
           <label>Mode</label>
           <select id="fMode">
@@ -178,110 +154,70 @@
         <!-- Séries × Rép + Kg -->
         <div id="blkSRK" class="mode-block">
           <div class="mini-header">
-            <div class="mini-label">Séries</div>
-            <div class="mini-label">Rép</div>
-            <div class="mini-label">Kg</div>
-            <div></div>
+            <div class="mini-label">Séries</div><div class="mini-label">Rép</div><div class="mini-label">Kg</div><div></div>
           </div>
           <div id="rowsSRK" class="grid"></div>
-          <div class="mini-actions" style="margin-top:6px">
-            <button class="iconbtn" id="addRowSRK" title="Ajouter une ligne">＋</button>
-          </div>
+          <div style="margin-top:6px"><button class="iconbtn add" id="addRowSRK">＋</button></div>
         </div>
 
         <!-- Séries × Rép -->
         <div id="blkSR" class="mode-block">
           <div class="mini-header">
-            <div class="mini-label">Séries</div>
-            <div class="mini-label">Rép</div>
-            <div style="visibility:hidden" class="mini-label">_</div>
-            <div></div>
+            <div class="mini-label">Séries</div><div class="mini-label">Rép</div><div></div><div></div>
           </div>
           <div id="rowsSR" class="grid"></div>
-          <div class="mini-actions" style="margin-top:6px">
-            <button class="iconbtn" id="addRowSR" title="Ajouter une ligne">＋</button>
-          </div>
+          <div style="margin-top:6px"><button class="iconbtn add" id="addRowSR">＋</button></div>
         </div>
 
         <!-- Répétitions -->
         <div id="blkR" class="mode-block">
-          <div class="mini-header">
-            <div class="mini-label" style="grid-column:1/4">Répétitions (liste)</div>
-          </div>
+          <div class="mini-header"><div class="mini-label" style="grid-column:1/4">Répétitions</div></div>
           <div id="rowsR" class="grid"></div>
-          <div class="mini-actions" style="margin-top:6px">
-            <button class="iconbtn" id="addRowR" title="Ajouter">＋</button>
-          </div>
+          <div style="margin-top:6px"><button class="iconbtn add" id="addRowR">＋</button></div>
         </div>
 
         <!-- Durée -->
         <div id="blkT" class="mode-block">
-          <div class="mini-header">
-            <div class="mini-label">Min</div>
-            <div class="mini-label">Sec</div>
-            <div style="visibility:hidden" class="mini-label">_</div>
-            <div></div>
-          </div>
+          <div class="mini-header"><div class="mini-label">Min</div><div class="mini-label">Sec</div><div></div><div></div></div>
           <div id="rowsT" class="grid"></div>
-          <div class="mini-actions" style="margin-top:6px">
-            <button class="iconbtn" id="addRowT" title="Ajouter">＋</button>
-          </div>
+          <div style="margin-top:6px"><button class="iconbtn add" id="addRowT">＋</button></div>
         </div>
 
         <!-- Kg seul -->
         <div id="blkW" class="mode-block">
-          <div class="mini-header">
-            <div class="mini-label" style="grid-column:1/3">Kg</div>
-            <div style="visibility:hidden" class="mini-label">_</div>
-            <div></div>
-          </div>
+          <div class="mini-header"><div class="mini-label" style="grid-column:1/3">Kg</div><div></div><div></div></div>
           <div id="rowsW" class="grid"></div>
-          <div class="mini-actions" style="margin-top:6px">
-            <button class="iconbtn" id="addRowW" title="Ajouter">＋</button>
-          </div>
+          <div style="margin-top:6px"><button class="iconbtn add" id="addRowW">＋</button></div>
         </div>
 
-        <div class="row">
-          <label>Commentaire</label>
-          <textarea id="fNote" rows="3"></textarea>
-        </div>
-
-        <div class="actions">
-          <button class="btn ghost" id="cancel">Annuler</button>
-          <button class="btn" id="save">Ajouter</button>
-        </div>
+        <div class="row"><label>Commentaire</label><textarea id="fNote" rows="3" placeholder="Notes, sensations…"></textarea></div>
+        <div class="actions"><button class="btn ghost" id="cancel">Annuler</button><button class="btn" id="save">Ajouter</button></div>
         <div id="msg" class="small" style="margin-top:6px"></div>
       </div>
     </div>
   </div>
 
   <script>
-    /********** STATE + UTILS **********/
-    const daysEl = document.getElementById('days');
-    const listEl = document.getElementById('list');
-    const whenEl = document.getElementById('when');
-    const sheetBg = document.getElementById('sheetBg');
+    /***** SEMAINE *****/
+    const daysEl = document.getElementById("days");
+    const listEl = document.getElementById("list");
+    const whenEl = document.getElementById("when");
+    const sheetBg = document.getElementById("sheetBg");
 
-    const fDate = document.getElementById('fDate');
-    const fName = document.getElementById('fName');
-    const fMode = document.getElementById('fMode');
-    const fNote = document.getElementById('fNote');
+    const fDate = document.getElementById("fDate");
+    const fName = document.getElementById("fName");
+    const fMode = document.getElementById("fMode");
+    const fNote = document.getElementById("fNote");
 
-    const blkSRK = document.getElementById('blkSRK'); // sets x reps + kg
-    const blkSR  = document.getElementById('blkSR');  // sets x reps
-    const blkR   = document.getElementById('blkR');   // reps list
-    const blkT   = document.getElementById('blkT');   // time list
-    const blkW   = document.getElementById('blkW');   // weight list
-
-    const rowsSRK = document.getElementById('rowsSRK');
-    const rowsSR  = document.getElementById('rowsSR');
-    const rowsR   = document.getElementById('rowsR');
-    const rowsT   = document.getElementById('rowsT');
-    const rowsW   = document.getElementById('rowsW');
+    const rowsSRK = document.getElementById("rowsSRK");
+    const rowsSR  = document.getElementById("rowsSR");
+    const rowsR   = document.getElementById("rowsR");
+    const rowsT   = document.getElementById("rowsT");
+    const rowsW   = document.getElementById("rowsW");
 
     let currentMonday = getMonday(new Date());
-    let selectedDate  = new Date();
-    let workouts = loadLS(); // [{id,date,name,mode,data:{...},note}]
+    let selectedDate = new Date();
+    let items = []; // {id, date, name, mode, rows[], note, lines[]}
 
     function getMonday(d){
       d = new Date(d);
@@ -292,290 +228,274 @@
       const d2 = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
       return d2.toISOString().split("T")[0];
     }
-    function loadLS(){
-      try{ return JSON.parse(localStorage.getItem('workouts')||'[]'); }catch(_){ return [] }
-    }
-    function saveLS(){ localStorage.setItem('workouts', JSON.stringify(workouts)); }
 
-    /********** WEEK RENDER **********/
     function renderWeek(){
-      daysEl.innerHTML = '';
+      daysEl.innerHTML = "";
       const pills = [];
       for(let i=0;i<7;i++){
         const day = new Date(currentMonday);
         day.setDate(day.getDate()+i);
-        const pill = document.createElement('div');
-        pill.className='daypill';
+        const pill = document.createElement("div");
+        pill.className = "daypill";
         pill.dataset.date = formatDate(day);
-        pill.innerHTML = `${day.toLocaleDateString('fr-FR',{weekday:'short'})}<small>${day.getDate()} ${day.toLocaleDateString('fr-FR',{month:'short'})}</small>`;
-        pill.onclick = ()=>{
+        pill.innerHTML = `${day.toLocaleDateString("fr-FR",{weekday:"short"})}<small>${day.getDate()} ${day.toLocaleDateString("fr-FR",{month:"short"})}</small>`;
+        pill.onclick = () => {
           selectedDate = new Date(day);
           fDate.value = formatDate(selectedDate);
           highlightSelected(pill.dataset.date);
           renderList();
-          pill.scrollIntoView({inline:'center',behavior:'smooth',block:'nearest'});
+          pill.scrollIntoView({ inline:"center", behavior:"smooth", block:"nearest" });
         };
         daysEl.appendChild(pill);
         pills.push(pill);
       }
-      const end = new Date(currentMonday); end.setDate(end.getDate()+6);
-      whenEl.textContent = `${currentMonday.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})} – ${end.toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})}`;
+      const end = new Date(currentMonday);
+      end.setDate(end.getDate()+6);
+      whenEl.textContent = `${currentMonday.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})} – ${end.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}`;
 
       highlightSelected(formatDate(selectedDate));
       const today = formatDate(new Date());
       const todayPill = pills.find(p=>p.dataset.date===today);
-      if(todayPill) setTimeout(()=>todayPill.scrollIntoView({inline:'center',behavior:'smooth'}), 50);
-    }
-    function highlightSelected(dateStr){
-      document.querySelectorAll('.daypill').forEach(p=>p.classList.remove('active'));
-      const t = Array.from(document.querySelectorAll('.daypill')).find(p=>p.dataset.date===dateStr);
-      if(t) t.classList.add('active');
+      if(todayPill) setTimeout(()=>todayPill.scrollIntoView({inline:"center",behavior:"smooth"}), 50);
     }
 
-    /********** LIST RENDER **********/
+    function highlightSelected(dateStr){
+      document.querySelectorAll(".daypill").forEach(p=>p.classList.remove("active"));
+      const target = Array.from(document.querySelectorAll(".daypill")).find(p=>p.dataset.date===dateStr);
+      if(target) target.classList.add("active");
+    }
+
+    /***** AFFICHAGE LISTE *****/
     function renderList(){
       const dateStr = formatDate(selectedDate);
-      const items = workouts.filter(w=>w.date===dateStr);
-      listEl.innerHTML = '';
-      if(items.length===0){
-        listEl.innerHTML = `<div class="empty">Rien saisi pour ce jour</div>`;
+      const todays = items.filter(e=>e.date===dateStr);
+      listEl.innerHTML = "";
+      if(todays.length===0){
+        listEl.innerHTML = `<div class="empty">Aucun exercice</div>`;
         return;
       }
-      items.forEach(w=>{
-        const card = document.createElement('div');
-        card.className='card';
+      todays.forEach(e=>{
+        const card = document.createElement("div");
+        card.className = "card";
+        const lines = e.lines && e.lines.length ? e.lines : [];
         card.innerHTML = `
           <div class="bar"></div>
           <div class="info">
-            <div class="title">${escapeHTML(w.name||'Exercice')}</div>
-            <div class="meta">${labelMode(w.mode)}</div>
-            <div class="rows">${renderDataLines(w).join('')}</div>
-            ${w.note?`<div class="meta" style="margin-top:6px">${escapeHTML(w.note)}</div>`:''}
+            <div class="title">${escapeHtml(e.name || 'Exercice')}</div>
+            <div class="meta">${formatFrenchDate(e.date)}</div>
+            <div class="rows">
+              ${lines.map(l=>`<div class="rowline">${escapeHtml(l)}</div>`).join('')}
+              ${e.note ? `<div class="rowline" style="opacity:.8">${escapeHtml(e.note)}</div>`:''}
+            </div>
           </div>
           <button class="del" title="Supprimer">×</button>
         `;
-        card.querySelector('.del').onclick = ()=>{
-          if(!confirm('Supprimer cet exercice ?')) return;
-          workouts = workouts.filter(x=>x.id!==w.id);
-          saveLS();
+        card.querySelector(".del").onclick = () => {
+          if(!confirm("Supprimer cet exercice ?")) return;
+          items = items.filter(x=>x.id!==e.id);
           renderList();
         };
         listEl.appendChild(card);
       });
     }
-    function labelMode(m){
-      return m==='sets_reps_kg'?'Séries × Rép + Kg'
-           : m==='sets_reps'   ?'Séries × Rép'
-           : m==='reps'        ?'Répétitions'
-           : m==='time'        ?'Durée'
-           : m==='weight_only' ?'Kg seul'
-           : '—';
-    }
-    function renderDataLines(w){
-      const out = [];
-      if(w.mode==='sets_reps_kg'){
-        (w.data?.rows||[]).forEach(r=>{
-          out.push(`<div class="rowline">${num(r.sets)}×${num(r.reps)} @ ${num(r.kg)} kg</div>`);
-        });
-      }else if(w.mode==='sets_reps'){
-        (w.data?.rows||[]).forEach(r=>{
-          out.push(`<div class="rowline">${num(r.sets)}×${num(r.reps)}</div>`);
-        });
-      }else if(w.mode==='reps'){
-        const reps = (w.data?.reps||[]).filter(v=>v!==''&&v!=null);
-        if(reps.length) out.push(`<div class="rowline">${reps.map(num).join(' • ')} reps</div>`);
-      }else if(w.mode==='time'){
-        const times = (w.data?.times||[]).map(t=>`${num(t.min)}:${String(num(t.sec)).padStart(2,'0')}`).join(' • ');
-        if(times) out.push(`<div class="rowline">${times}</div>`);
-      }else if(w.mode==='weight_only'){
-        const ws = (w.data?.weights||[]).filter(v=>v!==''&&v!=null);
-        if(ws.length) out.push(`<div class="rowline">${ws.map(num).join(' • ')} kg</div>`);
-      }
-      return out;
-    }
-    function num(v){ return (v==null||v==='')?0:parseFloat(v) }
 
-    function escapeHTML(s){
-      return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+    function escapeHtml(s){
+      return String(s||'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
     }
+    function formatFrenchDate(iso){
+      const d = isoToDate(iso);
+      return d.toLocaleDateString('fr-FR',{weekday:'short', day:'2-digit', month:'short'});
+    }
+    function isoToDate(s){const p=s.split('-');return new Date(+p[0],p[1]-1,+p[2]);}
 
-    /********** SHEET LOGIC **********/
-    function openSheet(){
-      document.getElementById('msg').textContent='';
-      sheetBg.style.display='flex';
-      // date préremplie (pas de placeholder)
-      fDate.value = formatDate(selectedDate);
-      fName.value = '';
-      fNote.value = '';
-      fMode.value = 'sets_reps_kg';
-      // reset blocs
-      resetBlocks();
-      showModeBlock('sets_reps_kg');
-    }
-    function closeSheet(){
-      sheetBg.style.display='none';
-    }
-    sheetBg.addEventListener('click', e=>{ if(e.target===sheetBg) closeSheet(); });
-    document.getElementById('cancel').onclick = closeSheet;
-
-    // Changement de mode
-    fMode.addEventListener('change', ()=>{
-      showModeBlock(fMode.value);
-    });
+    /***** MODALE AJOUT *****/
+    const modeBlocks = {
+      sets_reps_kg: document.getElementById('blkSRK'),
+      sets_reps:    document.getElementById('blkSR'),
+      reps:         document.getElementById('blkR'),
+      time:         document.getElementById('blkT'),
+      weight_only:  document.getElementById('blkW'),
+    };
 
     function showModeBlock(mode){
-      [blkSRK,blkSR,blkR,blkT,blkW].forEach(b=>b.classList.remove('active'));
-      if(mode==='sets_reps_kg'){ blkSRK.classList.add('active'); if(!rowsSRK.childElementCount) addRowSRK(); }
-      if(mode==='sets_reps'){    blkSR.classList.add('active');  if(!rowsSR.childElementCount)  addRowSR(); }
-      if(mode==='reps'){         blkR.classList.add('active');   if(!rowsR.childElementCount)   addRowR(); }
-      if(mode==='time'){         blkT.classList.add('active');   if(!rowsT.childElementCount)   addRowT(); }
-      if(mode==='weight_only'){  blkW.classList.add('active');   if(!rowsW.childElementCount)   addRowW(); }
+      Object.values(modeBlocks).forEach(el=>el.classList.remove('active'));
+      (modeBlocks[mode]||modeBlocks.sets_reps_kg).classList.add('active');
     }
 
-    function resetBlocks(){
-      rowsSRK.innerHTML = '';
-      rowsSR.innerHTML  = '';
-      rowsR.innerHTML   = '';
-      rowsT.innerHTML   = '';
-      rowsW.innerHTML   = '';
-      // valeurs par défaut : 1 ligne pour chaque mode
-      addRowSRK();
-      addRowSR();
-      addRowR();
-      addRowT();
-      addRowW();
+    fMode.addEventListener('change',()=>showModeBlock(fMode.value));
+
+    // Ajout / suppression de mini-lignes
+    function addRow(container, fields){
+      const row = document.createElement('div');
+      row.className = 'mini-row';
+      row.innerHTML = `
+        ${fields.sets?`<input class="mini-sets" type="number" min="0" inputmode="numeric" placeholder="">`:''}
+        ${fields.reps?`<input class="mini-reps" type="number" min="0" inputmode="numeric" placeholder="">`:''}
+        ${fields.kg?  `<input class="mini-kg"   type="number" step="0.5" inputmode="decimal" placeholder="">`:''}
+        ${fields.min? `<input class="mini-min"  type="number" min="0" inputmode="numeric" placeholder="">`:''}
+        ${fields.sec? `<input class="mini-sec"  type="number" min="0" inputmode="numeric" placeholder="">`:''}
+        <button class="iconbtn remove" title="Supprimer">−</button>
+      `;
+      row.querySelector('.iconbtn.remove').onclick = ()=> row.remove();
+      container.appendChild(row);
     }
 
-    // Builders de lignes (mini-cases sans placeholder)
-    function addRowSRK(){
-      const line = document.createElement('div');
-      line.className='mini-row';
-      line.innerHTML = `
-        <input type="number" class="mini-sets" min="0" aria-label="Séries">
-        <input type="number" class="mini-reps" min="0" aria-label="Répétitions">
-        <input type="number" step="0.5" class="mini-kg" min="0" aria-label="Kg">
-        <button class="iconbtn" title="Retirer">–</button>
-      `;
-      line.querySelector('.iconbtn').onclick = ()=> line.remove();
-      rowsSRK.appendChild(line);
-    }
-    function addRowSR(){
-      const line = document.createElement('div');
-      line.className='mini-row';
-      line.innerHTML = `
-        <input type="number" class="mini-sets" min="0" aria-label="Séries">
-        <input type="number" class="mini-reps" min="0" aria-label="Répétitions">
-        <div></div>
-        <button class="iconbtn" title="Retirer">–</button>
-      `;
-      line.querySelector('.iconbtn').onclick = ()=> line.remove();
-      rowsSR.appendChild(line);
-    }
-    function addRowR(){
-      const line = document.createElement('div');
-      line.className='mini-row';
-      line.innerHTML = `
-        <input type="number" class="mini-reps" min="0" style="grid-column:1/3" aria-label="Répet">
-        <div></div>
-        <button class="iconbtn" title="Retirer">–</button>
-      `;
-      line.querySelector('.iconbtn').onclick = ()=> line.remove();
-      rowsR.appendChild(line);
-    }
-    function addRowT(){
-      const line = document.createElement('div');
-      line.className='mini-row';
-      line.innerHTML = `
-        <input type="number" class="mini-reps" min="0" aria-label="Minutes">
-        <input type="number" class="mini-reps" min="0" aria-label="Secondes">
-        <div></div>
-        <button class="iconbtn" title="Retirer">–</button>
-      `;
-      line.querySelector('.iconbtn').onclick = ()=> line.remove();
-      rowsT.appendChild(line);
-    }
-    function addRowW(){
-      const line = document.createElement('div');
-      line.className='mini-row';
-      line.innerHTML = `
-        <input type="number" step="0.5" class="mini-kg" min="0" style="grid-column:1/3" aria-label="Kg">
-        <div></div>
-        <button class="iconbtn" title="Retirer">–</button>
-      `;
-      line.querySelector('.iconbtn').onclick = ()=> line.remove();
-      rowsW.appendChild(line);
+    document.getElementById('addRowSRK').onclick = ()=> addRow(rowsSRK,{sets:1,reps:1,kg:1});
+    document.getElementById('addRowSR' ).onclick = ()=> addRow(rowsSR ,{sets:1,reps:1});
+    document.getElementById('addRowR'  ).onclick = ()=> addRow(rowsR  ,{reps:1});
+    document.getElementById('addRowT'  ).onclick = ()=> addRow(rowsT  ,{min:1,sec:1});
+    document.getElementById('addRowW'  ).onclick = ()=> addRow(rowsW  ,{kg:1});
+
+    function readRows(container){
+      const arr = [];
+      container.querySelectorAll('.mini-row').forEach(r=>{
+        const get = sel => {
+          const el = r.querySelector(sel);
+          if(!el) return null;
+          const v = el.value.trim();
+          return v==='' ? null : Number(v);
+        };
+        arr.push({
+          sets: get('.mini-sets'),
+          reps: get('.mini-reps'),
+          kg:   get('.mini-kg'),
+          min:  get('.mini-min'),
+          sec:  get('.mini-sec')
+        });
+      });
+      // garde uniquement les lignes avec au moins une valeur
+      return arr.filter(o=> Object.values(o).some(v=>v!==null));
     }
 
-    // Boutons +
-    document.getElementById('addRowSRK').onclick = addRowSRK;
-    document.getElementById('addRowSR').onclick  = addRowSR;
-    document.getElementById('addRowR').onclick   = addRowR;
-    document.getElementById('addRowT').onclick   = addRowT;
-    document.getElementById('addRowW').onclick   = addRowW;
+    // Résumés lisibles (sans libellés techniques)
+    function trimKg(n){
+      if(n==null || isNaN(n)) return '';
+      return (Math.round(n*10)/10).toString().replace('.',',');
+    }
+    function lineSetsRepsKg(o){
+      const s = o.sets ?? 0, r = o.reps ?? 0, kg = o.kg ?? null;
+      if(s>0 && r>0 && kg!=null) return `${s}×${r} à ${trimKg(kg)} kg`;
+      if(s>0 && r>0) return `${s}×${r}`;
+      if(r>0 && kg!=null) return `${r} rép à ${trimKg(kg)} kg`;
+      if(kg!=null) return `${trimKg(kg)} kg`;
+      return null;
+    }
+    function lineSetsReps(o){
+      const s = o.sets ?? 0, r = o.reps ?? 0;
+      if(s>0 && r>0) return `${s}×${r}`;
+      if(r>0) return `${r} rép`;
+      return null;
+    }
+    function lineReps(o){
+      const r = o.reps ?? 0;
+      return r>0 ? `${r} rép` : null;
+    }
+    function lineTime(o){
+      const m = o.min ?? 0, s = o.sec ?? 0;
+      if(m>0 && s>0) return `${m} min ${s} s`;
+      if(m>0) return `${m} min`;
+      if(s>0) return `${s} s`;
+      return null;
+    }
+    function lineWeight(o){
+      return (o.kg!=null) ? `${trimKg(o.kg)} kg` : null;
+    }
 
-    // Sauvegarde
-    document.getElementById('save').onclick = ()=>{
+    function summarize(mode, rows){
+      const map = {
+        sets_reps_kg: lineSetsRepsKg,
+        sets_reps:    lineSetsReps,
+        reps:         lineReps,
+        time:         lineTime,
+        weight_only:  lineWeight
+      };
+      const fn = map[mode] || lineSetsRepsKg;
+      return rows.map(fn).filter(Boolean);
+    }
+
+    // Ouvre/ferme la modale
+    document.getElementById("fab").onclick = () => {
+      fDate.value = formatDate(selectedDate);
+      fName.value = '';
+      fMode.value = 'sets_reps_kg';
+      fNote.value = '';
+
+      [rowsSRK,rowsSR,rowsR,rowsT,rowsW].forEach(c=>c.innerHTML='');
+      addRow(rowsSRK,{sets:1,reps:1,kg:1});
+
+      showModeBlock('sets_reps_kg');
+      document.getElementById("msg").textContent = '';
+      sheetBg.style.display = "flex";
+    };
+    document.getElementById("cancel").onclick = () => {
+      sheetBg.style.display = "none";
+      document.getElementById("msg").textContent = '';
+    };
+    sheetBg.addEventListener("click",(e)=>{
+      if(e.target===sheetBg){
+        sheetBg.style.display="none";
+        document.getElementById("msg").textContent='';
+      }
+    });
+
+    // Enregistrer
+    document.getElementById("save").onclick = () => {
       const date = (fDate.value||'').trim();
       const name = (fName.value||'').trim();
       const mode = fMode.value;
       const note = (fNote.value||'').trim();
 
       if(!date || !name){
-        document.getElementById('msg').textContent = 'Date et nom requis.';
+        document.getElementById("msg").textContent = "Nom et date requis.";
         return;
       }
 
-      const data = {};
-      if(mode==='sets_reps_kg'){
-        data.rows = Array.from(rowsSRK.children).map(r=>({
-          sets: valNum(r.querySelector('.mini-sets').value),
-          reps: valNum(r.querySelector('.mini-reps').value),
-          kg:   valNum(r.querySelector('.mini-kg').value)
-        })).filter(x=>x.sets>0 || x.reps>0 || x.kg>0);
-      }else if(mode==='sets_reps'){
-        data.rows = Array.from(rowsSR.children).map(r=>({
-          sets: valNum(r.querySelector('.mini-sets').value),
-          reps: valNum(r.querySelector('.mini-reps').value)
-        })).filter(x=>x.sets>0 || x.reps>0);
-      }else if(mode==='reps'){
-        data.reps = Array.from(rowsR.querySelectorAll('input')).map(i=>valNum(i.value)).filter(v=>v>0);
-      }else if(mode==='time'){
-        data.times = Array.from(rowsT.children).map(r=>({
-          min: valNum(r.querySelectorAll('input')[0].value),
-          sec: valNum(r.querySelectorAll('input')[1].value)
-        })).filter(t=> (t.min+t.sec)>0 );
-      }else if(mode==='weight_only'){
-        data.weights = Array.from(rowsW.querySelectorAll('input')).map(i=>valNum(i.value)).filter(v=>v>0);
+      const rows = mode==='sets_reps_kg' ? readRows(rowsSRK)
+                  : mode==='sets_reps'    ? readRows(rowsSR)
+                  : mode==='reps'         ? readRows(rowsR)
+                  : mode==='time'         ? readRows(rowsT)
+                  :                         readRows(rowsW);
+
+      if(rows.length===0){
+        document.getElementById("msg").textContent = "Ajoute au moins une ligne.";
+        return;
       }
 
-      const item = { id:String(Date.now()), date, name, mode, data, note };
-      workouts.push(item);
-      saveLS();
-      closeSheet();
-      if(formatDate(selectedDate)===date) renderList();
+      const lines = summarize(mode, rows); // <= ICI les lignes “5×4 à 130 kg”, “55 min 32 s”, “12 rép”, etc.
+
+      const item = {
+        id: String(Date.now()),
+        date, name, mode, rows, note,
+        lines
+      };
+
+      items.push(item);
+      sheetBg.style.display = "none";
+      renderList();
     };
 
-    function valNum(v){ if(v==null||String(v).trim()==='') return 0; return Number(v) }
-
-    /********** WEEK NAV **********/
-    document.getElementById('prev').onclick = ()=>{ currentMonday.setDate(currentMonday.getDate()-7); renderWeek(); renderList(); };
-    document.getElementById('next').onclick = ()=>{ currentMonday.setDate(currentMonday.getDate()+7); renderWeek(); renderList(); };
-    document.getElementById('today').onclick = ()=>{
+    /***** NAV SEMAINE *****/
+    document.getElementById("prev").onclick = () => {
+      currentMonday.setDate(currentMonday.getDate()-7);
+      renderWeek(); renderList();
+    };
+    document.getElementById("next").onclick = () => {
+      currentMonday.setDate(currentMonday.getDate()+7);
+      renderWeek(); renderList();
+    };
+    document.getElementById("today").onclick = () => {
       currentMonday = getMonday(new Date());
       selectedDate = new Date();
       renderWeek();
+      fDate.value = formatDate(selectedDate);
       renderList();
     };
 
-    /********** FAB **********/
-    document.getElementById('fab').onclick = openSheet;
-
-    /********** INIT **********/
+    /***** INIT *****/
     (function init(){
       renderWeek();
-      renderList();
-      // date du sheet = date sélectionnée
       fDate.value = formatDate(selectedDate);
+      renderList();
     })();
   </script>
 </body>
