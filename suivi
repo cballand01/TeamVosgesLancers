@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Suivi d’entraînement — Calendrier</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0f172a; --card:#111827; --surface:#0b1326;
+      --text:#e5e7eb; --muted:#94a3b8; --line:#1f2937; --accent:#22c55e; --danger:#ef4444;
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
+    a{color:inherit}
+
+    .wrap{max-width:980px;margin:0 auto;padding:16px 16px 96px}
+    .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px;margin-bottom:10px}
+    .back svg{width:20px;height:20px;stroke:#fff}
+
+    h1{margin:0 0 4px;font-size:28px;line-height:1.15;font-weight:800;letter-spacing:.2px;position:relative;padding-bottom:8px}
+    h1::after{content:"";position:absolute;left:0;bottom:0;width:88px;height:3px;background:var(--accent);border-radius:999px}
+    .subtitle{opacity:.85;color:var(--muted);margin:8px 0 14px}
+
+    /* Tabs */
+    .tabs{display:flex;gap:8px;margin:10px 0 16px}
+    .tab{border:1px solid var(--line);background:#0b1326;color:var(--text);padding:8px 12px;border-radius:999px;cursor:pointer;font-size:13px}
+    .tab.active{background:var(--accent);color:#0b1a10;border-color:var(--accent);font-weight:700}
+
+    /* Header calendrier (mois) */
+    .cal-head{display:flex;align-items:center;gap:8px;margin:6px 0 12px}
+    .cal-title{font-weight:800}
+    .spacer{flex:1}
+    .btn{border:1px solid var(--line);background:#0b1326;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .btn.ghost{background:transparent}
+    .btn.danger{border-color:var(--danger);color:var(--danger)}
+    .btn.primary{background:var(--accent);color:#0b1326;border-color:var(--accent);font-weight:700}
+
+    /* Calendrier mois */
+    .month-grid{
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:8px;
+    }
+    .dow{font-size:12px;color:var(--muted);text-align:center;margin:6px 0}
+    .cell{
+      position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;min-height:86px;display:flex;flex-direction:column;gap:6px
+    }
+    .cell header{display:flex;align-items:center;gap:6px}
+    .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:.9}
+    .date{font-weight:700;font-size:13px;opacity:.95}
+    .muted{opacity:.45}
+    .add-mini{
+      margin-left:auto;border:1px solid var(--line);background:transparent;color:var(--text);
+      width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;
+    }
+    .entries{display:flex;flex-direction:column;gap:4px}
+    .entry-chip{
+      display:flex;align-items:center;gap:6px;
+      background:#0b1326;border:1px solid #243043;border-radius:8px;padding:4px 6px;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis
+    }
+    .entry-chip .bullet{width:6px;height:6px;border-radius:50%;background:#94a3b8;opacity:.9}
+    .entry-chip .txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+
+    /* Vue jour */
+    .day-wrap{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+    .day-head{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+    .big{font-size:20px;font-weight:800}
+    .day-list{display:grid;gap:8px}
+    .row{
+      background:#0b1326;border:1px solid #243043;border-radius:12px;padding:10px;
+      display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center
+    }
+    .row .meta{font-size:12px;color:var(--muted);margin-top:4px}
+    .row .act{display:flex;gap:6px}
+    .badge{border:1px solid #334155;border-radius:999px;padding:2px 8px;font-size:12px;color:#cbd5e1;margin-left:6px}
+    .empty{font-size:14px;color:var(--muted);padding:10px 4px}
+
+    /* Bottom sheet (ajout/édition) */
+    .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);display:none;align-items:flex-end;z-index:50}
+    .sheet{
+      width:100%;max-width:980px;margin:0 auto;background:var(--card);border:1px solid var(--line);
+      border-bottom:none;border-top-left-radius:16px;border-top-right-radius:16px;padding:12px 14px 14px;max-height:85vh;overflow:auto;
+      animation:slideup .18s ease-out
+    }
+    @keyframes slideup{from{transform:translateY(12px);opacity:.3}to{transform:translateY(0);opacity:1}}
+    .grid{display:grid;gap:10px}
+    .rowf{display:flex;gap:8px;align-items:center}
+    .rowf label{flex:0 0 120px;opacity:.9}
+    .rowf input,.rowf select,.rowf textarea{
+      flex:1;background:#0b1326;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:10px
+    }
+    .rowf small{color:var(--muted)}
+    .sheet .actions{display:flex;gap:8px;margin-top:2px}
+
+    @media (min-width:760px){
+      .cell{min-height:110px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="index.html" class="back">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      Retour
+    </a>
+
+    <h1>Suivi d’entraînement</h1>
+    <div class="subtitle">Vue mois & jour • Ajoute rapidement tes séances</div>
+
+    <div class="tabs">
+      <button id="tabMonth" class="tab active">Mois</button>
+      <button id="tabDay" class="tab">Jour</button>
+      <div class="spacer"></div>
+      <button id="btnToday" class="btn ghost">Aujourd’hui</button>
+    </div>
+
+    <!-- === Vue Mois === -->
+    <div id="viewMonth">
+      <div class="cal-head">
+        <button id="prevMonth" class="btn">◀</button>
+        <div id="monthTitle" class="cal-title"></div>
+        <button id="nextMonth" class="btn">▶</button>
+        <div class="spacer"></div>
+      </div>
+
+      <div class="month-grid" id="dowRow"></div>
+      <div class="month-grid" id="monthGrid"></div>
+    </div>
+
+    <!-- === Vue Jour === -->
+    <div id="viewDay" style="display:none">
+      <div class="day-wrap">
+        <div class="day-head">
+          <button id="prevDay" class="btn">◀</button>
+          <div id="dayTitle" class="big"></div>
+          <button id="nextDay" class="btn">▶</button>
+          <div class="spacer"></div>
+          <button id="addDay" class="btn primary">＋ Ajouter</button>
+        </div>
+        <div id="dayList" class="day-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === Bottom Sheet: Ajouter / Éditer === -->
+  <div id="sheetBg" class="sheet-bg">
+    <div class="sheet">
+      <h3 style="margin:4px 0 10px">Ajouter une séance</h3>
+      <div class="grid">
+        <div class="rowf">
+          <label for="fDate">Date</label>
+          <input id="fDate" type="date">
+        </div>
+
+        <div class="rowf">
+          <label for="fName">Exercice</label>
+          <input id="fName" placeholder="ex: Développé couché, Stand throw…">
+        </div>
+
+        <div class="rowf">
+          <label for="fMode">Type de mesure</label>
+          <select id="fMode">
+            <option value="reps">Répétitions</option>
+            <option value="sets_reps">Séries × Répétitions</option>
+            <option value="duration">Durée</option>
+            <option value="weight">Poids (Kg) uniquement</option>
+          </select>
+        </div>
+
+        <div class="rowf" data-field="reps">
+          <label for="fReps">Répétitions</label>
+          <input id="fReps" type="number" inputmode="numeric" min="0" placeholder="ex: 12">
+        </div>
+
+        <div class="rowf" data-field="sets_reps" style="display:none">
+          <label>Séries × Rép</label>
+          <input id="fSets" type="number" inputmode="numeric" min="0" placeholder="Séries (ex: 4)" style="max-width:140px">
+          <input id="fSRReps" type="number" inputmode="numeric" min="0" placeholder="Rép (ex: 6)" style="max-width:140px">
+        </div>
+
+        <div class="rowf" data-field="duration" style="display:none">
+          <label>Durée</label>
+          <input id="fMin" type="number" inputmode="numeric" min="0" placeholder="Minutes" style="max-width:140px">
+          <input id="fSec" type="number" inputmode="numeric" min="0" max="59" placeholder="Secondes" style="max-width:140px">
+        </div>
+
+        <div class="rowf">
+          <label for="fKg">Kg (optionnel)</label>
+          <input id="fKg" type="number" inputmode="decimal" step="0.5" placeholder="ex: 60">
+        </div>
+
+        <div class="rowf">
+          <label for="fNotes">Commentaires</label>
+          <textarea id="fNotes" rows="3" placeholder="Sensations, technique, contexte…"></textarea>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="btnCancel" class="btn ghost">Annuler</button>
+        <button id="btnSave" class="btn primary">Enregistrer</button>
+      </div>
+      <div id="msg" style="margin-top:6px;color:var(--muted);font-size:12px"></div>
+    </div>
+  </div>
+
+  <script>
+    /* ===== Utils ===== */
+    const $ = (q,root=document)=>root.querySelector(q);
+    const $$ = (q,root=document)=>Array.from(root.querySelectorAll(q));
+    const pad = n => String(n).padStart(2,'0');
+    const toISO = (d)=> `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const fromISO = (s)=>{ const [y,m,da]=s.split('-').map(Number); return new Date(y, m-1, da); };
+    const monthsFR = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+    const dowsFR = ['L','M','M','J','V','S','D']; // Lundi en premier
+
+    /* ===== State ===== */
+    let current = new Date();
+    let selDayISO = toISO(new Date());
+
+    const STORAGE_KEY = 'trainingLog.v1';
+    function loadStore(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); }catch{ return []; } }
+    function saveStore(arr){ localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
+    let DATA = loadStore(); // {id, date:'YYYY-MM-DD', name, mode, reps, sets, srreps, min, sec, kg, notes}
+
+    /* ===== Tabs ===== */
+    const tabMonth = $('#tabMonth'), tabDay = $('#tabDay');
+    const viewMonth = $('#viewMonth'), viewDay = $('#viewDay');
+    function goMonth(){ tabMonth.classList.add('active'); tabDay.classList.remove('active'); viewMonth.style.display='block'; viewDay.style.display='none'; renderMonth(); }
+    function goDay(dateISO){ if(dateISO) selDayISO = dateISO; tabDay.classList.add('active'); tabMonth.classList.remove('active'); viewDay.style.display='block'; viewMonth.style.display='none'; renderDay(); }
+    tabMonth.onclick = goMonth;
+    tabDay.onclick = ()=> goDay(selDayISO);
+
+    $('#btnToday').onclick = ()=>{ selDayISO = toISO(new Date()); current = new Date(); goDay(selDayISO); };
+
+    /* ===== Month view ===== */
+    const monthTitle = $('#monthTitle');
+    const dowRow = $('#dowRow');
+    const monthGrid = $('#monthGrid');
+
+    // Init DOW header
+    (function(){ dowRow.innerHTML=''; dowsFR.forEach(x=>{ const el=document.createElement('div'); el.className='dow'; el.textContent=x; dowRow.appendChild(el); }); })();
+
+    $('#prevMonth').onclick = ()=>{ current = new Date(current.getFullYear(), current.getMonth()-1, 1); renderMonth(); };
+    $('#nextMonth').onclick = ()=>{ current = new Date(current.getFullYear(), current.getMonth()+1, 1); renderMonth(); };
+
+    function renderMonth(){
+      const y = current.getFullYear(), m = current.getMonth();
+      monthTitle.textContent = `${monthsFR[m]} ${y}`;
+
+      // Build calendar starting Monday
+      const first = new Date(y, m, 1);
+      const firstDay = (first.getDay()+6)%7; // 0=Mon … 6=Sun
+      const daysInMonth = new Date(y, m+1, 0).getDate();
+
+      // previous month filler
+      const prevDays = firstDay;
+      const totalCells = Math.ceil((prevDays + daysInMonth)/7)*7;
+
+      monthGrid.innerHTML = '';
+      for(let i=0;i<totalCells;i++){
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+
+        const dayNum = i - prevDays + 1;
+        let cellDate;
+        if(i < prevDays){ // previous month
+          const dmPrev = new Date(y, m, 0).getDate();
+          const d = dmPrev - (prevDays - 1 - i);
+          cellDate = new Date(y, m-1, d);
+        }else if(dayNum > daysInMonth){ // next month
+          const d = dayNum - daysInMonth;
+          cellDate = new Date(y, m+1, d);
+        }else{
+          cellDate = new Date(y, m, dayNum);
+        }
+        const iso = toISO(cellDate);
+
+        const isCurrentMonth = cellDate.getMonth() === m;
+        const hdr = document.createElement('header');
+        const dot = document.createElement('div'); dot.className='dot';
+        const dateEl = document.createElement('div'); dateEl.className='date'; dateEl.textContent = cellDate.getDate();
+        if(!isCurrentMonth){ dateEl.classList.add('muted'); dot.style.opacity=.2; }
+        const plus = document.createElement('button'); plus.className='add-mini'; plus.innerHTML='＋'; plus.title='Ajouter';
+        plus.onclick = ()=> openSheet(iso);
+
+        hdr.append(dot,dateEl,plus);
+        cell.appendChild(hdr);
+
+        // Entries preview
+        const dayEntries = DATA.filter(x=>x.date===iso);
+        if(dayEntries.length){
+          const list = document.createElement('div'); list.className='entries';
+          dayEntries.slice(0,3).forEach(e=>{
+            const chip = document.createElement('div'); chip.className='entry-chip';
+            const bullet = document.createElement('div'); bullet.className='bullet';
+            const txt = document.createElement('div'); txt.className='txt';
+            txt.textContent = formatEntryLine(e);
+            chip.append(bullet,txt);
+            list.appendChild(chip);
+          });
+          if(dayEntries.length>3){
+            const more = document.createElement('div'); more.className='entry-chip'; more.innerHTML = `<div class="bullet" style="opacity:.5"></div><div class="txt">+${dayEntries.length-3} autres…</div>`;
+            list.appendChild(more);
+          }
+          cell.appendChild(list);
+        }
+
+        // Click cell body → aller en vue jour
+        cell.addEventListener('click', (ev)=>{
+          if(ev.target===plus) return; // évite double déclenchement
+          goDay(iso);
+        });
+
+        monthGrid.appendChild(cell);
+      }
+    }
+
+    /* ===== Day view ===== */
+    $('#prevDay').onclick = ()=>{ const d=fromISO(selDayISO); d.setDate(d.getDate()-1); selDayISO=toISO(d); renderDay(); };
+    $('#nextDay').onclick = ()=>{ const d=fromISO(selDayISO); d.setDate(d.getDate()+1); selDayISO=toISO(d); renderDay(); };
+    $('#addDay').onclick = ()=> openSheet(selDayISO);
+
+    function renderDay(){
+      const d = fromISO(selDayISO);
+      $('#dayTitle').textContent = d.toLocaleDateString('fr-FR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+      const root = $('#dayList'); root.innerHTML = '';
+      const arr = DATA.filter(x=>x.date===selDayISO);
+      if(arr.length===0){
+        root.innerHTML = `<div class="empty">Aucune séance ce jour.</div>`;
+        return;
+      }
+      arr.sort((a,b)=> (a._ts||0) - (b._ts||0));
+      arr.forEach(e=>{
+        const row = document.createElement('div'); row.className='row';
+        const txt = document.createElement('div');
+        const name = document.createElement('div'); name.innerHTML = `<strong>${escapeHtml(e.name)}</strong> <span class="badge">${modeLabel(e)}</span>`;
+        const meta = document.createElement('div'); meta.className='meta'; meta.textContent = entryDetails(e);
+        if(e.notes){ const com = document.createElement('div'); com.className='meta'; com.textContent = `💬 ${e.notes}`; meta.appendChild(document.createElement('br')); meta.appendChild(document.createTextNode(``)); }
+        txt.appendChild(name);
+        txt.appendChild(meta);
+
+        const act = document.createElement('div'); act.className='act';
+        const del = document.createElement('button'); del.className='btn danger'; del.textContent='Supprimer';
+        del.onclick = ()=>{ if(confirm('Supprimer cette entrée ?')){ DATA = DATA.filter(x=>x.id!==e.id); saveStore(DATA); renderDay(); renderMonth(); } };
+        act.appendChild(del);
+
+        row.append(txt, act);
+        root.appendChild(row);
+      });
+    }
+
+    function modeLabel(e){
+      switch(e.mode){
+        case 'reps': return 'Répétitions';
+        case 'sets_reps': return 'Séries×Rép';
+        case 'duration': return 'Durée';
+        case 'weight': return 'Poids';
+        default: return '—';
+      }
+    }
+    function entryDetails(e){
+      let parts = [];
+      if(e.mode==='reps' && e.reps) parts.push(`${e.reps} rép`);
+      if(e.mode==='sets_reps' && (e.sets||e.srreps)) parts.push(`${e.sets||0}×${e.srreps||0}`);
+      if(e.mode==='duration' && (e.min||e.sec!==undefined)) parts.push(`${e.min||0}′${pad(e.sec||0)}″`);
+      if(e.mode==='weight' && e.kg!=null) parts.push(`${e.kg} kg`);
+      // Kg optionnel en plus :
+      if(e.mode!=='weight' && e.kg!=null && e.kg!=='') parts.push(`${e.kg} kg`);
+      return parts.join(' • ');
+    }
+    function formatEntryLine(e){
+      const base = `${e.name}`;
+      const details = entryDetails(e);
+      return details ? `${base} — ${details}` : base;
+    }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c])); }
+
+    /* ===== Sheet (add) ===== */
+    const sheetBg = $('#sheetBg');
+    const fDate = $('#fDate'), fName = $('#fName'), fMode = $('#fMode');
+    const fReps = $('#fReps'), fSets = $('#fSets'), fSRReps = $('#fSRReps');
+    const fMin = $('#fMin'), fSec = $('#fSec'), fKg = $('#fKg'), fNotes = $('#fNotes');
+
+    function openSheet(dateISO){
+      $('#msg').textContent='';
+      fDate.value = dateISO || toISO(new Date());
+      fName.value = ''; fMode.value = 'reps';
+      fReps.value=''; fSets.value=''; fSRReps.value='';
+      fMin.value=''; fSec.value=''; fKg.value=''; fNotes.value='';
+      updateModeFields();
+      sheetBg.style.display='flex';
+    }
+    function closeSheet(){ sheetBg.style.display='none'; }
+    $('#btnCancel').onclick = closeSheet;
+    sheetBg.addEventListener('click', e=>{ if(e.target===sheetBg) closeSheet(); });
+    fMode.addEventListener('change', updateModeFields);
+
+    function updateModeFields(){
+      $$('[data-field]').forEach(el=> el.style.display='none');
+      const m = fMode.value;
+      if(m==='reps') $('[data-field="reps"]').style.display='';
+      if(m==='sets_reps') $('[data-field="sets_reps"]').style.display='';
+      if(m==='duration') $('[data-field="duration"]').style.display='';
+      // 'weight' n’affiche que Kg (déjà présent plus bas)
+    }
+
+    $('#btnSave').onclick = ()=>{
+      const item = {
+        id: 'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+        _ts: Date.now(),
+        date: fDate.value,
+        name: fName.value.trim(),
+        mode: fMode.value,
+        reps: numOrNull(fReps.value),
+        sets: numOrNull(fSets?.value),
+        srreps: numOrNull(fSRReps?.value),
+        min: numOrNull(fMin?.value),
+        sec: numOrNull(fSec?.value),
+        kg: numOrNull(fKg?.value, true),
+        notes: fNotes.value.trim()
+      };
+      if(!item.date){ return $('#msg').textContent='La date est obligatoire.'; }
+      if(!item.name){ return $('#msg').textContent='Le nom de l’exercice est obligatoire.'; }
+
+      // Nettoyage selon mode
+      if(item.mode!=='reps') item.reps = null;
+      if(item.mode!=='sets_reps'){ item.sets=null; item.srreps=null; }
+      if(item.mode!=='duration'){ item.min=null; item.sec=null; }
+      if(item.mode==='weight' && (item.kg==null || isNaN(item.kg))) return $('#msg').textContent='Indique un poids (kg).';
+
+      DATA.push(item);
+      saveStore(DATA);
+      closeSheet();
+      // refresh
+      if(tabDay.classList.contains('active')) renderDay(); else renderMonth();
+    };
+
+    function numOrNull(v, allowFloat=false){
+      if(v==null || v==='') return null;
+      const n = allowFloat ? parseFloat(v) : parseInt(v,10);
+      return isNaN(n) ? null : n;
+    }
+
+    /* ===== Boot ===== */
+    (function init(){
+      // Démarre sur Mois mais sélection du jour aujourd’hui
+      selDayISO = toISO(new Date());
+      renderMonth();
+    })();
+  </script>
+</body>
+</html>
