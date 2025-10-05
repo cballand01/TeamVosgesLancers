@@ -22,15 +22,6 @@
       box-shadow:0 0 0 1px rgba(34,197,94,.15), 0 8px 18px rgba(34,197,94,.18)}
     .subtitle{opacity:.85;color:var(--muted);margin:6px 0 12px}
 
-    /* Header actions (Admin + Ajouter) */
-    .head-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 16px}
-    .pill{
-      padding:8px 12px;border-radius:999px;border:1px solid var(--line);
-      background:#0b1326;color:var(--text);cursor:pointer;font-size:13px
-    }
-    .pill.primary{background:var(--accent);color:#0b1326;border-color:var(--accent);font-weight:700}
-    [data-admin]{display:none} /* masqué par défaut, visible si admin */
-
     /* ====== ATHLÈTES (mobile: liste verticale) ====== */
     .ath-list{display:grid;gap:10px}
     a.ath-card{
@@ -92,23 +83,9 @@
     .lightbox.open{display:flex}
     .viewer{position:relative;width:min(100%,900px);max-height:90vh;background:#000;border-radius:12px;overflow:hidden}
     .viewer img{display:block;width:100%;height:auto}
-    .viewer-head{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:center}
-    .viewer-title{color:#fff;font-size:14px;background:rgba(0,0,0,.5);padding:6px 10px;border-radius:8px}
+    .viewer-head{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:flex-end;align-items:center}
+    .viewer-title{display:none} /* cache tout texte dans la lightbox */
     .close{background:rgba(255,255,255,.15);border:none;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer}
-
-    /* Sheets (login + add exercise) */
-    .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);display:none;align-items:flex-end;z-index:1100}
-    .sheet{width:100%;max-width:1000px;margin:0 auto;background:var(--card);
-      border-top-left-radius:16px;border-top-right-radius:16px;border:1px solid var(--line);
-      border-bottom:none;padding:14px 16px 16px;animation:slideup .18s ease-out;max-height:85vh;overflow:auto}
-    @keyframes slideup{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
-    .row{display:flex;gap:8px;margin:8px 0;align-items:center}
-    .row label{flex:0 0 130px;opacity:.9}
-    .row input,.row select,.row textarea{flex:1;background:#0b1326;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:10px}
-    .actions{display:flex;gap:8px;justify-content:flex-start;margin-top:8px}
-    .btn{border:1px solid var(--line);border-radius:10px;background:#0b1326;color:#e5e7eb;padding:8px 12px;cursor:pointer}
-    .btn.ghost{background:transparent}
-    .small{font-size:12px;color:var(--muted)}
   </style>
 </head>
 <body>
@@ -120,12 +97,6 @@
 
     <h1>Plans d’entraînement</h1>
     <p class="subtitle">Choisis un athlète pour ouvrir son plan • Explore les exercices illustrés</p>
-
-    <!-- Header actions -->
-    <div class="head-actions">
-      <button id="btnAdmin" class="pill">Se connecter</button>
-      <button id="btnAddExo" class="pill primary" data-admin>＋ Ajouter un exercice</button>
-    </div>
 
     <!-- Liste athlètes -->
     <div id="athList" class="ath-list"></div>
@@ -159,174 +130,8 @@
     </div>
   </div>
 
-  <!-- Sheet: Connexion admin -->
-  <div id="loginSheet" class="sheet-backdrop">
-    <div class="sheet">
-      <h3 style="margin:4px 0 8px">Connexion admin</h3>
-      <div class="row"><label>Mot de passe</label><input id="adminPwd" type="password" placeholder="••••••" autocomplete="current-password"></div>
-      <div class="actions">
-        <button class="btn ghost" id="loginCancel">Annuler</button>
-        <button class="btn" id="loginSubmit">Se connecter</button>
-      </div>
-      <div id="loginMsg" class="small" style="margin-top:6px"></div>
-    </div>
-  </div>
-
-  <!-- Sheet: Ajouter un exercice (admin only) -->
-  <div id="addExoSheet" class="sheet-backdrop">
-    <div class="sheet">
-      <h3 style="margin:4px 0 8px">Ajouter un exercice</h3>
-      <div class="row"><label>Nom</label><input id="exName" placeholder="ex: Développé couché"></div>
-      <div class="row">
-        <label>Famille</label>
-        <select id="exFam">
-          <option value="muscu">Musculation</option>
-          <option value="halter">Haltérophilie</option>
-          <option value="corps">Poids du corps</option>
-          <option value="ppg">PPG</option>
-          <option value="spec">Spécifique</option>
-        </select>
-      </div>
-      <div class="row">
-        <label>Type de mesure</label>
-        <select id="exMeasure">
-          <option value="sets_reps_kg">Séries + Rép + Kg</option>
-          <option value="sets_reps">Séries + Rép</option>
-          <option value="reps">Répétitions</option>
-          <option value="weight_only">Poids (Kg)</option>
-          <option value="time">Temps</option>
-          <option value="distance">Distance</option>
-          <option value="technique">Technique / Quali.</option>
-        </select>
-      </div>
-      <div class="row"><label>Miniature</label><input id="exThumb" placeholder="URL image miniature"></div>
-      <div class="row"><label>Illustration</label><input id="exFull" placeholder="URL image/vidéo (optionnel)"></div>
-      <div class="row"><label>Tags</label><input id="exTags" placeholder="ex: pousser, poitrine"></div>
-      <div class="row"><label>Note</label><input id="exNote" placeholder="ex: Pectoraux • Triceps"></div>
-
-      <div class="actions">
-        <button class="btn ghost" id="addExoCancel">Annuler</button>
-        <button class="btn" id="addExoSave">Enregistrer</button>
-      </div>
-      <div id="addExoMsg" class="small" style="margin-top:6px"></div>
-    </div>
-  </div>
-
   <script>
-    /* ====== API base ====== */
-    const API = 'https://script.google.com/macros/s/YOUR-APPS-SCRIPT/exec'; // ← remplace
-
-    /* ====== Auth front (token en localStorage) ====== */
-    const btnAdmin = document.getElementById('btnAdmin');
-    const adminSheet = document.getElementById('loginSheet');
-    const adminPwd = document.getElementById('adminPwd');
-    const loginMsg = document.getElementById('loginMsg');
-
-    const FRONT_PASSWORD = "CH48ba84&*"; // à changer évidemment
-
-    function authToken(){ return localStorage.getItem('authToken') || ''; }
-    function isAdmin(){ return !!authToken(); }
-    function authHeader(){
-      const t = authToken();
-      return t ? { 'Authorization':'Bearer '+t } : {};
-    }
-    function openLogin(){ adminSheet.style.display='flex'; loginMsg.textContent=''; adminPwd.value=''; adminPwd.focus(); }
-    function closeLogin(){ adminSheet.style.display='none'; loginMsg.textContent=''; adminPwd.value=''; }
-    async function doLogin(){
-      if (adminPwd.value === FRONT_PASSWORD) {
-        // Simule un token
-        localStorage.setItem('authToken', 'local-dev-token');
-        loginMsg.textContent = 'Connecté !';
-        setTimeout(()=>{ closeLogin(); refreshAdminUI(); }, 300);
-      } else {
-        loginMsg.textContent = 'Mot de passe invalide.';
-      }
-    }
-    function logout(){
-      localStorage.removeItem('authToken');
-      refreshAdminUI();
-    }
-    function refreshAdminUI(){
-      const adminBits = document.querySelectorAll('[data-admin]');
-      if(isAdmin()){
-        btnAdmin.textContent = 'Admin ✅ (Déconnexion)';
-        btnAdmin.onclick = logout;
-        adminBits.forEach(x=>x.style.display='');
-      }else{
-        btnAdmin.textContent = 'Administrateur';
-        btnAdmin.onclick = openLogin;
-        adminBits.forEach(x=>x.style.display='none');
-      }
-    }
-    document.getElementById('loginCancel').onclick = closeLogin;
-    document.getElementById('loginSubmit').onclick = doLogin;
-    adminSheet.addEventListener('click', e=>{ if(e.target===adminSheet) closeLogin(); });
-
-    /* ====== Add Exercise sheet (admin) ====== */
-    const addExoBtn = document.getElementById('btnAddExo');
-    const addExoSheet = document.getElementById('addExoSheet');
-    const addExoMsg = document.getElementById('addExoMsg');
-    const exName = document.getElementById('exName');
-    const exFam = document.getElementById('exFam');
-    const exMeasure = document.getElementById('exMeasure');
-    const exThumb = document.getElementById('exThumb');
-    const exFull = document.getElementById('exFull');
-    const exTags = document.getElementById('exTags');
-    const exNote = document.getElementById('exNote');
-
-    function openAddExo(){
-      if(!isAdmin()){ openLogin(); return; }
-      addExoMsg.textContent=''; exName.value=''; exThumb.value=''; exFull.value='';
-      exTags.value=''; exNote.value='';
-      exFam.value='muscu'; exMeasure.value='sets_reps_kg';
-      addExoSheet.style.display='flex';
-    }
-    function closeAddExo(){ addExoSheet.style.display='none'; addExoMsg.textContent=''; }
-    document.getElementById('addExoCancel').onclick = closeAddExo;
-    addExoSheet.addEventListener('click', e=>{ if(e.target===addExoSheet) closeAddExo(); });
-    addExoBtn.onclick = openAddExo;
-
-    async function createExercise(payload){
-      const r = await fetch(API+'?resource=exercises&action=create', {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json', ...authHeader() },
-        body: JSON.stringify(payload)
-      });
-      return r.json();
-    }
-
-    document.getElementById('addExoSave').onclick = async ()=>{
-      const name = exName.value.trim();
-      const fam  = exFam.value;
-      const measure_mode = exMeasure.value;
-      const thumb = exThumb.value.trim();
-      const full  = exFull.value.trim();
-      const tags  = exTags.value.split(',').map(s=>s.trim()).filter(Boolean);
-      const note  = exNote.value.trim();
-
-      if(!name){ addExoMsg.textContent='Le nom est obligatoire.'; return; }
-      addExoMsg.textContent='Enregistrement…';
-      try{
-        const payload = { name, family:fam, measure_mode, media_thumb:thumb, media_full:full, tags, note };
-        const res = await createExercise(payload);
-        if(res && res.ok){
-          addExoMsg.textContent = 'Ajouté !';
-          // Option UX : injecter localement pour voir l’exo tout de suite
-          EXOS.unshift({
-            id: res.item?.id || (name.toLowerCase().replace(/\s+/g,'_')+'_'+Date.now()),
-            fam, name, thumb: thumb || P_MUSC, note
-          });
-          renderExos();
-          setTimeout(closeAddExo, 350);
-        }else{
-          addExoMsg.textContent = 'Erreur: ' + (res && res.error ? res.error : 'API');
-        }
-      }catch(e){
-        addExoMsg.textContent = 'Erreur réseau.';
-      }
-    };
-
-    /* ====== Données mock (athlètes + exos de départ) ====== */
+    /* ====== Données mock (athlètes) ====== */
     const ATHLETES = [
       { id:'charles', name:'Charles Balland', photo:'./images/Charles.png', club:'PCA • Senior' },
       { id:'daniel',  name:'Daniel Balland',  photo:'./images/Daniel.png',  club:'AVEC • Légende' },
@@ -347,84 +152,84 @@
     const P_SN   = 'https://i.imgur.com/0dXw0k2.jpeg';
     const P_CJ   = 'https://i.imgur.com/8v9M3Kj.jpeg';
 
-    // Grosse base d’exercices (à compléter/remplacer)
+    /* ====== Exercices avec notes corrigées ====== */
     const EXOS = [
-      // Musculation — Squats
-      { id:'squat_arriere_complet', fam:'muscu', name:'Squat arrière complet', thumb:'./images/Exercices/squatComplet.jpeg', note:'Quadriceps • Force' },
-      { id:'squat_arriere_demi', fam:'muscu', name:'Demi-squat arrière', thumb:P_MUSC, note:'Quadriceps • Force' },
-      { id:'squat_avant', fam:'muscu', name:'Squat avant (front squat)', thumb:'./images/Exercices/front-squat.jpg', note:'Quadriceps • Gainage' },
-      { id:'overhead_squat', fam:'muscu', name:'Overhead squat', thumb:'./images/Exercices/overhead-squat.jpg', note:'Mobilité • Stability' },
-      { id:'squat_bulgare', fam:'muscu', name:'Squat Bulgare', thumb:'./images/Exercices/SquatBulgare.png', note:'Mobilité • Stability' },
+      /* Musculation — Squats */
+      { id:'squat_arriere_complet', fam:'muscu', name:'Squat arrière complet', thumb:'./images/Exercices/squatComplet.jpeg', note:'Quadriceps, fessiers, adducteurs, gainage' },
+      { id:'squat_arriere_demi', fam:'muscu', name:'Demi-squat arrière', thumb:P_MUSC, note:'Quadriceps, puissance jambes' },
+      { id:'squat_avant', fam:'muscu', name:'Squat avant (front squat)', thumb:'./images/Exercices/front-squat.jpg', note:'Quadriceps, haut du dos, gainage ant.' },
+      { id:'overhead_squat', fam:'muscu', name:'Overhead squat', thumb:'./images/Exercices/overhead-squat.jpg', note:'Épaules, tronc, mobilité hanches/chevilles' },
+      { id:'squat_bulgare', fam:'muscu', name:'Squat Bulgare', thumb:'./images/Exercices/SquatBulgare.png', note:'Quadriceps, fessiers, stabilité hanche' },
 
-      // Musculation — Poussé
-      { id:'dev_couche', fam:'muscu', name:'Développé couché', thumb:'./images/Exercices/Bench1.png', note:'Pectoraux • Triceps' },
-      { id:'dev_couche_incline', fam:'muscu', name:'Développé couché incliné', thumb:'./images/Exercices/BenchInc1.png', note:'Haut de pectoraux' },
-      { id:'dev_militaire', fam:'muscu', name:'Développé militaire (strict press)', thumb:'./images/Exercices/devMili.jpg', note:'Épaules • Tronc' },
-      { id:'dev_epaule_halteres', fam:'muscu', name:'Développé épaules haltères', thumb:P_MUSC, note:'Stabilité • Unilatéral' },
-      { id:'push_press', fam:'muscu', name:'Push press', thumb:P_MUSC, note:'Transfert de force' },
+      /* Musculation — Poussée */
+      { id:'dev_couche', fam:'muscu', name:'Développé couché', thumb:'./images/Exercices/Bench1.png', note:'Pectoraux, triceps, deltoïdes ant.' },
+      { id:'dev_couche_incline', fam:'muscu', name:'Développé couché incliné', thumb:'./images/Exercices/BenchInc1.png', note:'Haut des pectoraux, deltoïdes ant., triceps' },
+      { id:'dev_militaire', fam:'muscu', name:'Développé militaire (strict press)', thumb:'./images/Exercices/devMili.jpg', note:'Deltoïdes, triceps, gainage' },
+      { id:'dev_epaule_halteres', fam:'muscu', name:'Développé épaules haltères', thumb:P_MUSC, note:'Deltoïdes, coiffe des rotateurs, stabilité' },
+      { id:'push_press', fam:'muscu', name:'Push press', thumb:P_MUSC, note:'Épaules, triceps, puissance hanche-genou' },
 
-      // Musculation — Tirage / Chaîne post
-      { id:'souleve_terre', fam:'muscu', name:'Soulevé de terre', thumb:'./images/Exercices/sdt.jpg', note:'Chaîne postérieure' },
-      { id:'souleve_terre_jt', fam:'muscu', name:'Soulevé de terre jambes tendues', thumb:'./images/Exercices/sdtjambetendu.webp', note:'Ischios • Fessiers' },
-      { id:'row_barre', fam:'muscu', name:'Rowing barre', thumb:'./images/Exercices/rowing-barre-buste-penche-exercice.jpg', note:'Dos • Scapulas' },
-      { id:'row_un_lateral', fam:'muscu', name:'Rowing unilatéral haltère', thumb:P_POST, note:'Dos • Antidéséquilibre' },
-      { id:'tirage', fam:'muscu', name:'Tirage couché', thumb:P_MUSC, note:'Dos • ...' },
-      { id:'hip_thrust', fam:'muscu', name:'Hip Thrust', thumb:'./images/Exercices/HipThrust.png', note:'Fessiers • Puissance' },
-      { id:'curl', fam:'muscu', name:'Biceps', thumb:'./images/Exercices/CurlBarre.png', note:'Ischios • Lombaires' },
-      { id:'good_morning', fam:'muscu', name:'Good Morning', thumb:P_MUSC, note:'Ischios • Lombaires' },
-      { id:'elev_lat', fam:'muscu', name:'Elévation latérale', thumb:'./images/Exercices/ElevLat.png', note:'Ischios • Lombaires' },
-      { id:'triceps', fam:'muscu', name:'Triceps', thumb:'./images/Exercices/Triceps.png', note:'Ischios • Lombaires' },
-      { id:'tirage_poit', fam:'muscu', name:'Tirage poitrine', thumb:'./images/Exercices/tiragePoit.png', note:'Ischios • Lombaires' },
+      /* Musculation — Tirage / Chaîne postérieure */
+      { id:'souleve_terre', fam:'muscu', name:'Soulevé de terre', thumb:'./images/Exercices/sdt.jpg', note:'Ischios, fessiers, lombaires, trapèzes' },
+      { id:'souleve_terre_jt', fam:'muscu', name:'Soulevé de terre jambes tendues', thumb:'./images/Exercices/sdtjambetendu.webp', note:'Ischios, fessiers, lombaires' },
+      { id:'row_barre', fam:'muscu', name:'Rowing barre', thumb:'./images/Exercices/rowing-barre-buste-penche-exercice.jpg', note:'Grand dorsal, rhomboïdes, biceps' },
+      { id:'row_un_lateral', fam:'muscu', name:'Rowing unilatéral haltère', thumb:P_POST, note:'Dos, biceps, anti-rotation (obliques)' },
+      { id:'tirage', fam:'muscu', name:'Tirage couché', thumb:P_MUSC, note:'Dos moyen, arrière d’épaules, scapulas' },
+      { id:'hip_thrust', fam:'muscu', name:'Hip Thrust', thumb:'./images/Exercices/HipThrust.png', note:'Grand fessier, ischios' },
+      { id:'curl', fam:'muscu', name:'Curl biceps (barre/haltères)', thumb:'./images/Exercices/CurlBarre.png', note:'Biceps brachial, brachial antérieur' },
+      { id:'good_morning', fam:'muscu', name:'Good Morning', thumb:P_MUSC, note:'Ischios, lombaires, fessiers' },
+      { id:'elev_lat', fam:'muscu', name:'Élévations latérales', thumb:'./images/Exercices/ElevLat.png', note:'Deltoïdes moyens' },
+      { id:'triceps', fam:'muscu', name:'Extensions triceps', thumb:'./images/Exercices/Triceps.png', note:'Triceps brachial' },
+      { id:'tirage_poit', fam:'muscu', name:'Tirage poitrine (lat pulldown)', thumb:'./images/Exercices/tiragePoit.png', note:'Grand dorsal, biceps, trapèzes inf.' },
 
-      // Haltérophilie
-      { id:'snatch', fam:'halter', name:'Arraché (Snatch)', thumb:'./images/Exercices/snatch.jpg', note:'Explosivité • Technique' },
-      { id:'power_snatch', fam:'halter', name:'Arraché des hanches', thumb:P_SN, note:'Vitesse • Coordination' },
-      { id:'clean_jerk', fam:'halter', name:'Épaulé-jeté (Clean & Jerk)', thumb:'./images/Exercices/CleanJerk.jpg', note:'Puissance' },
-      { id:'clean', fam:'halter', name:'Épaulé (Clean)', thumb:'./images/Exercices/Clean.jpg', note:'Triple extension' },
-      { id:'hang_clean', fam:'halter', name:'Épaulé des genoux', thumb:P_CJ, note:'Travail du 2e tirage' },
-      { id:'jerk', fam:'halter', name:'Jeté (Jerk)', thumb:P_CJ, note:'Puissance épaule/hanches' },
-      { id:'high_pull', fam:'halter', name:'High Pull (tirage haut)', thumb:P_CJ, note:'Puissance • Trajectoire' },
-      { id:'shrug_jump', fam:'halter', name:'Shrug jump', thumb:P_CJ, note:'Synchronisation' },
+      /* Haltérophilie */
+      { id:'snatch', fam:'halter', name:'Arraché (Snatch)', thumb:'./images/Exercices/snatch.jpg', note:'Chaîne post., trapèzes, vitesse, mobilité' },
+      { id:'power_snatch', fam:'halter', name:'Arraché des hanches', thumb:P_SN, note:'Vitesse, coordination, chaîne post.' },
+      { id:'clean_jerk', fam:'halter', name:'Épaulé-jeté (Clean & Jerk)', thumb:'./images/Exercices/CleanJerk.jpg', note:'Quadriceps, fessiers, trapèzes, épaules' },
+      { id:'clean', fam:'halter', name:'Épaulé (Clean)', thumb:'./images/Exercices/Clean.jpg', note:'Quadriceps, fessiers, trapèzes' },
+      { id:'hang_clean', fam:'halter', name:'Épaulé des genoux', thumb:P_CJ, note:'2e tirage, puissance hanches' },
+      { id:'jerk', fam:'halter', name:'Jeté (Jerk)', thumb:P_CJ, note:'Épaules, triceps, jambes (dip/drive)' },
+      { id:'high_pull', fam:'halter', name:'High pull (tirage haut)', thumb:P_CJ, note:'Trapèzes, chaîne post., trajectoire' },
+      { id:'shrug_jump', fam:'halter', name:'Shrug jump', thumb:P_CJ, note:'Triple extension, synchronisation' },
 
-      // Poids du corps
-      { id:'pompes', fam:'corps', name:'Pompes', thumb:'./images/Exercices/pompes.png', note:'Pectoraux • Triceps' },
-      { id:'dips', fam:'corps', name:'Dips', thumb:'./images/Exercices/dips.png', note:'Triceps • Pectoraux' },
-      { id:'tractions_pronation', fam:'corps', name:'Tractions pronation', thumb:P_CJ, note:'Dos • Biceps' },
-      { id:'tractions_suppination', fam:'corps', name:'Tractions supination', thumb:P_CJ, note:'Biceps • Dos' },
+      /* Poids du corps */
+      { id:'pompes', fam:'corps', name:'Pompes', thumb:'./images/Exercices/pompes.png', note:'Pectoraux, triceps, deltoïdes ant.' },
+      { id:'dips', fam:'corps', name:'Dips', thumb:'./images/Exercices/dips.png', note:'Triceps, pectoraux inférieurs' },
+      { id:'tractions_pronation', fam:'corps', name:'Tractions pronation', thumb:P_CJ, note:'Grand dorsal, biceps, avant-bras' },
+      { id:'tractions_suppination', fam:'corps', name:'Tractions supination', thumb:P_CJ, note:'Biceps, grand dorsal' },
       { id:'abdos_crunch', fam:'corps', name:'Abdominaux — Crunch', thumb:P_CJ, note:'Grand droit' },
-      { id:'gainage_planche', fam:'corps', name:'Gainage — Planche', thumb:P_CJ, note:'Core • Anti-extension' },
-      { id:'gainage_cote', fam:'corps', name:'Gainage — Côté', thumb:P_CJ, note:'Obliques • Anti-inclinaison' },
-      { id:'burpees', fam:'corps', name:'Burpees', thumb:'./images/burpees.png', note:'Cardio • Explosivité' },
-      { id:'fentes_saut', fam:'corps', name:'Fentes sautées', thumb:P_CJ, note:'Plyo • Jambes' },
+      { id:'gainage_planche', fam:'corps', name:'Gainage — Planche', thumb:P_CJ, note:'Transverse, anti-extension' },
+      { id:'gainage_cote', fam:'corps', name:'Gainage — Côté', thumb:P_CJ, note:'Obliques, moyen fessier' },
+      { id:'burpees', fam:'corps', name:'Burpees', thumb:'./images/burpees.png', note:'Cardio, chaîne complète' },
+      { id:'fentes_saut', fam:'corps', name:'Fentes sautées', thumb:P_CJ, note:'Quadriceps, fessiers, plyométrie' },
 
-      // PPG (Prépa Physique Générale)
-      { id:'ppg_haies', fam:'ppg', name:'PPG — Sauts de haies', thumb:P_SPEC, note:'Coordination • Plyo' },
-      { id:'ppg_montes_genoux', fam:'ppg', name:'PPG — Montées de genoux', thumb:P_SPEC, note:'Fréquence • Posture' },
-      { id:'ppg_talons_fesses', fam:'ppg', name:'PPG — Talons-fesses', thumb:P_SPEC, note:'Mobilité genou' },
-      { id:'ppg_multibonds', fam:'ppg', name:'PPG — Multibonds', thumb:P_SPEC, note:'Plyométrie' },
-      { id:'ppg_sauts_corde', fam:'ppg', name:'PPG — Corde à sauter', thumb:P_SPEC, note:'Rythme • Chevilles' },
-      { id:'ppg_cote_cote', fam:'ppg', name:'PPG — Appuis latéraux', thumb:P_SPEC, note:'Réactivité • Appuis' },
+      /* PPG */
+      { id:'ppg_haies', fam:'ppg', name:'PPG — Sauts de haies', thumb:P_SPEC, note:'Plyo, coordination, cheville' },
+      { id:'ppg_montes_genoux', fam:'ppg', name:'PPG — Montées de genoux', thumb:P_SPEC, note:'Fléchisseurs de hanche, fréquence' },
+      { id:'ppg_talons_fesses', fam:'ppg', name:'PPG — Talons-fesses', thumb:P_SPEC, note:'Ischios, coordination' },
+      { id:'ppg_multibonds', fam:'ppg', name:'PPG — Multibonds', thumb:P_SPEC, note:'Plyométrie, chaîne post.' },
+      { id:'ppg_sauts_corde', fam:'ppg', name:'PPG — Corde à sauter', thumb:P_SPEC, note:'Mollets, cheville, cardio' },
+      { id:'ppg_cote_cote', fam:'ppg', name:'PPG — Appuis latéraux', thumb:P_SPEC, note:'Adducteurs/abducteurs, réactivité' },
 
-      // Spécifiques lancers (ex. disque)
-      { id:'disq_frappes_mur', fam:'spec', name:'Disque — Frappes au mur', thumb:P_SPEC, note:'Rythme • Posture' },
-      { id:'disq_deplacements', fam:'spec', name:'Disque — Déplacements (rotations)', thumb:P_DISC, note:'Rythme • Posture' },
-      { id:'disq_stand_throw', fam:'spec', name:'Disque — Stand throw', thumb:P_DISC, note:'Rythme • Posture' },
-      { id:'disq_south_african', fam:'spec', name:'Disque — South African', thumb:P_DISC, note:'Rythme • Posture' },
-      { id:'disq_full_throw', fam:'spec', name:'Disque — Lancer complet', thumb:P_DISC, note:'Rythme • Posture' },
+      /* Spécifiques Disque */
+      { id:'disq_frappes_mur', fam:'spec', name:'Disque — Frappes au mur', thumb:P_SPEC, note:'Rotateurs tronc, fessiers, dorsaux' },
+      { id:'disq_deplacements', fam:'spec', name:'Disque — Déplacements (rotations)', thumb:P_DISC, note:'Chaîne rotatoire, fessiers, stabilité' },
+      { id:'disq_stand_throw', fam:'spec', name:'Disque — Stand throw', thumb:P_DISC, note:'Fessiers, tronc, dorsaux' },
+      { id:'disq_south_african', fam:'spec', name:'Disque — South African', thumb:P_DISC, note:'Chaîne rotatoire, quadriceps, fessiers' },
+      { id:'disq_full_throw', fam:'spec', name:'Disque — Lancer complet', thumb:P_DISC, note:'Coordination totale, tronc, fessiers' },
 
-      // Spécifiques poids
-      { id:'poids_sansélan', fam:'spec', name:'Poids — Sans élan', thumb:'./images/Exercices/Poids/Sans-élan.png', note:'Rythme • Posture' },
-      { id:'poids_glide', fam:'spec', name:'Poids — Jet complet', thumb:'./images/Exercices/Poids/complet.png', note:'Rythme • Posture' },
-      { id:'poids_robertson', fam:'spec', name:'Poids — Robertson', thumb:'./images/Exercices/Poids/Robertson.png', note:'Rythme • Posture' },
-      { id:'poids_mimes', fam:'spec', name:'Poids — Mimes simples', thumb:'./images/Exercices/Poids/mimes.png', note:'Rythme • Posture' },
-      { id:'poids_piedgauche', fam:'spec', name:'Poids — Mimes percussion butoire', thumb:'./images/Exercices/Poids/frappe.png', note:'Rythme • Posture' },
-      { id:'poids_elastique', fam:'spec', name:'Poids — Ramener élastique', thumb:'./images/Exercices/Poids/ramene_elastique.png', note:'Rythme • Posture' },
-      { id:'poids_ramenerlancer', fam:'spec', name:'Poids — Ramener-Lancer', thumb:'./images/Exercices/Poids/ramenéLance.png', note:'Rythme • Posture' },
-      { id:'poids_mimeslouds', fam:'spec', name:'Poids — Mimes lestés', thumb:'./images/Exercices/Poids/mimes_10kg.png', note:'Rythme • Posture' },
-      { id:'poids_fentes', fam:'spec', name:'Poids — Fentes Dynamiques', thumb:'./images/Exercices/Poids/fentes_rapide.png', note:'Rythme • Posture' },
-      { id:'poids_mimes_enchaine', fam:'spec', name:'Poids — Mimes enchainés', thumb:'./images/Exercices/Poids/déplacement_enchainé.png', note:'Rythme • Posture' },
-      { id:'poids_mimes_finale', fam:'spec', name:'Poids — Mimes finale avec barre', thumb:'./images/Exercices/Poids/déplacement_enchainé.png', note:'Rythme • Posture' },
-      { id:'poids_frappes', fam:'spec', name:'Poids — Frappes au mur (medecinBall)', thumb:'./images/Exercices/Poids/frappe mur.png', note:'Rythme • Posture' },
+      /* Spécifiques Poids */
+      { id:'poids_sanselan', fam:'spec', name:'Poids — Sans élan', thumb:'./images/Exercices/Poids/Sans-élan.png', note:'Tronc, triceps, pectoraux, jambes' },
+      { id:'poids_glide', fam:'spec', name:'Poids — Jet complet (glide)', thumb:'./images/Exercices/Poids/complet.png', note:'Quadriceps, fessiers, tronc, triceps' },
+      { id:'poids_robertson', fam:'spec', name:'Poids — Robertson', thumb:'./images/Exercices/Poids/Robertson.png', note:'Séquence hanche-épaule, tronc' },
+      { id:'poids_mimes', fam:'spec', name:'Poids — Mimes simples', thumb:'./images/Exercices/Poids/mimes.png', note:'Fessiers, tronc, schéma moteur' },
+      { id:'poids_piedgauche', fam:'spec', name:'Poids — Mimes percussion butoir', thumb:'./images/Exercices/Poids/frappe.png', note:'Extension jambe d’appui, fessiers, mollets' },
+      { id:'poids_elastique', fam:'spec', name:'Poids — Ramener élastique', thumb:'./images/Exercices/Poids/ramene_elastique.png', note:'Rotateurs internes, pectoraux, triceps' },
+      { id:'poids_ramenerlancer', fam:'spec', name:'Poids — Ramener-Lancer', thumb:'./images/Exercices/Poids/ramenéLance.png', note:'Triceps, pectoraux, tronc' },
+      { id:'poids_mimeslourds', fam:'spec', name:'Poids — Mimes lestés', thumb:'./images/Exercices/Poids/mimes_10kg.png', note:'Tronc, fessiers, pattern' },
+      { id:'poids_fentes', fam:'spec', name:'Poids — Fentes dynamiques', thumb:'./images/Exercices/Poids/fentes_rapide.png', note:'Quadriceps, fessiers, mollets' },
+      { id:'poids_mimes_enchaine', fam:'spec', name:'Poids — Mimes enchaînés', thumb:'./images/Exercices/Poids/déplacement_enchainé.png', note:'Coordination, tronc, fessiers' },
+      { id:'poids_mimes_finale', fam:'spec', name:'Poids — Finale avec barre', thumb:'./images/Exercices/Poids/déplacement_enchainé.png', note:'Érecteurs du rachis, fessiers, jambes' },
+      { id:'poids_frappes', fam:'spec', name:'Poids — Frappes mur (med ball)', thumb:'./images/Exercices/Poids/frappe mur.png', note:'Rotateurs tronc, pectoraux, triceps' },
     ];
 
     /* ====== Athlètes (cartes cliquables) ====== */
@@ -482,7 +287,7 @@
             <div class="ex-thumb"><img src="${x.thumb}" alt=""></div>
             <div class="ex-txt">
               <div class="ex-title">${x.name}</div>
-              <div class="ex-info">${labelFam(x.fam)}${x.note ? ' • ' + x.note : ''}</div>
+              <div class="ex-info">${labelFam(x.fam)} • ${x.note}</div>
             </div>
             <button class="info-btn" data-id="${x.id}" title="Voir l’illustration">i</button>
           `;
@@ -494,18 +299,16 @@
     /* Lightbox */
     const lb = document.getElementById('lb');
     const lbImg = document.getElementById('lbImg');
-    const lbTitle = document.getElementById('lbTitle');
     document.getElementById('lbClose').onclick = ()=> lb.classList.remove('open');
     lb.addEventListener('click', e=>{ if(e.target===lb) lb.classList.remove('open'); });
     function openLB(ex){
       lbImg.src = ex.thumb;
-      lbTitle.textContent = `${ex.name} • ${labelFam(ex.fam)}${ex.note?' — '+ex.note:''}`;
+      // pas de texte dans la lightbox
       lb.classList.add('open');
     }
 
     /* Boot */
     renderExos();
-    refreshAdminUI();
   </script>
 </body>
 </html>
