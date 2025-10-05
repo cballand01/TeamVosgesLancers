@@ -57,9 +57,15 @@
       display:grid;
       grid-template-columns:6px 1fr auto;
       gap:10px;
-      align-items:start;
+      align-items:stretch; /* ✅ pour que la barre remplisse la hauteur */
     }
-    .bar{width:6px;border-radius:8px;background:var(--accent)}
+    .bar{
+      width:6px;
+      height:100%; /* ✅ occupe toute la hauteur */
+      border-radius:8px;
+      background:linear-gradient(180deg,#34d399,#22c55e);
+      box-shadow:0 0 0 1px rgba(34,197,94,.15),0 6px 14px rgba(34,197,94,.25) inset;
+    }
     .title{font-weight:700}
     .meta{font-size:13px;color:var(--muted)}
     .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
