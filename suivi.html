@@ -7,52 +7,64 @@
   <style>
     :root{
       --bg:#0f172a; --card:#111827; --text:#e5e7eb; --muted:#94a3b8; --line:#1f2937;
-      --accent:#22c55e; --danger:#ef4444;
+      --accent:#22c55e; --blue:#3b82f6; --danger:#ef4444;
     }
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Arial}
     .wrap{max-width:960px;margin:0 auto;padding:16px 16px 96px}
 
+    /* Retour */
     .topbar{display:flex;align-items:center;margin-bottom:12px}
     .back{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;font-size:16px}
     .back svg{width:20px;height:20px;stroke:#fff}
 
-    .page-header h1{font-size:28px;font-weight:700;margin:0 0 4px;position:relative;padding-bottom:6px}
-    .page-header h1::after{content:"";position:absolute;left:0;bottom:0;width:72px;height:3px;background:var(--accent);border-radius:999px}
-    .page-header .subtitle{opacity:.8;font-size:16px;margin:0 0 16px}
+    /* Header */
+    .page-header h1{
+      font-size:28px;font-weight:700;margin:0 0 4px;position:relative;padding-bottom:6px;text-align:left;
+    }
+    .page-header h1::after{
+      content:"";position:absolute;left:0;bottom:0;width:72px;height:3px;background:var(--accent);border-radius:999px;
+    }
+    .page-header .subtitle{
+      text-align:left;opacity:.85;font-size:16px;margin:0 0 16px;
+    }
 
-    .weekbar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px}
+    /* Week bar */
+    .weekbar{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0 14px}
     .navbtn{
       width:36px;height:36px;border-radius:50%;border:1px solid var(--line);
       background:var(--card);color:var(--text);display:grid;place-items:center;
-      font-size:18px;cursor:pointer;transition:border-color .2s,transform .1s
+      font-size:18px;cursor:pointer;transition:border-color .2s, transform .1s
     }
-    .navbtn:hover{border-color:var(--accent);transform:translateY(-1px)}
+    .navbtn:hover{ border-color:var(--accent); transform:translateY(-1px) }
     .when{font-weight:600;font-size:15px;min-width:190px;text-align:center}
 
-    .days{display:flex;gap:8px;overflow-x:auto;padding:6px 0 10px;margin-bottom:14px;scroll-behavior:smooth}
+    /* Days pills */
+    .days{display:flex;gap:8px;overflow-x:auto;padding:6px 0 10px;margin-bottom:12px;scroll-behavior:smooth}
     .daypill{
-      flex:0 0 auto;min-width:72px;text-align:center;padding:10px 12px;border-radius:999px;
-      border:1px solid var(--line);background:#0b1326;color:#fff;cursor:pointer;font-weight:500
+      flex:0 0 auto; min-width:72px; text-align:center; padding:10px 12px; border-radius:999px;
+      border:1px solid var(--line); background:#0b1326; color:#fff; cursor:pointer; font-weight:500
     }
     .daypill small{display:block;opacity:.7}
-    .daypill.active{background:var(--accent);color:#0b1326;border-color:var(--accent);font-weight:700}
+    .daypill.active{background:var(--accent); color:#0b1326; border-color:var(--accent); font-weight:700}
 
-    .list{display:grid;gap:10px}
-    .empty{font-size:14px;color:var(--muted);opacity:.9;padding:6px}
+    /* Liste */
+    .list{display:grid;gap:12px}
+    .empty{font-size:14px;color:var(--muted);opacity:.9;padding:8px}
 
-    .card{
-      position:relative;display:flex;gap:10px;align-items:stretch;background:var(--card);border:1px solid var(--line);
-      border-radius:12px;padding:10px;overflow:hidden
+    /* Event card */
+    .ev{
+      display:flex;gap:10px;align-items:stretch;background:var(--card);border:1px solid var(--line);
+      border-radius:12px;padding:10px;position:relative;overflow:hidden
     }
-    .card .bar{width:6px;border-radius:8px;background:var(--accent);flex:0 0 6px}
-    .card .info{flex:1;min-width:0}
-    .title{font-weight:800;margin-bottom:4px}
-    .rows{margin-top:6px;display:grid;gap:4px}
-    .rowline{font-size:13px}
-    .del{position:absolute;top:6px;right:8px;border:none;background:transparent;color:#94a3b8;cursor:pointer;font-size:18px}
-    .del:hover{color:#fff}
+    .ev .bar{width:6px;border-radius:8px;background:var(--accent);flex:0 0 6px}
+    .ev .info{flex:1;min-width:0}
+    .ev .title{font-weight:800;margin-bottom:4px;word-break:break-word}
+    .ev .meta{font-size:13px;color:var(--muted)}
+    .ev .del{position:absolute;top:6px;right:8px;border:none;background:transparent;color:#94a3b8;cursor:pointer;font-size:18px}
+    .ev .del:hover{color:#fff}
 
+    /* FAB */
     .fab{
       position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;
       display:grid;place-items:center;background:var(--accent);color:#0b1326;
@@ -60,11 +72,15 @@
       font-size:28px;font-weight:900
     }
 
-    .sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);display:none;align-items:flex-end;z-index:60}
+    /* Bottom sheet */
+    .sheet-backdrop{
+      position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);
+      display:none;align-items:flex-end;z-index:60
+    }
     .sheet{
       width:100%;max-width:960px;margin:0 auto;background:var(--card);
       border-top-left-radius:16px;border-top-right-radius:16px;border:1px solid var(--line);
-      border-bottom:none;padding:12px 16px 16px;animation:slideup .18s ease-out;max-height:88vh;overflow:auto
+      border-bottom:none;padding:12px 16px 16px;animation:slideup .18s ease-out;max-height:90vh;overflow:auto
     }
     @keyframes slideup{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
 
@@ -73,38 +89,36 @@
     .row input,.row select,.row textarea{
       flex:1;background:#0b1326;border:1px solid var(--line);border-radius:8px;color:#e5e7eb;padding:10px
     }
-    .row textarea{resize:vertical}
+    .row textarea{min-height:70px;resize:vertical}
 
-    .grid{display:grid;gap:6px}
-    .mini-header{display:grid;grid-template-columns:64px 64px 64px 36px;gap:6px;align-items:center}
-    .mini-row{display:grid;grid-template-columns:64px 64px 64px 36px;gap:6px;align-items:center}
-    .mini-sets,.mini-reps,.mini-kg,.mini-min,.mini-sec{
-      width:100%;height:40px;text-align:center;
-      background:#0b1326;border:1px solid var(--line);border-radius:8px;color:#e5e7eb;
-      font-size:14px;appearance:textfield;
+    .subtle{font-size:12px;color:var(--muted);margin-top:2px}
+
+    /* Mini-grid (4 colonnes constantes : 3 champs + 1 bouton) */
+    .mini-wrap{margin:8px 0 12px}
+    .mini-header, .mini-row{
+      display:grid; grid-template-columns:1fr 1fr 1fr 38px; gap:6px; align-items:center;
     }
-    .mini-label{font-size:12px;color:#94a3b8;text-align:center}
+    .mini-header{margin-bottom:4px}
+    .mini-label{font-size:12px;color:#cbd5e1;opacity:.9}
+    .mini-row input{
+      width:100%;background:#0b1326;border:1px solid var(--line);border-radius:8px;color:#e5e7eb;
+      padding:10px; text-align:center; font-variant-numeric:tabular-nums; -moz-appearance:textfield;
+    }
+    .mini-row input::-webkit-outer-spin-button, .mini-row input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
 
-    /* Boutons + / - mis en couleurs bien visibles */
+    /* Icon buttons */
     .iconbtn{
-      width:36px;height:36px;border-radius:10px;border:1px solid var(--line);
-      background:#0b1326;color:#e5e7eb;display:grid;place-items:center;cursor:pointer;
-      transition:all .15s ease;
+      width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#0b1326;color:#e5e7eb;
+      display:grid;place-items:center;cursor:pointer;font-size:20px;line-height:1;
     }
-    .iconbtn.add{background:var(--accent);color:#0b1326;border-color:#16a34a;font-weight:900}
-    .iconbtn.remove{background:var(--danger);color:#fff;border-color:#b91c1c;font-weight:900}
-    .iconbtn:active{transform:scale(.94)}
+    .iconbtn.add{background:var(--blue);border-color:#1e40af;color:#fff}
+    .iconbtn.remove{background:#2a1212;border-color:#5c1e1e;color:var(--danger);font-weight:900}
+    .mini-actions{display:flex;gap:8px;margin-top:6px}
 
-    .actions{display:flex;gap:8px;justify-content:flex-start;margin-top:10px}
-    .btn{border:1px solid var(--line);border-radius:10px;background:#0b1326;color:#e5e7eb;padding:10px 12px;cursor:pointer}
+    .actions{display:flex;gap:8px;justify-content:flex-start;margin-top:8px}
+    .btn{border:1px solid var(--line);border-radius:10px;background:#0b1326;color:#e5e7eb;padding:10px 14px;cursor:pointer}
     .btn.ghost{background:transparent}
-    .small{font-size:12px;color:#94a3b8}
-    .mode-block{display:none}
-    .mode-block.active{display:block}
-
-    @media (max-width:380px){
-      .mini-header,.mini-row{grid-template-columns:56px 56px 56px 36px}
-    }
+    .btn.primary{background:var(--accent);color:#0b1326;border-color:#1a2b1f;font-weight:800}
   </style>
 </head>
 <body>
@@ -118,7 +132,7 @@
 
     <header class="page-header">
       <h1>Suivi d’entraînement</h1>
-      <div class="subtitle">Vue semaine • Ajoute tes exos par jour</div>
+      <div class="subtitle">Vue semaine • Ajoute les séances par jour</div>
     </header>
 
     <div class="weekbar">
@@ -130,6 +144,7 @@
 
     <div class="days" id="days"></div>
     <div class="list" id="list"></div>
+
     <button class="fab" id="fab" title="Ajouter">＋</button>
 
     <!-- Bottom sheet -->
@@ -137,86 +152,106 @@
       <div class="sheet">
         <h3 style="margin:4px 0 8px">Ajouter un exercice</h3>
 
-        <div class="row"><label>Date :</label><input id="fDate" type="date"></div>
-        <div class="row"><label>Exercice :</label><input id="fName" type="text" placeholder="ex: Développé couché"></div>
         <div class="row">
-          <label>Mode :</label>
+          <label>Nom</label>
+          <input id="fName" placeholder="" autocomplete="off">
+        </div>
+
+        <div class="row">
+          <label>Mode</label>
           <select id="fMode">
-            <option value="sets_reps_kg">Séries × Rép + Kg</option>
-            <option value="sets_reps">Séries × Rép</option>
-            <option value="reps">Répétitions</option>
-            <option value="time">Durée</option>
-            <option value="weight_only">Kg seul</option>
+            <option value="srk">Séries × Rép + Kg</option>
+            <option value="sr">Séries × Rép</option>
+            <option value="r">Répétitions</option>
+            <option value="w">Kg seul</option>
+            <option value="t">Temps (min/s)</option>
           </select>
         </div>
 
-        <!-- Séries × Rép + Kg -->
-        <div id="blkSRK" class="mode-block">
+        <!-- SRK -->
+        <div id="blkSRK" class="mini-wrap" data-block="srk">
           <div class="mini-header">
-            <div class="mini-label">Séries</div><div class="mini-label">Rép</div><div class="mini-label">Kg</div><div></div>
+            <div class="mini-label">Séries</div>
+            <div class="mini-label">Rép</div>
+            <div class="mini-label">Kg</div>
+            <div></div>
           </div>
-          <div id="rowsSRK" class="grid"></div>
-          <div style="margin-top:6px"><button class="iconbtn add" id="addRowSRK" type="button">＋</button></div>
+          <div class="mini-rows"></div>
+          <div class="mini-actions">
+            <button class="iconbtn add" type="button" data-add="srk">＋</button>
+          </div>
         </div>
 
-        <!-- Séries × Rép -->
-        <div id="blkSR" class="mode-block">
+        <!-- SR -->
+        <div id="blkSR" class="mini-wrap" data-block="sr" style="display:none">
           <div class="mini-header">
-            <div class="mini-label">Séries</div><div class="mini-label">Rép</div><div></div><div></div>
+            <div class="mini-label">Séries</div>
+            <div class="mini-label">Rép</div>
+            <div></div>
+            <div></div>
           </div>
-          <div id="rowsSR" class="grid"></div>
-          <div style="margin-top:6px"><button class="iconbtn add" id="addRowSR" type="button">＋</button></div>
+          <div class="mini-rows"></div>
+          <div class="mini-actions">
+            <button class="iconbtn add" type="button" data-add="sr">＋</button>
+          </div>
         </div>
 
-        <!-- Répétitions -->
-        <div id="blkR" class="mode-block">
-          <div class="mini-header"><div class="mini-label" style="grid-column:1/4">Répétitions</div></div>
-          <div id="rowsR" class="grid"></div>
-          <div style="margin-top:6px"><button class="iconbtn add" id="addRowR" type="button">＋</button></div>
+        <!-- R -->
+        <div id="blkR" class="mini-wrap" data-block="r" style="display:none">
+          <div class="mini-header">
+            <div class="mini-label">Rép</div><div></div><div></div><div></div>
+          </div>
+          <div class="mini-rows"></div>
+          <div class="mini-actions">
+            <button class="iconbtn add" type="button" data-add="r">＋</button>
+          </div>
         </div>
 
-        <!-- Durée -->
-        <div id="blkT" class="mode-block">
-          <div class="mini-header"><div class="mini-label">Min</div><div class="mini-label">Sec</div><div></div><div></div></div>
-          <div id="rowsT" class="grid"></div>
-          <div style="margin-top:6px"><button class="iconbtn add" id="addRowT" type="button">＋</button></div>
+        <!-- W -->
+        <div id="blkW" class="mini-wrap" data-block="w" style="display:none">
+          <div class="mini-header">
+            <div class="mini-label">Kg</div><div></div><div></div><div></div>
+          </div>
+          <div class="mini-rows"></div>
+          <div class="mini-actions">
+            <button class="iconbtn add" type="button" data-add="w">＋</button>
+          </div>
         </div>
 
-        <!-- Kg seul -->
-        <div id="blkW" class="mode-block">
-          <div class="mini-header"><div class="mini-label" style="grid-column:1/3">Kg</div><div></div><div></div></div>
-          <div id="rowsW" class="grid"></div>
-          <div style="margin-top:6px"><button class="iconbtn add" id="addRowW" type="button">＋</button></div>
+        <!-- T -->
+        <div id="blkT" class="mini-wrap" data-block="t" style="display:none">
+          <div class="mini-header">
+            <div class="mini-label">Min</div>
+            <div class="mini-label">Sec</div>
+            <div></div>
+            <div></div>
+          </div>
+          <div class="mini-rows"></div>
+          <div class="mini-actions">
+            <button class="iconbtn add" type="button" data-add="t">＋</button>
+          </div>
         </div>
 
-        <div class="row"><label>Commentaire</label><textarea id="fNote" rows="3" placeholder="Notes, sensations…"></textarea></div>
-        <div class="actions"><button class="btn ghost" id="cancel" type="button">Annuler</button><button class="btn" id="save" type="button">Ajouter</button></div>
-        <div id="msg" class="small" style="margin-top:6px"></div>
+        <div class="row">
+          <label>Commentaires</label>
+          <textarea id="fCom" placeholder=""></textarea>
+        </div>
+
+        <div class="actions">
+          <button class="btn ghost" id="cancel">Annuler</button>
+          <button class="btn primary" id="save">Enregistrer</button>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    /***** SEMAINE *****/
+    /* ====== Dates / Semaine ====== */
     const daysEl = document.getElementById("days");
     const listEl = document.getElementById("list");
     const whenEl = document.getElementById("when");
-    const sheetBg = document.getElementById("sheetBg");
-
-    const fDate = document.getElementById("fDate");
-    const fName = document.getElementById("fName");
-    const fMode = document.getElementById("fMode");
-    const fNote = document.getElementById("fNote");
-
-    const rowsSRK = document.getElementById("rowsSRK");
-    const rowsSR  = document.getElementById("rowsSR");
-    const rowsR   = document.getElementById("rowsR");
-    const rowsT   = document.getElementById("rowsT");
-    const rowsW   = document.getElementById("rowsW");
-
     let currentMonday = getMonday(new Date());
     let selectedDate = new Date();
-    let items = []; // {id, date, name, mode, rows[], note, lines[]}
 
     function getMonday(d){
       d = new Date(d);
@@ -227,10 +262,9 @@
       const d2 = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
       return d2.toISOString().split("T")[0];
     }
-
     function renderWeek(){
       daysEl.innerHTML = "";
-      const pills = [];
+      const pills=[];
       for(let i=0;i<7;i++){
         const day = new Date(currentMonday);
         day.setDate(day.getDate()+i);
@@ -238,124 +272,184 @@
         pill.className = "daypill";
         pill.dataset.date = formatDate(day);
         pill.innerHTML = `${day.toLocaleDateString("fr-FR",{weekday:"short"})}<small>${day.getDate()} ${day.toLocaleDateString("fr-FR",{month:"short"})}</small>`;
-        pill.onclick = () => {
-          selectedDate = new Date(day);
-          fDate.value = formatDate(selectedDate);
-          highlightSelected(pill.dataset.date);
-          renderList();
+        pill.onclick=()=>{
+          selectedDate=new Date(day);
+          highlightSelected(formatDate(day));
+          renderEntries();
           pill.scrollIntoView({ inline:"center", behavior:"smooth", block:"nearest" });
         };
         daysEl.appendChild(pill);
         pills.push(pill);
       }
-      const end = new Date(currentMonday);
-      end.setDate(end.getDate()+6);
+      const end = new Date(currentMonday); end.setDate(end.getDate()+6);
       whenEl.textContent = `${currentMonday.toLocaleDateString("fr-FR",{day:"numeric",month:"short"})} – ${end.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}`;
-
       highlightSelected(formatDate(selectedDate));
       const today = formatDate(new Date());
       const todayPill = pills.find(p=>p.dataset.date===today);
       if(todayPill) setTimeout(()=>todayPill.scrollIntoView({inline:"center",behavior:"smooth"}), 50);
     }
-
     function highlightSelected(dateStr){
       document.querySelectorAll(".daypill").forEach(p=>p.classList.remove("active"));
-      const target = Array.from(document.querySelectorAll(".daypill")).find(p=>p.dataset.date===dateStr);
+      const target=[...document.querySelectorAll(".daypill")].find(p=>p.dataset.date===dateStr);
       if(target) target.classList.add("active");
     }
 
-    /***** AFFICHAGE LISTE *****/
-    function renderList(){
+    /* ====== Données (démo locale) ====== */
+    let entries = []; // {id, date, name, mode, rows:[{...}], comment}
+
+    /* ====== Rendu des entrées ====== */
+    function renderEntries(){
       const dateStr = formatDate(selectedDate);
-      const todays = items.filter(e=>e.date===dateStr);
+      const todays = entries.filter(e=>e.date===dateStr);
       listEl.innerHTML = "";
       if(todays.length===0){
-        listEl.innerHTML = `<div class="empty">Aucun exercice</div>`;
+        listEl.innerHTML = `<div class="empty">Aucune séance</div>`;
         return;
       }
       todays.forEach(e=>{
         const card = document.createElement("div");
-        card.className = "card";
-        const lines = e.lines && e.lines.length ? e.lines : [];
+        card.className = "ev";
         card.innerHTML = `
           <div class="bar"></div>
           <div class="info">
-            <div class="title">${escapeHtml(e.name || 'Exercice')}</div>
-            <div class="rows">
-              ${lines.map(l=>`<div class="rowline">${escapeHtml(l)}</div>`).join('')}
-              ${e.note ? `<div class="rowline" style="opacity:.8">${escapeHtml(e.note)}</div>`:''}
-            </div>
+            <div class="title">${escapeHTML(e.name || '')}</div>
+            <div class="meta">${escapeHTML(formatVolume(e))}${e.comment?` • ${escapeHTML(e.comment)}`:''}</div>
           </div>
           <button class="del" title="Supprimer">×</button>
         `;
-        card.querySelector(".del").onclick = () => {
-          if(!confirm("Supprimer cet exercice ?")) return;
-          items = items.filter(x=>x.id!==e.id);
-          renderList();
+        card.querySelector(".del").onclick = ()=>{
+          if(!confirm("Supprimer cette entrée ?")) return;
+          entries = entries.filter(x=>x.id!==e.id);
+          renderEntries();
         };
         listEl.appendChild(card);
       });
     }
 
-    function escapeHtml(s){
-      return String(s||'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
-    }
+    function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m])); }
 
-    /***** MODALE AJOUT *****/
-    const modeBlocks = {
-      sets_reps_kg: document.getElementById('blkSRK'),
-      sets_reps:    document.getElementById('blkSR'),
-      reps:         document.getElementById('blkR'),
-      time:         document.getElementById('blkT'),
-      weight_only:  document.getElementById('blkW'),
-    };
-
-    const fieldsByMode = {
-      sets_reps_kg: {sets:1,reps:1,kg:1},
-      sets_reps:    {sets:1,reps:1},
-      reps:         {reps:1},
-      time:         {min:1,sec:1},
-      weight_only:  {kg:1}
-    };
-
-    function showModeBlock(mode){
-      Object.values(modeBlocks).forEach(el=>el.classList.remove('active'));
-      const blk = modeBlocks[mode] || modeBlocks.sets_reps_kg;
-      blk.classList.add('active');
-      // garantir au moins une ligne
-      const container = getContainerForMode(mode);
-      if(container.querySelectorAll('.mini-row').length===0){
-        addRow(container, fieldsByMode[mode] || fieldsByMode.sets_reps_kg);
+    /* ====== Formatage du volume (affichage compact) ====== */
+    function formatVolume(e){
+      const parts = [];
+      if(e.mode==='srk'){
+        e.rows.forEach(r=>{
+          const sets = num(r.sets), reps = num(r.reps), kg = numFloat(r.kg);
+          if(sets||reps||kg!==null){
+            const a = [];
+            if(sets && reps) a.push(`${sets} x ${reps}`);
+            else if(sets) a.push(`${sets} x`);
+            else if(reps) a.push(`${reps}`);
+            if(kg!==null) a.push(`à ${trimFloat(kg)} kg`);
+            parts.push(a.join(' '));
+          }
+        });
+      }else if(e.mode==='sr'){
+        e.rows.forEach(r=>{
+          const sets = num(r.sets), reps = num(r.reps);
+          if(sets||reps) parts.push(`${sets||''}${sets&&reps?' x ':''}${reps||''}`.trim());
+        });
+      }else if(e.mode==='r'){
+        e.rows.forEach(r=>{
+          const reps = num(r.reps);
+          if(reps) parts.push(`${reps} réps`);
+        });
+      }else if(e.mode==='w'){
+        e.rows.forEach(r=>{
+          const kg = numFloat(r.kg);
+          if(kg!==null) parts.push(`${trimFloat(kg)} kg`);
+        });
+      }else if(e.mode==='t'){
+        e.rows.forEach(r=>{
+          const min = num(r.min), sec = num(r.sec);
+          const t = [(min?`${min} min`:''),(sec?`${sec} s`:'')].filter(Boolean).join(' ');
+          if(t) parts.push(t);
+        });
       }
+      return parts.join(' • ');
+    }
+    function num(v){ const n=parseInt(v,10); return Number.isFinite(n) ? n : 0; }
+    function numFloat(v){ if(v===undefined||v===null||v==='') return null; const n=parseFloat(v); return Number.isFinite(n)?n:null; }
+    function trimFloat(n){ return (Math.round(n*100)/100).toString().replace('.', ','); }
+
+    /* ====== Bottom sheet + formulaire ====== */
+    const sheetBg = document.getElementById("sheetBg");
+    const fName = document.getElementById("fName");
+    const fMode = document.getElementById("fMode");
+    const fCom  = document.getElementById("fCom");
+
+    const blkSRK = document.getElementById("blkSRK");
+    const blkSR  = document.getElementById("blkSR");
+    const blkR   = document.getElementById("blkR");
+    const blkW   = document.getElementById("blkW");
+    const blkT   = document.getElementById("blkT");
+
+    document.getElementById("fab").onclick = openSheet;
+    document.getElementById("cancel").onclick = closeSheet;
+    sheetBg.addEventListener("click",(e)=>{ if(e.target===sheetBg) closeSheet(); });
+
+    function openSheet(){
+      fName.value = "";
+      fCom.value  = "";
+      fMode.value = "srk";
+      switchMode();
+      sheetBg.style.display = "flex";
+    }
+    function closeSheet(){ sheetBg.style.display = "none"; }
+
+    fMode.addEventListener('change', switchMode);
+    function switchMode(){
+      // cacher tous
+      [blkSRK, blkSR, blkR, blkW, blkT].forEach(b=>b.style.display='none');
+      // montrer le bon
+      const val = fMode.value;
+      const map = { srk:blkSRK, sr:blkSR, r:blkR, w:blkW, t:blkT };
+      const block = map[val];
+      block.style.display = '';
+      // reset lignes → conserver au moins 1 ligne vide
+      ensureOneEmptyRow(block, val);
     }
 
-    document.getElementById('fMode').addEventListener('change',()=>showModeBlock(fMode.value));
+    function rowsContainer(block){ return block.querySelector('.mini-rows'); }
 
-    function getContainerForMode(mode){
-      return mode==='sets_reps_kg' ? rowsSRK
-           : mode==='sets_reps'    ? rowsSR
-           : mode==='reps'         ? rowsR
-           : mode==='time'         ? rowsT
-           :                          rowsW;
+    function ensureOneEmptyRow(block, mode){
+      const cont = rowsContainer(block);
+      cont.innerHTML = '';
+      addRow(cont, fieldsFor(mode));
     }
 
-    // Ajout / suppression de mini-lignes avec garde "au moins 1 ligne"
+    // Ajout d’une ligne selon les champs du mode
+    function fieldsFor(mode){
+      if(mode==='srk') return {sets:true, reps:true, kg:true};
+      if(mode==='sr')  return {sets:true, reps:true};
+      if(mode==='r')   return {reps:true};
+      if(mode==='w')   return {kg:true};
+      if(mode==='t')   return {min:true, sec:true};
+      return {};
+    }
+
+    // === Fix d’alignement : 4 colonnes constantes, compléter par des vides ===
     function addRow(container, fields){
       const row = document.createElement('div');
       row.className = 'mini-row';
-      row.innerHTML = `
-        ${fields.sets?`<input class="mini-sets" type="number" min="0" inputmode="numeric" placeholder="">`:''}
-        ${fields.reps?`<input class="mini-reps" type="number" min="0" inputmode="numeric" placeholder="">`:''}
-        ${fields.kg?  `<input class="mini-kg"   type="number" step="0.5" inputmode="decimal" placeholder="">`:''}
-        ${fields.min? `<input class="mini-min"  type="number" min="0" inputmode="numeric" placeholder="">`:''}
-        ${fields.sec? `<input class="mini-sec"  type="number" min="0" inputmode="numeric" placeholder="">`:''}
-        <button class="iconbtn remove" type="button" title="Supprimer">−</button>
-      `;
+
+      const parts = [];
+      if (fields.sets) parts.push('<input class="mini-sets" type="number" min="0" inputmode="numeric">');
+      if (fields.reps) parts.push('<input class="mini-reps" type="number" min="0" inputmode="numeric">');
+      if (fields.kg)   parts.push('<input class="mini-kg"   type="number" step="0.5" inputmode="decimal">');
+      if (fields.min)  parts.push('<input class="mini-min"  type="number" min="0" inputmode="numeric">');
+      if (fields.sec)  parts.push('<input class="mini-sec"  type="number" min="0" inputmode="numeric">');
+
+      const emptyNeeded = Math.max(0, 3 - parts.length);
+      for (let i=0;i<emptyNeeded;i++) parts.push('<div></div>');
+
+      parts.push('<button class="iconbtn remove" type="button" title="Supprimer">−</button>');
+
+      row.innerHTML = parts.join('');
+
       row.querySelector('.iconbtn.remove').onclick = ()=>{
         const count = container.querySelectorAll('.mini-row').length;
         if(count<=1){
-          // on garde une ligne vide
-          row.querySelectorAll('input').forEach(i=>i.value='');
+          row.querySelectorAll('input').forEach(i=>i.value=''); // on garde 1 ligne vide
         }else{
           row.remove();
         }
@@ -363,161 +457,79 @@
       container.appendChild(row);
     }
 
-    document.getElementById('addRowSRK').onclick = ()=> addRow(rowsSRK, fieldsByMode.sets_reps_kg);
-    document.getElementById('addRowSR' ).onclick = ()=> addRow(rowsSR , fieldsByMode.sets_reps);
-    document.getElementById('addRowR'  ).onclick = ()=> addRow(rowsR  , fieldsByMode.reps);
-    document.getElementById('addRowT'  ).onclick = ()=> addRow(rowsT  , fieldsByMode.time);
-    document.getElementById('addRowW'  ).onclick = ()=> addRow(rowsW  , fieldsByMode.weight_only);
-
-    function readRows(container){
-      const arr = [];
-      container.querySelectorAll('.mini-row').forEach(r=>{
-        const get = sel => {
-          const el = r.querySelector(sel);
-          if(!el) return null;
-          const v = el.value.trim();
-          return v==='' ? null : Number(v);
-        };
-        const obj = {
-          sets: get('.mini-sets'),
-          reps: get('.mini-reps'),
-          kg:   get('.mini-kg'),
-          min:  get('.mini-min'),
-          sec:  get('.mini-sec')
-        };
-        // ne garder que si au moins une valeur est remplie (ligne non totalement vide)
-        if (Object.values(obj).some(v=>v!==null)) arr.push(obj);
+    // Boutons +
+    document.querySelectorAll('[data-add]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const mode = btn.dataset.add;
+        const block = document.querySelector(`.mini-wrap[data-block="${mode}"]`);
+        addRow(rowsContainer(block), fieldsFor(mode));
       });
-      return arr;
-    }
-
-    // Résumés lisibles (sans libellés techniques)
-    function trimKg(n){
-      if(n==null || isNaN(n)) return '';
-      return (Math.round(n*10)/10).toString().replace('.',',');
-    }
-    function lineSetsRepsKg(o){
-      const s = o.sets ?? 0, r = o.reps ?? 0, kg = o.kg ?? null;
-      if(s>0 && r>0 && kg!=null) return `${s}×${r} à ${trimKg(kg)} kg`;
-      if(s>0 && r>0) return `${s}×${r}`;
-      if(r>0 && kg!=null) return `${r} rép à ${trimKg(kg)} kg`;
-      if(kg!=null) return `${trimKg(kg)} kg`;
-      return null;
-    }
-    function lineSetsReps(o){
-      const s = o.sets ?? 0, r = o.reps ?? 0;
-      if(s>0 && r>0) return `${s}×${r}`;
-      if(r>0) return `${r} rép`;
-      return null;
-    }
-    function lineReps(o){
-      const r = o.reps ?? 0;
-      return r>0 ? `${r} rép` : null;
-    }
-    function lineTime(o){
-      const m = o.min ?? 0, s = o.sec ?? 0;
-      if(m>0 && s>0) return `${m} min ${s} s`;
-      if(m>0) return `${m} min`;
-      if(s>0) return `${s} s`;
-      return null;
-    }
-    function lineWeight(o){
-      return (o.kg!=null) ? `${trimKg(o.kg)} kg` : null;
-    }
-
-    function summarize(mode, rows){
-      const map = {
-        sets_reps_kg: lineSetsRepsKg,
-        sets_reps:    lineSetsReps,
-        reps:         lineReps,
-        time:         lineTime,
-        weight_only:  lineWeight
-      };
-      const fn = map[mode] || lineSetsRepsKg;
-      return rows.map(fn).filter(Boolean);
-    }
-
-    // Ouvre/ferme la modale
-    document.getElementById("fab").onclick = () => {
-      fDate.value = formatDate(selectedDate);
-      fName.value = '';
-      fMode.value = 'sets_reps_kg';
-      fNote.value = '';
-
-      // vider tous les conteneurs et poser 1 ligne par mode actif
-      [rowsSRK,rowsSR,rowsR,rowsT,rowsW].forEach(c=>c.innerHTML='');
-      addRow(rowsSRK, fieldsByMode.sets_reps_kg);
-
-      showModeBlock('sets_reps_kg');
-      document.getElementById("msg").textContent = '';
-      sheetBg.style.display = "flex";
-    };
-    document.getElementById("cancel").onclick = () => {
-      sheetBg.style.display = "none";
-      document.getElementById("msg").textContent = '';
-    };
-    sheetBg.addEventListener("click",(e)=>{
-      if(e.target===sheetBg){
-        sheetBg.style.display="none";
-        document.getElementById("msg").textContent='';
-      }
     });
 
     // Enregistrer
-    document.getElementById("save").onclick = () => {
-      const date = (fDate.value||'').trim();
-      const name = (fName.value||'').trim();
+    document.getElementById("save").onclick = ()=>{
+      const name = fName.value.trim();
       const mode = fMode.value;
-      const note = (fNote.value||'').trim();
+      if(!name){ alert("Nom de l’exercice requis"); return; }
 
-      if(!date || !name){
-        document.getElementById("msg").textContent = "Nom et date requis.";
-        return;
-      }
+      const block = document.querySelector(`.mini-wrap[data-block="${mode}"]`);
+      const cont  = rowsContainer(block);
+      const rows = [...cont.querySelectorAll('.mini-row')].map(r=>{
+        return {
+          sets: getVal(r,'.mini-sets'),
+          reps: getVal(r,'.mini-reps'),
+          kg:   getVal(r,'.mini-kg'),
+          min:  getVal(r,'.mini-min'),
+          sec:  getVal(r,'.mini-sec'),
+        };
+      }).filter(row=>{
+        // garder uniquement les lignes qui contiennent au moins une valeur
+        return Object.values(row).some(v=>v!=='' && v!==null && v!==undefined);
+      });
 
-      const container = getContainerForMode(mode);
-      const rows = readRows(container);
-
-      if(rows.length===0){
-        document.getElementById("msg").textContent = "Ajoute au moins une ligne.";
-        return;
-      }
-
-      const lines = summarize(mode, rows); // ex. “3×5 à 60 kg”, “55 min 32 s”, etc.
-
-      const item = {
+      const entry = {
         id: String(Date.now()),
-        date, name, mode, rows, note,
-        lines
+        date: formatDate(selectedDate),
+        name,
+        mode,
+        rows,
+        comment: fCom.value.trim()
       };
 
-      items.push(item);
-      sheetBg.style.display = "none";
-      renderList();
+      entries.push(entry);
+      renderEntries();
+
+      // Reset : garder au moins 1 ligne vide pour le bloc courant
+      fName.value = '';
+      fCom.value  = '';
+      ensureOneEmptyRow(block, mode);
+      closeSheet();
     };
 
-    /***** NAV SEMAINE *****/
+    function getVal(root, sel){
+      const el = root.querySelector(sel);
+      return el ? el.value.trim() : '';
+    }
+
+    /* ====== Navigation semaine ====== */
     document.getElementById("prev").onclick = () => {
       currentMonday.setDate(currentMonday.getDate()-7);
-      renderWeek(); renderList();
+      renderWeek(); renderEntries();
     };
     document.getElementById("next").onclick = () => {
       currentMonday.setDate(currentMonday.getDate()+7);
-      renderWeek(); renderList();
+      renderWeek(); renderEntries();
     };
     document.getElementById("today").onclick = () => {
       currentMonday = getMonday(new Date());
       selectedDate = new Date();
-      renderWeek();
-      fDate.value = formatDate(selectedDate);
-      renderList();
+      renderWeek(); renderEntries();
     };
 
-    /***** INIT *****/
+    /* ====== Init ====== */
     (function init(){
       renderWeek();
-      fDate.value = formatDate(selectedDate);
-      renderList();
+      renderEntries();
     })();
   </script>
 </body>
