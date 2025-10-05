@@ -238,7 +238,7 @@
     ATHLETES.forEach(a=>{
       const card = document.createElement('a');
       card.className = 'ath-card';
-      card.href = `athlete.html?id=${encodeURIComponent(a.id)}`;
+      card.href = `suivi.html?id=${encodeURIComponent(a.id)}`;
       card.innerHTML = `
         <div class="ath-avatar"><img src="${a.photo}" alt="${a.name}"></div>
         <div class="ath-txt">
