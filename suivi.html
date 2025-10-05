@@ -48,7 +48,6 @@
     .card .bar{width:6px;border-radius:8px;background:var(--accent);flex:0 0 6px}
     .card .info{flex:1;min-width:0}
     .title{font-weight:800;margin-bottom:4px}
-    .meta{font-size:13px;color:var(--muted)}
     .rows{margin-top:6px;display:grid;gap:4px}
     .rowline{font-size:13px}
     .del{position:absolute;top:6px;right:8px;border:none;background:transparent;color:#94a3b8;cursor:pointer;font-size:18px}
@@ -86,7 +85,7 @@
     }
     .mini-label{font-size:12px;color:#94a3b8;text-align:center}
 
-    /* Boutons + / - mis en couleurs */
+    /* Boutons + / - mis en couleurs bien visibles */
     .iconbtn{
       width:36px;height:36px;border-radius:10px;border:1px solid var(--line);
       background:#0b1326;color:#e5e7eb;display:grid;place-items:center;cursor:pointer;
@@ -157,7 +156,7 @@
             <div class="mini-label">Séries</div><div class="mini-label">Rép</div><div class="mini-label">Kg</div><div></div>
           </div>
           <div id="rowsSRK" class="grid"></div>
-          <div style="margin-top:6px"><button class="iconbtn add" id="addRowSRK">＋</button></div>
+          <div style="margin-top:6px"><button class="iconbtn add" id="addRowSRK" type="button">＋</button></div>
         </div>
 
         <!-- Séries × Rép -->
@@ -166,32 +165,32 @@
             <div class="mini-label">Séries</div><div class="mini-label">Rép</div><div></div><div></div>
           </div>
           <div id="rowsSR" class="grid"></div>
-          <div style="margin-top:6px"><button class="iconbtn add" id="addRowSR">＋</button></div>
+          <div style="margin-top:6px"><button class="iconbtn add" id="addRowSR" type="button">＋</button></div>
         </div>
 
         <!-- Répétitions -->
         <div id="blkR" class="mode-block">
           <div class="mini-header"><div class="mini-label" style="grid-column:1/4">Répétitions</div></div>
           <div id="rowsR" class="grid"></div>
-          <div style="margin-top:6px"><button class="iconbtn add" id="addRowR">＋</button></div>
+          <div style="margin-top:6px"><button class="iconbtn add" id="addRowR" type="button">＋</button></div>
         </div>
 
         <!-- Durée -->
         <div id="blkT" class="mode-block">
           <div class="mini-header"><div class="mini-label">Min</div><div class="mini-label">Sec</div><div></div><div></div></div>
           <div id="rowsT" class="grid"></div>
-          <div style="margin-top:6px"><button class="iconbtn add" id="addRowT">＋</button></div>
+          <div style="margin-top:6px"><button class="iconbtn add" id="addRowT" type="button">＋</button></div>
         </div>
 
         <!-- Kg seul -->
         <div id="blkW" class="mode-block">
           <div class="mini-header"><div class="mini-label" style="grid-column:1/3">Kg</div><div></div><div></div></div>
           <div id="rowsW" class="grid"></div>
-          <div style="margin-top:6px"><button class="iconbtn add" id="addRowW">＋</button></div>
+          <div style="margin-top:6px"><button class="iconbtn add" id="addRowW" type="button">＋</button></div>
         </div>
 
         <div class="row"><label>Commentaire</label><textarea id="fNote" rows="3" placeholder="Notes, sensations…"></textarea></div>
-        <div class="actions"><button class="btn ghost" id="cancel">Annuler</button><button class="btn" id="save">Ajouter</button></div>
+        <div class="actions"><button class="btn ghost" id="cancel" type="button">Annuler</button><button class="btn" id="save" type="button">Ajouter</button></div>
         <div id="msg" class="small" style="margin-top:6px"></div>
       </div>
     </div>
@@ -282,7 +281,6 @@
           <div class="bar"></div>
           <div class="info">
             <div class="title">${escapeHtml(e.name || 'Exercice')}</div>
-            <div class="meta">${formatFrenchDate(e.date)}</div>
             <div class="rows">
               ${lines.map(l=>`<div class="rowline">${escapeHtml(l)}</div>`).join('')}
               ${e.note ? `<div class="rowline" style="opacity:.8">${escapeHtml(e.note)}</div>`:''}
@@ -302,11 +300,6 @@
     function escapeHtml(s){
       return String(s||'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
     }
-    function formatFrenchDate(iso){
-      const d = isoToDate(iso);
-      return d.toLocaleDateString('fr-FR',{weekday:'short', day:'2-digit', month:'short'});
-    }
-    function isoToDate(s){const p=s.split('-');return new Date(+p[0],p[1]-1,+p[2]);}
 
     /***** MODALE AJOUT *****/
     const modeBlocks = {
@@ -317,14 +310,36 @@
       weight_only:  document.getElementById('blkW'),
     };
 
+    const fieldsByMode = {
+      sets_reps_kg: {sets:1,reps:1,kg:1},
+      sets_reps:    {sets:1,reps:1},
+      reps:         {reps:1},
+      time:         {min:1,sec:1},
+      weight_only:  {kg:1}
+    };
+
     function showModeBlock(mode){
       Object.values(modeBlocks).forEach(el=>el.classList.remove('active'));
-      (modeBlocks[mode]||modeBlocks.sets_reps_kg).classList.add('active');
+      const blk = modeBlocks[mode] || modeBlocks.sets_reps_kg;
+      blk.classList.add('active');
+      // garantir au moins une ligne
+      const container = getContainerForMode(mode);
+      if(container.querySelectorAll('.mini-row').length===0){
+        addRow(container, fieldsByMode[mode] || fieldsByMode.sets_reps_kg);
+      }
     }
 
-    fMode.addEventListener('change',()=>showModeBlock(fMode.value));
+    document.getElementById('fMode').addEventListener('change',()=>showModeBlock(fMode.value));
 
-    // Ajout / suppression de mini-lignes
+    function getContainerForMode(mode){
+      return mode==='sets_reps_kg' ? rowsSRK
+           : mode==='sets_reps'    ? rowsSR
+           : mode==='reps'         ? rowsR
+           : mode==='time'         ? rowsT
+           :                          rowsW;
+    }
+
+    // Ajout / suppression de mini-lignes avec garde "au moins 1 ligne"
     function addRow(container, fields){
       const row = document.createElement('div');
       row.className = 'mini-row';
@@ -334,17 +349,25 @@
         ${fields.kg?  `<input class="mini-kg"   type="number" step="0.5" inputmode="decimal" placeholder="">`:''}
         ${fields.min? `<input class="mini-min"  type="number" min="0" inputmode="numeric" placeholder="">`:''}
         ${fields.sec? `<input class="mini-sec"  type="number" min="0" inputmode="numeric" placeholder="">`:''}
-        <button class="iconbtn remove" title="Supprimer">−</button>
+        <button class="iconbtn remove" type="button" title="Supprimer">−</button>
       `;
-      row.querySelector('.iconbtn.remove').onclick = ()=> row.remove();
+      row.querySelector('.iconbtn.remove').onclick = ()=>{
+        const count = container.querySelectorAll('.mini-row').length;
+        if(count<=1){
+          // on garde une ligne vide
+          row.querySelectorAll('input').forEach(i=>i.value='');
+        }else{
+          row.remove();
+        }
+      };
       container.appendChild(row);
     }
 
-    document.getElementById('addRowSRK').onclick = ()=> addRow(rowsSRK,{sets:1,reps:1,kg:1});
-    document.getElementById('addRowSR' ).onclick = ()=> addRow(rowsSR ,{sets:1,reps:1});
-    document.getElementById('addRowR'  ).onclick = ()=> addRow(rowsR  ,{reps:1});
-    document.getElementById('addRowT'  ).onclick = ()=> addRow(rowsT  ,{min:1,sec:1});
-    document.getElementById('addRowW'  ).onclick = ()=> addRow(rowsW  ,{kg:1});
+    document.getElementById('addRowSRK').onclick = ()=> addRow(rowsSRK, fieldsByMode.sets_reps_kg);
+    document.getElementById('addRowSR' ).onclick = ()=> addRow(rowsSR , fieldsByMode.sets_reps);
+    document.getElementById('addRowR'  ).onclick = ()=> addRow(rowsR  , fieldsByMode.reps);
+    document.getElementById('addRowT'  ).onclick = ()=> addRow(rowsT  , fieldsByMode.time);
+    document.getElementById('addRowW'  ).onclick = ()=> addRow(rowsW  , fieldsByMode.weight_only);
 
     function readRows(container){
       const arr = [];
@@ -355,16 +378,17 @@
           const v = el.value.trim();
           return v==='' ? null : Number(v);
         };
-        arr.push({
+        const obj = {
           sets: get('.mini-sets'),
           reps: get('.mini-reps'),
           kg:   get('.mini-kg'),
           min:  get('.mini-min'),
           sec:  get('.mini-sec')
-        });
+        };
+        // ne garder que si au moins une valeur est remplie (ligne non totalement vide)
+        if (Object.values(obj).some(v=>v!==null)) arr.push(obj);
       });
-      // garde uniquement les lignes avec au moins une valeur
-      return arr.filter(o=> Object.values(o).some(v=>v!==null));
+      return arr;
     }
 
     // Résumés lisibles (sans libellés techniques)
@@ -420,8 +444,9 @@
       fMode.value = 'sets_reps_kg';
       fNote.value = '';
 
+      // vider tous les conteneurs et poser 1 ligne par mode actif
       [rowsSRK,rowsSR,rowsR,rowsT,rowsW].forEach(c=>c.innerHTML='');
-      addRow(rowsSRK,{sets:1,reps:1,kg:1});
+      addRow(rowsSRK, fieldsByMode.sets_reps_kg);
 
       showModeBlock('sets_reps_kg');
       document.getElementById("msg").textContent = '';
@@ -450,18 +475,15 @@
         return;
       }
 
-      const rows = mode==='sets_reps_kg' ? readRows(rowsSRK)
-                  : mode==='sets_reps'    ? readRows(rowsSR)
-                  : mode==='reps'         ? readRows(rowsR)
-                  : mode==='time'         ? readRows(rowsT)
-                  :                         readRows(rowsW);
+      const container = getContainerForMode(mode);
+      const rows = readRows(container);
 
       if(rows.length===0){
         document.getElementById("msg").textContent = "Ajoute au moins une ligne.";
         return;
       }
 
-      const lines = summarize(mode, rows); // <= ICI les lignes “5×4 à 130 kg”, “55 min 32 s”, “12 rép”, etc.
+      const lines = summarize(mode, rows); // ex. “3×5 à 60 kg”, “55 min 32 s”, etc.
 
       const item = {
         id: String(Date.now()),
